@@ -234,6 +234,64 @@ schema/routes/users.route.yaml
 generated/node/src/routes/users.routes.ts     → Fastify plugin (autoloaded by Platformatic)
 ```
 
+### Service — Standalone Infrastructure Services
+
+Define proxy servers, collectors, and workers.
+
+```yaml
+name: llm-proxy
+description: Transparent LLM API proxy
+type: http-proxy
+listen:
+  port: 8787
+  host: 0.0.0.0
+upstream:
+  providers:
+    - name: openai
+      baseUrl: https://api.openai.com
+      detect: [/v1/chat/completions, /v1/embeddings]
+middleware: [request-capture, cost-calculator]
+streaming: true
+```
+
+### Middleware — Request/Response Interceptors
+
+Define hooks that run in the request/response lifecycle.
+
+```yaml
+name: cost-calculator
+description: Calculate LLM call cost
+phase: response
+inputs:
+  - name: model
+    from: response.model
+  - name: inputTokens
+    from: response.usage.prompt_tokens
+output:
+  costUsd: number
+steps:
+  - id: calculate
+    action: assign
+    value: computed
+```
+
+### Plugin — Fastify Plugins
+
+Define reusable Fastify plugins with hooks and decorators.
+
+```yaml
+name: otel-capture
+description: OpenTelemetry span capture
+type: fastify-plugin
+hooks:
+  onRequest:
+    - action: startSpan
+      name: llm-call
+decorators:
+  - name: fluskCapture
+    type: function
+```
+
 ## Project Structure
 
 ```
@@ -244,6 +302,9 @@ schema/          → YAML definitions (the source of truth)
   routes/        → HTTP endpoint definitions
   providers/     → External integration definitions
   clients/       → API client definitions
+  services/      → Service definitions (proxy, server, worker)
+  middlewares/   → Middleware definitions (request/response hooks)
+  plugins/       → Plugin definitions (Fastify plugins)
 compiler/        → The flusk-lang compiler (TypeScript)
 generated/       → Output code (auto-generated, never hand-edit)
   node/          → Generated Node.js/TypeScript code

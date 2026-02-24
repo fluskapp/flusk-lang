@@ -6,9 +6,12 @@ import { parseCommand, type CommandDef } from './parsers/command.parser.js';
 import { parseRoute, type RouteDef } from './parsers/route.parser.js';
 import { parseProvider, type ProviderDef } from './parsers/provider.parser.js';
 import { parseClient, type ClientDef } from './parsers/client.parser.js';
+import { parseService, type ServiceDef } from './parsers/service.parser.js';
+import { parseMiddleware, type MiddlewareDef } from './parsers/middleware.parser.js';
+import { parsePlugin, type PluginDef } from './parsers/plugin.parser.js';
 import { validateRefs } from './validators/refs.validator.js';
 
-export type { EntityDef, FunctionDef, CommandDef, RouteDef, ProviderDef, ClientDef };
+export type { EntityDef, FunctionDef, CommandDef, RouteDef, ProviderDef, ClientDef, ServiceDef, MiddlewareDef, PluginDef };
 
 export interface ParsedSchema {
   entities: EntityDef[];
@@ -17,6 +20,9 @@ export interface ParsedSchema {
   routes: RouteDef[];
   providers: ProviderDef[];
   clients: ClientDef[];
+  services: ServiceDef[];
+  middlewares: MiddlewareDef[];
+  plugins: PluginDef[];
 }
 
 const loadDir = <T>(dir: string, parser: (f: string) => T): T[] => {
@@ -37,6 +43,9 @@ export const parseAll = (schemaDir: string): ParsedSchema => {
     routes: loadDir(join(schemaDir, 'routes'), parseRoute),
     providers: loadDir(join(schemaDir, 'providers'), parseProvider),
     clients: loadDir(join(schemaDir, 'clients'), parseClient),
+    services: loadDir(join(schemaDir, 'services'), parseService),
+    middlewares: loadDir(join(schemaDir, 'middlewares'), parseMiddleware),
+    plugins: loadDir(join(schemaDir, 'plugins'), parsePlugin),
   };
   return schema;
 };

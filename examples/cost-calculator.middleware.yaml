@@ -1,0 +1,24 @@
+name: cost-calculator
+description: Calculate LLM call cost from token usage
+phase: response
+inputs:
+  - name: model
+    from: response.model
+  - name: inputTokens
+    from: response.usage.prompt_tokens
+  - name: outputTokens
+    from: response.usage.completion_tokens
+output:
+  costUsd: number
+lookup:
+  pricing:
+    gpt-4o: { input: 2.50, output: 10.00 }
+    gpt-4o-mini: { input: 0.15, output: 0.60 }
+    claude-3-sonnet: { input: 3.00, output: 15.00 }
+steps:
+  - id: findPricing
+    action: assign
+    value: lookup.pricing[model]
+  - id: calculate
+    action: assign
+    value: computed

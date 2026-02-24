@@ -1,0 +1,12 @@
+name: request-capture
+description: Capture incoming request data
+phase: request
+inputs:
+  - name: method
+    from: request.method
+  - name: url
+    from: request.url
+steps:
+  - id: log
+    action: assign
+    value: captured

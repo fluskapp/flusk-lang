@@ -9,6 +9,9 @@ import { generateRoute } from './generators/node/route.gen.js';
 import { generateProvider } from './generators/node/provider.gen.js';
 import { generateClient } from './generators/node/client.gen.js';
 import { generateBarrel } from './generators/node/barrel.gen.js';
+import { generateService } from './generators/node/service.gen.js';
+import { generateMiddleware } from './generators/node/middleware.gen.js';
+import { generatePlugin } from './generators/node/plugin.gen.js';
 import { generatePythonEntity } from './generators/python/entity.gen.js';
 import { generatePythonFunction } from './generators/python/function.gen.js';
 
@@ -67,6 +70,24 @@ const buildNode = (): void => {
   for (const client of schema.clients) {
     const f = `clients/${client.name}.client.ts`;
     writeFile(join(nodeDir, f), generateClient(client));
+    allFiles.push(f);
+  }
+
+  for (const svc of schema.services) {
+    const f = `services/${svc.name}.service.ts`;
+    writeFile(join(nodeDir, f), generateService(svc));
+    allFiles.push(f);
+  }
+
+  for (const mw of schema.middlewares) {
+    const f = `middlewares/${mw.name}.middleware.ts`;
+    writeFile(join(nodeDir, f), generateMiddleware(mw));
+    allFiles.push(f);
+  }
+
+  for (const plugin of schema.plugins) {
+    const f = `plugins/${plugin.name}.plugin.ts`;
+    writeFile(join(nodeDir, f), generatePlugin(plugin));
     allFiles.push(f);
   }
 

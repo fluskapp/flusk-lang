@@ -2,6 +2,9 @@ import type { EntityDef } from '../parsers/entity.parser.js';
 import type { FunctionDef } from '../parsers/function.parser.js';
 import type { RouteDef } from '../parsers/route.parser.js';
 import type { CommandDef } from '../parsers/command.parser.js';
+import type { ServiceDef } from '../parsers/service.parser.js';
+import type { MiddlewareDef } from '../parsers/middleware.parser.js';
+import type { PluginDef } from '../parsers/plugin.parser.js';
 
 export class RefValidationError extends Error {
   constructor(public readonly issues: string[]) {
@@ -15,12 +18,16 @@ interface AllDefs {
   functions: FunctionDef[];
   routes: RouteDef[];
   commands: CommandDef[];
+  services?: ServiceDef[];
+  middlewares?: MiddlewareDef[];
+  plugins?: PluginDef[];
 }
 
 export const validateRefs = (defs: AllDefs): void => {
   const issues: string[] = [];
   const entityNames = new Set(defs.entities.map((e) => e.name));
   const functionNames = new Set(defs.functions.map((f) => f.name));
+  const middlewareNames = new Set((defs.middlewares ?? []).map((m) => m.name));
 
   for (const fn of defs.functions) {
     for (const input of fn.inputs ?? []) {
@@ -50,6 +57,27 @@ export const validateRefs = (defs: AllDefs): void => {
   for (const cmd of defs.commands) {
     if (!functionNames.has(cmd.action.call)) {
       issues.push(`Command "${cmd.name}" calls unknown function "${cmd.action.call}"`);
+    }
+  }
+
+  for (const svc of defs.services ?? []) {
+    for (const mw of svc.middleware ?? []) {
+      if (!middlewareNames.has(mw)) {
+        issues.push(`Service "${svc.name}" references unknown middleware "${mw}"`);
+      }
+    }
+    if (svc.capture?.entity && !entityNames.has(svc.capture.entity)) {
+      issues.push(`Service "${svc.name}" capture references unknown entity "${svc.capture.entity}"`);
+    }
+  }
+
+  for (const mw of defs.middlewares ?? []) {
+    if (mw.output) {
+      for (const val of Object.values(mw.output)) {
+        if (/^[A-Z]/.test(val) && !entityNames.has(val)) {
+          issues.push(`Middleware "${mw.name}" output references unknown entity "${val}"`);
+        }
+      }
     }
   }
 
