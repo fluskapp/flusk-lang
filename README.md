@@ -1,25 +1,35 @@
 # flusk-lang
 
-YAML-first development language. Write YAML, generate full Node.js + Python codebases.
+**YAML-first development language** — define your entire backend in YAML, generate production-ready Node.js + Python code.
 
-## Concept
+> Write YAML. Ship code. No hallucinations.
 
-Developers (or AI agents) write **only YAML files** to define:
-- **Entities** — data models with types, storage, and capabilities
-- **Functions** — business logic as composable steps
-- **Commands** — CLI commands that call functions
-- **Routes** — HTTP API endpoints mapped to functions
-- **Providers** — external integrations (webhooks, email, REST)
+[![Build](https://github.com/fluskapp/flusk-lang/actions/workflows/build.yml/badge.svg)](https://github.com/fluskapp/flusk-lang/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-The compiler generates production-ready TypeScript and Python code.
+## Why?
+
+AI agents write code. AI agents also hallucinate, ignore rules, and fake generated markers.
+
+**flusk-lang** solves this: agents can only write YAML, and the compiler generates deterministic code.
+
+Same YAML → same output. Every time. No exceptions.
+
+```
+┌──────────┐     ┌───────────┐     ┌──────────────────┐
+│  YAML    │ ──▶ │  flusk    │ ──▶ │  generated/node/ │
+│  files   │     │  compiler │     │  generated/python/│
+└──────────┘     └───────────┘     └──────────────────┘
+  source of        validate +         production-ready
+  truth            build              code
+```
 
 ## Quick Start
 
 ```bash
-# Install compiler
-cd compiler && npm install && npm run build
+npm install @flusk/lang
 
-# Validate YAML schemas
+# Validate your YAML schemas
 npx flusk-lang validate
 
 # Generate code
@@ -28,19 +38,228 @@ npx flusk-lang build --target node
 npx flusk-lang build --target python
 ```
 
+## YAML Types
+
+### Entity — Data Models
+
+Define your data with types, storage backend, and capabilities.
+
+```yaml
+name: AlertChannel
+storage: postgres
+fields:
+  - name: name
+    type: string
+    required: true
+    unique: true
+  - name: channelType
+    type: enum
+    values: [slack, email, webhook]
+  - name: enabled
+    type: boolean
+    default: true
+capabilities: [crud, timestamps, soft-delete]
+```
+
+**Generates:** TypeBox schemas, TypeScript interfaces, repository interfaces, Pydantic models.
+
+### Function — Business Logic
+
+Define logic as composable steps. Steps can call functions, filter, forEach, map, and return values.
+
+```yaml
+name: dispatchAlert
+inputs:
+  - name: alert
+    type: AlertEvent
+  - name: db
+    type: Database
+output:
+  type: DispatchResult[]
+steps:
+  - id: findChannels
+    call: findEnabledAlertChannels
+    with: { db: $db }
+  - id: filtered
+    action: filter
+    source: $findChannels
+    where: { field: severity, op: gte, value: $alert.severity }
+  - id: send
+    action: forEach
+    source: $filtered
+    call: sendToProvider
+    with: { channel: $item, alert: $alert }
+    onError: log-and-continue
+```
+
+**Generates:** Async TypeScript functions, async Python functions.
+
+### Command — CLI Commands
+
+```yaml
+name: alerts-setup
+description: Configure an alert channel
+args:
+  - name: name
+    type: string
+    required: true
+options:
+  - name: severity
+    type: string
+    default: warning
+action:
+  call: createAlertChannel
+  with: { name: $name, severityFilter: $severity }
+```
+
+**Generates:** Commander.js CLI command files.
+
+### Route — HTTP Endpoints
+
+```yaml
+name: alert-channels
+basePath: /api/alert-channels
+entity: AlertChannel
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listAlertChannels
+  - method: POST
+    path: /
+    call: createAlertChannel
+    input: CreateAlertChannel
+  - method: DELETE
+    path: /:id
+    call: deleteAlertChannel
+```
+
+**Generates:** Fastify route plugins with typed handlers.
+
+### Provider — External Integrations
+
+```yaml
+name: slack
+type: webhook
+config:
+  fields:
+    - name: webhookUrl
+      type: string
+      required: true
+methods:
+  - name: send
+    input: AlertEvent
+    template: |
+      {
+        "text": "🚨 [{{severity}}] {{title}}",
+        "blocks": [
+          { "type": "header", "text": { "type": "plain_text", "text": "{{title}}" } }
+        ]
+      }
+```
+
+**Generates:** Provider classes with config interfaces and template rendering.
+
+### Client — API Clients
+
+```yaml
+name: openai
+baseUrl: https://api.openai.com/v1
+auth:
+  type: bearer
+  envVar: OPENAI_API_KEY
+endpoints:
+  - name: createChatCompletion
+    method: POST
+    path: /chat/completions
+    input:
+      - name: model
+        type: string
+        required: true
+      - name: messages
+        type: json
+        required: true
+    output:
+      type: ChatCompletion
+    retry:
+      maxAttempts: 3
+      backoff: exponential
+    timeout: 30000
+```
+
+**Generates:** Typed HTTP client classes with auth, retry logic, and timeout support.
+
+## The Flow
+
+```
+YAML → flusk-lang validate → flusk-lang build → generated/node/ + generated/python/
+```
+
+Every generated file includes `// @generated by flusk-lang — DO NOT EDIT` at the top. Your CI can grep for this marker to enforce the rule: **no hand-editing generated code.**
+
+## CI Integration
+
+```yaml
+# .github/workflows/build.yml
+name: Build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: cd compiler && npm ci
+      - run: cd compiler && npm run build
+      - run: cd compiler && npm test
+      - run: npx flusk-lang validate
+      - run: npx flusk-lang build
+      - run: git diff --exit-code generated/  # fail if generated code is stale
+```
+
+## Platformatic Integration
+
+flusk-lang is designed to work alongside [Platformatic](https://platformatic.dev). Entity YAMLs generate Platformatic-compatible schemas and types. Routes generate Fastify plugins that run inside Platformatic services.
+
+```
+schema/entities/user.entity.yaml
+  ↓ flusk-lang build
+generated/node/src/entities/user.schema.ts    → TypeBox schema (Platformatic DB)
+generated/node/src/entities/user.types.ts     → TypeScript types
+generated/node/src/entities/user.repository.ts → Repository interface
+
+schema/routes/users.route.yaml
+  ↓ flusk-lang build
+generated/node/src/routes/users.routes.ts     → Fastify plugin (autoloaded by Platformatic)
+```
+
 ## Project Structure
 
 ```
 schema/          → YAML definitions (the source of truth)
-compiler/        → YAML→code engine (TypeScript)
-generated/       → Output code (auto-generated, CI commits)
-examples/        → Example YAML definitions
+  entities/      → Data model definitions
+  functions/     → Business logic definitions
+  commands/      → CLI command definitions
+  routes/        → HTTP endpoint definitions
+  providers/     → External integration definitions
+  clients/       → API client definitions
+compiler/        → The flusk-lang compiler (TypeScript)
+generated/       → Output code (auto-generated, never hand-edit)
+  node/          → Generated Node.js/TypeScript code
+  python/        → Generated Python code
+examples/        → Example YAML definitions for all types
 ```
 
-## Rules
+## Philosophy
 
-- AI agents write **ONLY YAML** — never `.ts` or `.py` directly
-- All generated output has `@generated by flusk-lang — DO NOT EDIT` markers
-- CI validates and regenerates on every push to `schema/`
+- **YAML is the source of truth** — code is a build artifact
+- **Deterministic** — same input = same output, always
+- **Multi-target** — Node.js + Python from the same definitions
+- **AI-safe** — agents write YAML, humans review YAML, machines generate code
+- **Composable** — entities reference entities, functions call functions
+- **Minimal** — two dependencies (ajv + js-yaml), zero runtime overhead
 
-See `examples/` for YAML schema documentation.
+## License
+
+MIT © [Flusk](https://github.com/fluskapp)

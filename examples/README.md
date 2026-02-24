@@ -1,31 +1,37 @@
 # Example YAML Definitions
 
-These examples demonstrate all five YAML schema types using an alert management domain.
+These examples demonstrate all six YAML schema types using an alert management domain.
 
-## Schema Types
+## Entities
 
-### Entity (`*.entity.yaml`)
-Defines data models with fields, types, storage backend, and capabilities.
-- **alert-channel** — delivery channel (Slack, email, webhook, SMS)
-- **alert-event** — the alert itself with severity and metadata
+- **alert-channel.entity.yaml** — delivery channel (Slack, email, webhook, SMS) with CRUD + timestamps
+- **alert-event.entity.yaml** — the alert itself with severity levels and metadata
 
-### Function (`*.function.yaml`)
-Defines business logic as composable steps. Steps can call other functions, filter, forEach, map, transform, and more. This is the core innovation — logic as YAML, compiled to TypeScript/Python.
+## Functions
 
-### Command (`*.command.yaml`)
-Defines CLI commands with arguments, options, and an action that calls a function.
+- **dispatch-alert.function.yaml** — core dispatch logic: find channels, filter by severity, send alerts
+- **process-alert-batch.function.yaml** — batch processing: filter non-info alerts, dispatch each with error handling
 
-### Route (`*.route.yaml`)
-Defines HTTP API routes with CRUD operations that map to functions.
+## Commands
 
-### Provider (`*.provider.yaml`)
-Defines external integrations (webhooks, REST, email) with config fields and method templates.
+- **alerts-setup.command.yaml** — CLI command to configure an alert channel with args and options
+
+## Routes
+
+- **alert-channels.route.yaml** — REST API with GET/POST/DELETE operations mapped to functions
+
+## Providers
+
+- **slack.provider.yaml** — Slack webhook provider with JSON template rendering
+
+## Clients
+
+- **openai.client.yaml** — typed HTTP client for OpenAI API with bearer auth, retry, and timeout
 
 ## Usage
 
-Copy examples into `schema/` directories and run:
 ```bash
 cd compiler
-npx flusk-lang validate
-npx flusk-lang build
+npx flusk-lang validate    # validate all YAML schemas
+npx flusk-lang build       # generate Node.js + Python code
 ```

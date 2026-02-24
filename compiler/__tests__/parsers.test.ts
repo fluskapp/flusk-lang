@@ -5,6 +5,7 @@ import { parseFunction } from '../src/parsers/function.parser.js';
 import { parseCommand } from '../src/parsers/command.parser.js';
 import { parseRoute } from '../src/parsers/route.parser.js';
 import { parseProvider } from '../src/parsers/provider.parser.js';
+import { parseClient } from '../src/parsers/client.parser.js';
 
 const examples = join(__dirname, '../../examples');
 
@@ -59,5 +60,28 @@ describe('Provider Parser', () => {
     expect(provider.name).toBe('slack');
     expect(provider.type).toBe('webhook');
     expect(provider.methods).toHaveLength(2);
+  });
+});
+
+describe('Client Parser', () => {
+  it('parses openai client', () => {
+    const client = parseClient(join(examples, 'openai.client.yaml'));
+    expect(client.name).toBe('openai');
+    expect(client.endpoints).toHaveLength(2);
+    expect(client.auth?.type).toBe('bearer');
+  });
+
+  it('parses endpoint with retry config', () => {
+    const client = parseClient(join(examples, 'openai.client.yaml'));
+    const ep = client.endpoints[0];
+    expect(ep.retry?.maxAttempts).toBe(3);
+    expect(ep.timeout).toBe(30000);
+  });
+
+  it('parses batch function', () => {
+    const fn = parseFunction(join(examples, 'process-alert-batch.function.yaml'));
+    expect(fn.name).toBe('processAlertBatch');
+    expect(fn.inputs).toHaveLength(2);
+    expect(fn.steps).toHaveLength(3);
   });
 });

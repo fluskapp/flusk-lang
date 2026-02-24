@@ -1,0 +1,31 @@
+name: processAlertBatch
+description: Process a batch of alerts with filtering and dispatch
+inputs:
+  - name: alerts
+    type: AlertEvent[]
+  - name: db
+    type: Database
+output:
+  type: DispatchResult[]
+steps:
+  - id: activeAlerts
+    action: filter
+    source: $alerts
+    where:
+      field: severity
+      op: neq
+      value: info
+  - id: results
+    action: forEach
+    source: $activeAlerts
+    call: dispatchAlert
+    with:
+      alert: $item
+      db: $db
+    onError: log-and-continue
+  - id: done
+    action: return
+    source: $results
+errors:
+  - type: BatchFailure
+    action: log-and-continue

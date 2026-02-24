@@ -5,7 +5,10 @@ import { parseFunction, type FunctionDef } from './parsers/function.parser.js';
 import { parseCommand, type CommandDef } from './parsers/command.parser.js';
 import { parseRoute, type RouteDef } from './parsers/route.parser.js';
 import { parseProvider, type ProviderDef } from './parsers/provider.parser.js';
+import { parseClient, type ClientDef } from './parsers/client.parser.js';
 import { validateRefs } from './validators/refs.validator.js';
+
+export type { EntityDef, FunctionDef, CommandDef, RouteDef, ProviderDef, ClientDef };
 
 export interface ParsedSchema {
   entities: EntityDef[];
@@ -13,6 +16,7 @@ export interface ParsedSchema {
   commands: CommandDef[];
   routes: RouteDef[];
   providers: ProviderDef[];
+  clients: ClientDef[];
 }
 
 const loadDir = <T>(dir: string, parser: (f: string) => T): T[] => {
@@ -32,6 +36,7 @@ export const parseAll = (schemaDir: string): ParsedSchema => {
     commands: loadDir(join(schemaDir, 'commands'), parseCommand),
     routes: loadDir(join(schemaDir, 'routes'), parseRoute),
     providers: loadDir(join(schemaDir, 'providers'), parseProvider),
+    clients: loadDir(join(schemaDir, 'clients'), parseClient),
   };
   return schema;
 };
