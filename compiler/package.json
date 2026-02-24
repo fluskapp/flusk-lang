@@ -1,7 +1,7 @@
 {
   "name": "@flusk/lang",
   "version": "0.1.0",
-  "description": "YAML-first development language — define your backend in YAML, generate production-ready Node.js + Python code",
+  "description": "YAML-first development language — define your backend in YAML, generate production-ready code",
   "type": "module",
   "bin": {
     "flusk-lang": "./dist/cli.js"
@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run build && npm test"
   },
-  "keywords": ["yaml", "codegen", "dsl", "platformatic", "fastify", "typescript", "python", "compiler", "ai-safe"],
+  "keywords": ["yaml", "codegen", "dsl", "platformatic", "fastify", "typescript", "python", "llm", "observability"],
   "author": "Flusk <oss@flusk.app>",
   "license": "MIT",
   "repository": {
@@ -26,11 +26,12 @@
   "engines": {
     "node": ">=22"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "src",
     "dist",
-    "../LICENSE",
-    "../README.md"
+    "LICENSE",
+    "README.md"
   ],
   "dependencies": {
     "ajv": "^8.17.1",
