@@ -1,0 +1,24 @@
+{
+  "name": "@flusk/lang",
+  "version": "0.1.0",
+  "description": "YAML-first development language compiler",
+  "type": "module",
+  "bin": {
+    "flusk-lang": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

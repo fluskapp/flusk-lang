@@ -1,0 +1,23 @@
+name: AlertChannel
+description: A configured alert delivery channel
+storage: postgres
+fields:
+  - name: name
+    type: string
+    required: true
+    unique: true
+  - name: channelType
+    type: enum
+    required: true
+    values: [slack, email, webhook, sms]
+  - name: config
+    type: json
+    required: true
+    description: Channel-specific configuration
+  - name: severityFilter
+    type: string
+    description: Minimum severity to trigger this channel
+  - name: enabled
+    type: boolean
+    default: true
+capabilities: [crud, timestamps, soft-delete]

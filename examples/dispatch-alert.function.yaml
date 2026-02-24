@@ -1,0 +1,32 @@
+name: dispatchAlert
+description: Send alert to all matching channels
+inputs:
+  - name: alert
+    type: AlertEvent
+  - name: db
+    type: Database
+output:
+  type: DispatchResult[]
+steps:
+  - id: findChannels
+    call: findEnabledAlertChannels
+    with:
+      db: $db
+  - id: filterBySeverity
+    action: filter
+    source: $findChannels
+    where:
+      field: severityFilter
+      op: gte
+      value: $alert.severity
+  - id: sendAlerts
+    action: forEach
+    source: $filterBySeverity
+    call: sendToProvider
+    with:
+      channel: $item
+      alert: $alert
+    onError: log-and-continue
+errors:
+  - type: ProviderFailure
+    action: log-and-continue

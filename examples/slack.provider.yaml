@@ -1,0 +1,28 @@
+name: slack
+description: Slack webhook alert provider
+type: webhook
+config:
+  fields:
+    - name: webhookUrl
+      type: string
+      required: true
+      description: Slack incoming webhook URL
+    - name: channel
+      type: string
+      description: Override channel
+methods:
+  - name: send
+    description: Send alert to Slack
+    input: AlertEvent
+    template: |
+      {
+        "text": "🚨 [{{severity}}] {{title}}",
+        "blocks": [
+          { "type": "header", "text": { "type": "plain_text", "text": "{{title}}" } },
+          { "type": "section", "text": { "type": "mrkdwn", "text": "{{message}}" } }
+        ]
+      }
+  - name: test
+    description: Send test message
+    template: |
+      { "text": "✅ Flusk alert test — connection working" }

@@ -1,0 +1,19 @@
+name: AlertEvent
+description: An alert event to be dispatched
+storage: postgres
+fields:
+  - name: title
+    type: string
+    required: true
+  - name: message
+    type: string
+    required: true
+  - name: severity
+    type: enum
+    required: true
+    values: [info, warning, error, critical]
+  - name: source
+    type: string
+  - name: metadata
+    type: json
+capabilities: [crud, timestamps]

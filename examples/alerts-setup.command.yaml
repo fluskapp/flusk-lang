@@ -1,0 +1,24 @@
+name: alerts-setup
+description: Configure an alert channel
+args:
+  - name: name
+    type: string
+    required: true
+    description: Channel name
+  - name: type
+    type: AlertChannel.channelType
+    required: true
+  - name: config
+    type: json
+    required: true
+options:
+  - name: severity
+    type: string
+    default: warning
+action:
+  call: createAlertChannel
+  with:
+    name: $name
+    channelType: $type
+    config: $config
+    severityFilter: $severity

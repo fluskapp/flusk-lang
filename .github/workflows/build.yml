@@ -1,0 +1,22 @@
+name: Build
+on:
+  push:
+    paths: ['schema/**']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: cd compiler && npm install && npm run build
+      - run: cd compiler && node dist/cli.js validate
+      - run: cd compiler && node dist/cli.js build
+      - run: cd generated/node && npm test
+      - name: Commit generated code
+        run: |
+          git config user.name "flusk-lang[bot]"
+          git config user.email "bot@flusk.app"
+          git add generated/
+          git diff --cached --quiet || git commit -m "chore: regenerate from YAML changes"
+          git push
