@@ -70,7 +70,7 @@ export const generateClient = (def: ClientDef): string => {
 
   lines.push(`  private async request(method: string, url: string, opts: {`);
   lines.push(`    body?: string; timeout: number; maxAttempts: number;`);
-  lines.push(`  }): Promise<any> {`);
+  lines.push(`  }): Promise<unknown> {`);
   lines.push(`    const headers: Record<string, string> = { 'Content-Type': 'application/json' };`);
   const auth = genAuthSetup(def);
   if (auth) lines.push(auth);

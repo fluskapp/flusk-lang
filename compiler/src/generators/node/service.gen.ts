@@ -45,7 +45,7 @@ export const generateService = (def: ServiceDef): string => {
     lines.push(`    const upstream = upstreams[provider];`);
     if (def.streaming) {
       lines.push(`    const res = await fetch(upstream + request.url, {`);
-      lines.push(`      method: request.method, headers: request.headers as HeadersInit,`);
+      lines.push(`      method: request.method, headers: request.headers as Record<string, string>,`);
       lines.push(`      body: request.method !== 'GET' ? JSON.stringify(request.body) : undefined,`);
       lines.push(`    });`);
       lines.push(`    reply.raw.writeHead(res.status, Object.fromEntries(res.headers));`);
@@ -53,7 +53,7 @@ export const generateService = (def: ServiceDef): string => {
       lines.push(`    reply.raw.end();`);
     } else {
       lines.push(`    const res = await fetch(upstream + request.url, {`);
-      lines.push(`      method: request.method, headers: request.headers as HeadersInit,`);
+      lines.push(`      method: request.method, headers: request.headers as Record<string, string>,`);
       lines.push(`      body: request.method !== 'GET' ? JSON.stringify(request.body) : undefined,`);
       lines.push(`    });`);
       lines.push(`    reply.code(res.status).send(await res.json());`);

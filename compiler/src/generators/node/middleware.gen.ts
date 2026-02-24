@@ -47,7 +47,7 @@ export const generateMiddleware = (def: MiddlewareDef): string => {
 
   if (def.output) {
     const keys = Object.keys(def.output);
-    lines.push(`  (request as any).middlewareOutput = { ${keys.join(', ')} };`);
+    lines.push(`  (request as Record<string, unknown>).middlewareOutput = { ${keys.join(', ')} };`);
   }
 
   lines.push(`};\n`);

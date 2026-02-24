@@ -15,9 +15,9 @@ const generateHookBody = (actions: HookAction[]): string[] => {
       lines.push(`      const span = tracer.startSpan('${action.name ?? 'unknown'}', {`);
       lines.push(`        attributes: ${JSON.stringify(action.attributes ?? {})},`);
       lines.push(`      });`);
-      lines.push(`      (request as any).__span = span;`);
+      lines.push(`      (request as Record<string, unknown>).__span = span;`);
     } else if (action.action === 'endSpan') {
-      lines.push(`      const span = (request as any).__span;`);
+      lines.push(`      const span = (request as Record<string, unknown>).__span;`);
       if (action.attributes) {
         for (const [k, v] of Object.entries(action.attributes)) {
           lines.push(`      span?.setAttribute('${k}', ${v});`);

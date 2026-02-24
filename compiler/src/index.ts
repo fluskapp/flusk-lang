@@ -10,6 +10,9 @@ import { parseService, type ServiceDef } from './parsers/service.parser.js';
 import { parseMiddleware, type MiddlewareDef } from './parsers/middleware.parser.js';
 import { parsePlugin, type PluginDef } from './parsers/plugin.parser.js';
 import { validateRefs } from './validators/refs.validator.js';
+import { lintGeneratedCode, type LintResult, type LintIssue } from './validators/lint.validator.js';
+
+export { lintGeneratedCode, type LintResult, type LintIssue };
 
 export type { EntityDef, FunctionDef, CommandDef, RouteDef, ProviderDef, ClientDef, ServiceDef, MiddlewareDef, PluginDef };
 

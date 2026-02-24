@@ -18,7 +18,8 @@ export const generateRoute = (route: RouteDef): string => {
     if (op.method === 'POST' || op.method === 'PUT' || op.method === 'PATCH') {
       lines.push(`    const result = await ${op.call}(request.body);`);
     } else if (op.path.includes(':')) {
-      lines.push(`    const result = await ${op.call}((request.params as any).id);`);
+      lines.push(`    const { id } = request.params as Record<string, string>;`);
+      lines.push(`    const result = await ${op.call}(id);`);
     } else {
       lines.push(`    const result = await ${op.call}();`);
     }

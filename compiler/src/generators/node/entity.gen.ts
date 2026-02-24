@@ -8,18 +8,18 @@ const mapType = (field: EntityField): string => {
     number: 'Type.Number()',
     boolean: 'Type.Boolean()',
     date: 'Type.String({ format: "date-time" })',
-    json: 'Type.Any()',
+    json: 'Type.Record(Type.String(), Type.Unknown())',
   };
   if (field.type === 'enum' && field.values) {
     return `Type.Union([${field.values.map((v) => `Type.Literal('${v}')`).join(', ')}])`;
   }
-  return types[field.type] ?? 'Type.Any()';
+  return types[field.type] ?? 'Type.Unknown()';
 };
 
 const mapTsType = (field: EntityField): string => {
   const types: Record<string, string> = {
     string: 'string', number: 'number', boolean: 'boolean',
-    date: 'string', json: 'unknown',
+    date: 'string', json: 'Record<string, unknown>',
   };
   if (field.type === 'enum' && field.values) return field.values.map((v) => `'${v}'`).join(' | ');
   return types[field.type] ?? 'unknown';
@@ -33,6 +33,8 @@ export const generateEntitySchema = (entity: EntityDef): string => {
     const typeExpr = f.required === false ? `Type.Optional(${mapType(f)})` : mapType(f);
     lines.push(`  ${f.name}: ${typeExpr},`);
   }
+  lines.push(`  createdAt: Type.String({ format: "date-time" }),`);
+  lines.push(`  updatedAt: Type.String({ format: "date-time" }),`);
   lines.push(`});\n`);
   lines.push(`export type ${entity.name} = Static<typeof ${entity.name}Schema>;\n`);
   return lines.join('\n');
@@ -46,6 +48,8 @@ export const generateEntityType = (entity: EntityDef): string => {
     const opt = f.required === false ? '?' : '';
     lines.push(`  ${f.name}${opt}: ${mapTsType(f)};`);
   }
+  lines.push(`  createdAt: string;`);
+  lines.push(`  updatedAt: string;`);
   lines.push(`}\n`);
   return lines.join('\n');
 };
