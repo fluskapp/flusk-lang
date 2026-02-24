@@ -1,0 +1,13 @@
+name: sensor-ingest
+basePath: /api/ingest
+entity: Reading
+auth: none
+operations:
+  - method: POST
+    path: /
+    call: ingestReading
+    description: "Ingest sensor data"
+  - method: POST
+    path: /batch
+    call: ingestBatch
+    description: "Ingest batch readings"

@@ -1,0 +1,12 @@
+name: OrderItem
+description: "Line item in an order"
+storage: postgres
+fields:
+  - name: orderId
+    type: string
+  - name: productId
+    type: string
+  - name: quantity
+    type: number
+  - name: price
+    type: number

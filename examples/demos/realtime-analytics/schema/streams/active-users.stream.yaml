@@ -1,0 +1,8 @@
+name: ActiveUsers
+description: "Live active user count"
+type: websocket
+path: /api/stream/active-users
+source:
+  entity: Session
+  realtime: true
+auth: none

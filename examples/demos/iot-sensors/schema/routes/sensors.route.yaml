@@ -1,0 +1,21 @@
+name: sensors
+basePath: /api/sensors
+entity: Sensor
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listSensors
+    description: "List all sensors"
+  - method: POST
+    path: /
+    call: createSensor
+    description: "Register a new sensor"
+  - method: GET
+    path: /:id
+    call: getSensor
+    description: "Get sensor by ID"
+  - method: DELETE
+    path: /:id
+    call: deleteSensor
+    description: "Remove a sensor"

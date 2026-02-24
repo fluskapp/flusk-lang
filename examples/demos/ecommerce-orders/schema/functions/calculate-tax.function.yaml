@@ -1,0 +1,22 @@
+name: calculateTax
+description: "Calculate tax based on address"
+inputs:
+  - name: amount
+    type: number
+  - name: address
+    type: json
+output:
+  type: number
+steps:
+  - id: rate
+    call: getTaxRate
+    with:
+      address: "$address"
+  - id: tax
+    call: computeTax
+    with:
+      amount: "$amount"
+      rate: "$rate"
+  - id: result
+    action: return
+    source: $tax

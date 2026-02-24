@@ -1,0 +1,12 @@
+name: SpikeDetected
+description: "Traffic spike alert"
+channel: kafka
+topic: analytics-alerts
+payload:
+  fields:
+    - name: metricName
+      type: string
+    - name: currentValue
+      type: number
+    - name: threshold
+      type: number

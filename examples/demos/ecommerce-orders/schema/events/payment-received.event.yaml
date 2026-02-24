@@ -1,0 +1,12 @@
+name: PaymentReceived
+description: "Payment completed successfully"
+channel: kafka
+topic: order-events
+payload:
+  fields:
+    - name: orderId
+      type: string
+    - name: amount
+      type: number
+    - name: transactionId
+      type: string

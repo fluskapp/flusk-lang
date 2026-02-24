@@ -1,0 +1,16 @@
+name: AlertRule
+description: "Alert rule for sensor thresholds"
+storage: postgres
+fields:
+  - name: sensorId
+    type: string
+  - name: condition
+    type: enum
+    values:
+      - gt
+      - lt
+      - eq
+  - name: threshold
+    type: number
+  - name: action
+    type: string

@@ -1,0 +1,8 @@
+name: AgentOutput
+description: "Real-time agent thinking stream"
+type: sse
+path: /api/stream/agent-output
+source:
+  entity: AgentTask
+  realtime: true
+auth: required

@@ -1,0 +1,12 @@
+name: MetricSnapshot
+description: "Point-in-time metric value"
+storage: postgres
+fields:
+  - name: metricName
+    type: string
+  - name: value
+    type: number
+  - name: timestamp
+    type: date
+  - name: dimensions
+    type: json

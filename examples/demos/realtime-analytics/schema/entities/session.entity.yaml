@@ -1,0 +1,15 @@
+name: Session
+description: "User browsing session"
+storage: postgres
+fields:
+  - name: userId
+    type: string
+  - name: startTime
+    type: date
+  - name: endTime
+    type: date
+    required: false
+  - name: pageCount
+    type: number
+  - name: country
+    type: string

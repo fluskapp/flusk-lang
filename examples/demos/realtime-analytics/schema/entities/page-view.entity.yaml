@@ -1,0 +1,17 @@
+name: PageView
+description: "A single page view event"
+storage: postgres
+fields:
+  - name: url
+    type: string
+  - name: userId
+    type: string
+  - name: timestamp
+    type: date
+  - name: duration
+    type: number
+  - name: referrer
+    type: string
+    required: false
+  - name: device
+    type: string

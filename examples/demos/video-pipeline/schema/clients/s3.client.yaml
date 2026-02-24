@@ -1,0 +1,28 @@
+name: S3
+description: "AWS S3 upload/download"
+baseUrl: "https://s3.amazonaws.com"
+auth:
+  type: header
+  envVar: AWS_ACCESS_KEY
+endpoints:
+  - name: upload
+    method: PUT
+    path: /upload
+    input:
+      - name: file
+        type: string
+        required: true
+      - name: bucket
+        type: string
+        required: true
+    output:
+      type: json
+  - name: download
+    method: GET
+    path: /download
+    input:
+      - name: key
+        type: string
+        required: true
+    output:
+      type: string

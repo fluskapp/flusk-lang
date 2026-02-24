@@ -1,0 +1,31 @@
+name: FfmpegApi
+description: "FFmpeg cloud API"
+baseUrl: "https://api.ffmpeg.cloud"
+auth:
+  type: bearer
+  envVar: FFMPEG_API_KEY
+endpoints:
+  - name: transcode
+    method: POST
+    path: /transcode
+    input:
+      - name: input
+        type: string
+        required: true
+      - name: format
+        type: string
+        required: true
+    output:
+      type: json
+  - name: thumbnail
+    method: POST
+    path: /thumbnail
+    input:
+      - name: input
+        type: string
+        required: true
+      - name: timestamp
+        type: number
+        required: true
+    output:
+      type: string

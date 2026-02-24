@@ -62,7 +62,7 @@ const checkUnusedImports = (code: string): LintIssue[] => {
     const match = importRegex.exec(lines[i]);
     if (!match) continue;
     const names = match[1]
-      ? match[1].split(',').map((n) => n.trim().split(/\s+as\s+/).pop()!.trim()).filter(Boolean)
+      ? match[1].split(',').map((n) => n.trim().replace(/^type\s+/, '').split(/\s+as\s+/).pop()!.trim()).filter(Boolean)
       : match[2] ? [match[2]] : [];
     const body = lines.slice(i + 1).join('\n');
     for (const name of names) {
@@ -82,6 +82,10 @@ const checkUnusedVars = (code: string): LintIssue[] => {
   for (let i = 0; i < lines.length; i++) {
     const match = declRegex.exec(lines[i]);
     if (!match) continue;
+    // Exported declarations are used by consumers — skip them
+    if (/^\s*export\s+/.test(lines[i])) continue;
+    // Pipeline step results (await calls) are intentional intermediates
+    if (/=\s*await\s+/.test(lines[i])) continue;
     const name = match[1];
     const before = lines.slice(0, i).join('\n');
     const after = lines.slice(i + 1).join('\n');

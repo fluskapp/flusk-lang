@@ -1,0 +1,25 @@
+name: ingestReading
+description: "Validate and store sensor reading"
+inputs:
+  - name: sensorId
+    type: string
+  - name: value
+    type: number
+  - name: unit
+    type: string
+output:
+  type: string
+steps:
+  - id: sensor
+    call: getSensor
+    with:
+      id: "$sensorId"
+  - id: reading
+    call: createReading
+    with:
+      sensorId: "$sensorId"
+      value: "$value"
+      unit: "$unit"
+  - id: result
+    action: return
+    source: $reading

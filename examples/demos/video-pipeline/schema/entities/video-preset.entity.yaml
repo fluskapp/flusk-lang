@@ -1,0 +1,15 @@
+name: VideoPreset
+description: "Video encoding preset"
+storage: postgres
+fields:
+  - name: name
+    type: string
+    unique: true
+  - name: codec
+    type: string
+  - name: bitrate
+    type: number
+  - name: resolution
+    type: string
+  - name: watermark
+    type: boolean

@@ -1,0 +1,10 @@
+name: BudgetExceeded
+description: "Budget limit exceeded"
+channel: webhook
+url: https://hooks.example.com/budget-alert
+payload:
+  fields:
+    - name: taskId
+      type: string
+    - name: totalSpent
+      type: number

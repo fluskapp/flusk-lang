@@ -1,0 +1,23 @@
+name: detectContent
+description: "Analyze video frames with OpenAI Vision"
+inputs:
+  - name: jobId
+    type: string
+output:
+  type: json
+steps:
+  - id: fetchJob
+    call: getVideoJob
+    with:
+      id: "$jobId"
+  - id: frames
+    call: extractKeyFrames
+    with:
+      url: "$fetchJob.url"
+  - id: analysis
+    call: analyzeFrames
+    with:
+      images: "$frames"
+  - id: result
+    action: return
+    source: $analysis

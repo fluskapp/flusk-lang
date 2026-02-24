@@ -1,0 +1,15 @@
+name: checkBudget
+description: "Verify cost within budget"
+inputs:
+  - name: model
+    type: string
+output:
+  type: boolean
+steps:
+  - id: spent
+    call: getTotalSpent
+  - id: limit
+    call: getBudgetLimit
+  - id: result
+    action: return
+    source: $spent

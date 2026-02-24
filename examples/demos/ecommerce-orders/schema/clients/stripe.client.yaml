@@ -1,0 +1,28 @@
+name: Stripe
+description: "Stripe payments API"
+baseUrl: "https://api.stripe.com/v1"
+auth:
+  type: bearer
+  envVar: STRIPE_SECRET_KEY
+endpoints:
+  - name: createCharge
+    method: POST
+    path: /charges
+    input:
+      - name: amount
+        type: number
+        required: true
+      - name: currency
+        type: string
+        required: true
+    output:
+      type: json
+  - name: getCharge
+    method: GET
+    path: /charges
+    input:
+      - name: id
+        type: string
+        required: true
+    output:
+      type: json

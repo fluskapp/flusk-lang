@@ -1,0 +1,13 @@
+name: readings
+basePath: /api/readings
+entity: Reading
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listReadings
+    description: "List readings with filters"
+  - method: GET
+    path: /:id
+    call: getReading
+    description: "Get reading by ID"

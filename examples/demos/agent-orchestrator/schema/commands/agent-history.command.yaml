@@ -1,0 +1,11 @@
+name: agent-history
+description: "Show task history with cost"
+options:
+  - name: limit
+    type: number
+    description: "Max results"
+    default: 20
+action:
+  call: listAgentTasks
+  with:
+    limit: "$limit"

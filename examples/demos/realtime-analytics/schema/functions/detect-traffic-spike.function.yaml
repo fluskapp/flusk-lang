@@ -1,0 +1,15 @@
+name: detectTrafficSpike
+description: "Detect anomalies in traffic patterns"
+inputs:
+  - name: threshold
+    type: number
+output:
+  type: boolean
+steps:
+  - id: current
+    call: getCurrentRate
+  - id: baseline
+    call: getBaselineRate
+  - id: result
+    action: return
+    source: $current

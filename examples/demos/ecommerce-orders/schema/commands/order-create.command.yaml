@@ -1,0 +1,17 @@
+name: order-create
+description: "Create an order from CLI"
+args:
+  - name: userId
+    type: string
+    required: true
+    description: "User ID"
+options:
+  - name: items
+    type: string
+    description: "JSON items array"
+    default: "[]"
+action:
+  call: createOrder
+  with:
+    userId: "$userId"
+    items: "$items"

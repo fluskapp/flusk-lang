@@ -1,0 +1,14 @@
+name: Reading
+description: "Sensor reading data point"
+storage: postgres
+fields:
+  - name: sensorId
+    type: string
+  - name: value
+    type: number
+  - name: unit
+    type: string
+  - name: timestamp
+    type: date
+  - name: anomaly
+    type: boolean

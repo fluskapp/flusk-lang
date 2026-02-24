@@ -1,0 +1,17 @@
+name: agent-tasks
+basePath: /api/agent-tasks
+entity: AgentTask
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listAgentTasks
+    description: "List all tasks"
+  - method: POST
+    path: /
+    call: spawnAgent
+    description: "Create a new agent task"
+  - method: GET
+    path: /:id
+    call: getAgentTask
+    description: "Get task by ID"

@@ -1,0 +1,17 @@
+name: orders
+basePath: /api/orders
+entity: Order
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listOrders
+    description: "List all orders"
+  - method: POST
+    path: /
+    call: createOrder
+    description: "Create a new order"
+  - method: GET
+    path: /:id
+    call: getOrder
+    description: "Get order by ID"

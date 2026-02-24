@@ -1,0 +1,31 @@
+name: Shippo
+description: "Shippo shipping API"
+baseUrl: "https://api.goshippo.com"
+auth:
+  type: bearer
+  envVar: SHIPPO_API_KEY
+endpoints:
+  - name: createShipment
+    method: POST
+    path: /shipments
+    input:
+      - name: addressTo
+        type: json
+        required: true
+      - name: parcels
+        type: json
+        required: true
+    output:
+      type: json
+  - name: getTracking
+    method: GET
+    path: /tracks
+    input:
+      - name: carrier
+        type: string
+        required: true
+      - name: trackingNumber
+        type: string
+        required: true
+    output:
+      type: json

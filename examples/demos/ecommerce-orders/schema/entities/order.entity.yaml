@@ -1,0 +1,20 @@
+name: Order
+description: "Customer order"
+storage: postgres
+fields:
+  - name: userId
+    type: string
+  - name: items
+    type: json
+  - name: total
+    type: number
+  - name: status
+    type: enum
+    values:
+      - pending
+      - paid
+      - shipped
+      - delivered
+      - cancelled
+  - name: shippingAddress
+    type: json

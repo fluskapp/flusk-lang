@@ -1,0 +1,10 @@
+name: ShipmentDelivered
+description: "Package delivered to customer"
+channel: webhook
+url: https://hooks.example.com/delivered
+payload:
+  fields:
+    - name: orderId
+      type: string
+    - name: trackingNumber
+      type: string

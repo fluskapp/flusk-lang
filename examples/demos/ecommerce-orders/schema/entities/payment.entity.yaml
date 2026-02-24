@@ -1,0 +1,24 @@
+name: Payment
+description: "Payment record"
+storage: postgres
+fields:
+  - name: orderId
+    type: string
+  - name: method
+    type: enum
+    values:
+      - card
+      - paypal
+      - bank
+  - name: amount
+    type: number
+  - name: status
+    type: enum
+    values:
+      - pending
+      - completed
+      - failed
+      - refunded
+  - name: transactionId
+    type: string
+    required: false

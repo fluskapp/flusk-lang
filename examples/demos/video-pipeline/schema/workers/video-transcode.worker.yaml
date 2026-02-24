@@ -1,0 +1,13 @@
+name: VideoTranscode
+description: "BullMQ worker for video transcoding"
+type: bullmq
+queue: video-transcode
+steps:
+  - id: process
+    call: transcodeVideo
+  - id: notify
+    call: publishVideoCompleted
+retry:
+  maxAttempts: 3
+  backoff: exponential
+timeout: 30m

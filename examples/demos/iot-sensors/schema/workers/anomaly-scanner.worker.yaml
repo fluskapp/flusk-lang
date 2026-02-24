@@ -1,0 +1,13 @@
+name: AnomalyScanner
+description: "Scan readings for anomalies"
+type: cron
+schedule: "0 * * * *"
+steps:
+  - id: readings
+    call: getRecentReadings
+  - id: scan
+    call: detectAnomaly
+retry:
+  maxAttempts: 1
+  backoff: linear
+timeout: 5m

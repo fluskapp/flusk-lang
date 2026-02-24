@@ -1,0 +1,19 @@
+name: synthesizeResult
+description: "Combine sub-agent results"
+inputs:
+  - name: taskId
+    type: string
+output:
+  type: string
+steps:
+  - id: subResults
+    call: getSubTaskResults
+    with:
+      parentId: "$taskId"
+  - id: combined
+    call: combineResults
+    with:
+      results: "$subResults"
+  - id: result
+    action: return
+    source: $combined

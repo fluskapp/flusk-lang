@@ -1,0 +1,13 @@
+name: AgentMemory
+description: "Agent key-value memory store"
+storage: postgres
+fields:
+  - name: agentId
+    type: string
+  - name: key
+    type: string
+  - name: value
+    type: json
+  - name: expiresAt
+    type: date
+    required: false

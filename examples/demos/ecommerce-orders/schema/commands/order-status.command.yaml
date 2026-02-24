@@ -1,0 +1,11 @@
+name: order-status
+description: "Check order status"
+args:
+  - name: orderId
+    type: string
+    required: true
+    description: "Order ID"
+action:
+  call: getOrder
+  with:
+    id: "$orderId"

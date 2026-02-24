@@ -1,0 +1,9 @@
+name: LiveMetrics
+description: "Real-time metric updates via SSE"
+type: sse
+path: /api/stream/metrics
+source:
+  entity: MetricSnapshot
+  interval: 5s
+  realtime: true
+auth: optional

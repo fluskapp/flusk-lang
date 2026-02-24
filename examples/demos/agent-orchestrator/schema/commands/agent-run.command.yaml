@@ -1,0 +1,17 @@
+name: agent-run
+description: "Run an agent task"
+args:
+  - name: prompt
+    type: string
+    required: true
+    description: "The prompt for the agent"
+options:
+  - name: model
+    type: string
+    description: "AI model to use"
+    default: "gpt-4"
+action:
+  call: spawnAgent
+  with:
+    prompt: "$prompt"
+    model: "$model"

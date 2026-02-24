@@ -1,0 +1,10 @@
+name: VideoFailed
+description: "Video processing failed"
+channel: webhook
+url: https://hooks.example.com/video-failed
+payload:
+  fields:
+    - name: jobId
+      type: string
+    - name: error
+      type: string

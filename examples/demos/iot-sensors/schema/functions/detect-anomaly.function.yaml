@@ -1,0 +1,21 @@
+name: detectAnomaly
+description: "Statistical anomaly detection on readings"
+inputs:
+  - name: sensorId
+    type: string
+  - name: value
+    type: number
+output:
+  type: boolean
+steps:
+  - id: history
+    call: getRecentReadings
+    with:
+      sensorId: "$sensorId"
+  - id: stats
+    call: computeStats
+    with:
+      readings: "$history"
+  - id: result
+    action: return
+    source: $stats

@@ -1,0 +1,17 @@
+name: agent-memory
+basePath: /api/agent-memory
+entity: AgentMemory
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listAgentMemory
+    description: "List memory entries"
+  - method: POST
+    path: /
+    call: createAgentMemory
+    description: "Store a memory entry"
+  - method: DELETE
+    path: /:id
+    call: deleteAgentMemory
+    description: "Delete a memory entry"

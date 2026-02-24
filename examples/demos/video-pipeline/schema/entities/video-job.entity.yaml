@@ -1,0 +1,23 @@
+name: VideoJob
+description: "A video processing job"
+storage: postgres
+fields:
+  - name: url
+    type: string
+  - name: status
+    type: enum
+    values:
+      - pending
+      - processing
+      - completed
+      - failed
+  - name: format
+    type: string
+  - name: resolution
+    type: string
+  - name: outputUrl
+    type: string
+    required: false
+  - name: error
+    type: string
+    required: false

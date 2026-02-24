@@ -1,0 +1,25 @@
+name: processPayment
+description: "Charge payment and update order"
+inputs:
+  - name: orderId
+    type: string
+  - name: method
+    type: string
+  - name: amount
+    type: number
+output:
+  type: string
+steps:
+  - id: charge
+    call: chargePayment
+    with:
+      method: "$method"
+      amount: "$amount"
+  - id: update
+    call: updateOrderStatus
+    with:
+      orderId: "$orderId"
+      status: "paid"
+  - id: result
+    action: return
+    source: $charge

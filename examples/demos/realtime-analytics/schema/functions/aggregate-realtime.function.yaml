@@ -1,0 +1,19 @@
+name: aggregateRealtime
+description: "Aggregate page views into metrics"
+inputs:
+  - name: windowMinutes
+    type: number
+output:
+  type: json
+steps:
+  - id: views
+    call: getRecentPageViews
+    with:
+      minutes: "$windowMinutes"
+  - id: metrics
+    call: computeMetrics
+    with:
+      data: "$views"
+  - id: result
+    action: return
+    source: $metrics

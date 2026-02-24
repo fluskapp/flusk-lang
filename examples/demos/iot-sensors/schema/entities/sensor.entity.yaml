@@ -1,0 +1,25 @@
+name: Sensor
+description: "Physical sensor device"
+storage: postgres
+fields:
+  - name: name
+    type: string
+  - name: type
+    type: enum
+    values:
+      - temperature
+      - humidity
+      - pressure
+      - motion
+      - light
+  - name: location
+    type: string
+  - name: status
+    type: enum
+    values:
+      - online
+      - offline
+      - error
+  - name: lastReading
+    type: number
+    required: false

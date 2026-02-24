@@ -1,0 +1,17 @@
+name: shipments
+basePath: /api/shipments
+entity: Shipment
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listShipments
+    description: "List shipments"
+  - method: POST
+    path: /
+    call: initiateShipment
+    description: "Create a shipment"
+  - method: GET
+    path: /:id
+    call: getShipment
+    description: "Get shipment by ID"

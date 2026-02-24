@@ -1,0 +1,15 @@
+name: AgentExecutor
+description: "Temporal workflow for agent execution"
+type: temporal-workflow
+taskQueue: agent-tasks
+steps:
+  - id: spawn
+    call: spawnAgent
+  - id: execute
+    call: executeTool
+  - id: synthesize
+    call: synthesizeResult
+retry:
+  maxAttempts: 2
+  backoff: exponential
+timeout: 5m

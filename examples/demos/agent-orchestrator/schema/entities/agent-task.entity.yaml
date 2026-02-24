@@ -1,0 +1,24 @@
+name: AgentTask
+description: "An AI agent task"
+storage: postgres
+fields:
+  - name: prompt
+    type: string
+  - name: model
+    type: string
+  - name: status
+    type: enum
+    values:
+      - pending
+      - running
+      - completed
+      - failed
+  - name: result
+    type: string
+    required: false
+  - name: cost
+    type: number
+    required: false
+  - name: parentTaskId
+    type: string
+    required: false

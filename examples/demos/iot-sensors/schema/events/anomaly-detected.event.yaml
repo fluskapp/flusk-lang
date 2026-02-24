@@ -1,0 +1,12 @@
+name: AnomalyDetected
+description: "Anomaly in sensor reading"
+channel: kafka
+topic: sensor-alerts
+payload:
+  fields:
+    - name: sensorId
+      type: string
+    - name: value
+      type: number
+    - name: threshold
+      type: number

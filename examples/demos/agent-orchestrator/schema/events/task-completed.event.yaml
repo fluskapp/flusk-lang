@@ -1,0 +1,12 @@
+name: TaskCompleted
+description: "Agent task finished"
+channel: kafka
+topic: agent-events
+payload:
+  fields:
+    - name: taskId
+      type: string
+    - name: result
+      type: string
+    - name: cost
+      type: number

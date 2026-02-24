@@ -1,0 +1,19 @@
+name: computeFunnel
+description: "Compute conversion funnel stages"
+inputs:
+  - name: funnelId
+    type: string
+output:
+  type: json
+steps:
+  - id: stages
+    call: getFunnelStages
+    with:
+      id: "$funnelId"
+  - id: counts
+    call: countByStage
+    with:
+      stages: "$stages"
+  - id: result
+    action: return
+    source: $counts

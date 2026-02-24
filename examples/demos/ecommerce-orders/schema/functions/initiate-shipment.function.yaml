@@ -1,0 +1,20 @@
+name: initiateShipment
+description: "Create shipment with carrier"
+inputs:
+  - name: orderId
+    type: string
+output:
+  type: string
+steps:
+  - id: order
+    call: getOrder
+    with:
+      id: "$orderId"
+  - id: shipment
+    call: createShipment
+    with:
+      orderId: "$orderId"
+      address: "$order.shippingAddress"
+  - id: result
+    action: return
+    source: $shipment

@@ -1,0 +1,22 @@
+name: spawnAgent
+description: "Create new agent task with context"
+inputs:
+  - name: prompt
+    type: string
+  - name: model
+    type: string
+output:
+  type: string
+steps:
+  - id: budget
+    call: checkBudget
+    with:
+      model: "$model"
+  - id: task
+    call: createAgentTask
+    with:
+      prompt: "$prompt"
+      model: "$model"
+  - id: result
+    action: return
+    source: $task

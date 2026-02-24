@@ -1,0 +1,13 @@
+name: ShipmentTracker
+description: "Poll carrier APIs for status updates"
+type: cron
+schedule: "*/15 * * * *"
+steps:
+  - id: shipments
+    call: getPendingShipments
+  - id: poll
+    call: pollCarrierStatus
+retry:
+  maxAttempts: 1
+  backoff: linear
+timeout: 10m

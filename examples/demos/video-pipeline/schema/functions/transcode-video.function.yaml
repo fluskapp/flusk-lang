@@ -1,0 +1,28 @@
+name: transcodeVideo
+description: "Download, transcode via ffmpeg, upload to S3"
+inputs:
+  - name: jobId
+    type: string
+output:
+  type: string
+steps:
+  - id: fetchJob
+    call: getVideoJob
+    with:
+      id: "$jobId"
+  - id: download
+    call: downloadFile
+    with:
+      url: "$fetchJob.url"
+  - id: transcode
+    call: runTranscode
+    with:
+      input: "$download"
+      format: "$fetchJob.format"
+  - id: upload
+    call: uploadToS3
+    with:
+      file: "$transcode"
+  - id: result
+    action: return
+    source: $upload

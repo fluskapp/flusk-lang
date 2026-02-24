@@ -1,0 +1,8 @@
+name: SensorFeed
+description: "Real-time sensor data feed"
+type: websocket
+path: /api/stream/sensors
+source:
+  entity: Reading
+  realtime: true
+auth: required

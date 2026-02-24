@@ -1,0 +1,12 @@
+name: OrderPlaced
+description: "New order created"
+channel: kafka
+topic: order-events
+payload:
+  fields:
+    - name: orderId
+      type: string
+    - name: userId
+      type: string
+    - name: total
+      type: number

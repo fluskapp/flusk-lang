@@ -1,0 +1,30 @@
+name: executeTool
+description: "Run a tool call"
+inputs:
+  - name: taskId
+    type: string
+  - name: toolName
+    type: string
+  - name: input
+    type: json
+output:
+  type: json
+steps:
+  - id: start
+    call: recordToolStart
+    with:
+      taskId: "$taskId"
+      tool: "$toolName"
+  - id: result
+    call: runTool
+    with:
+      name: "$toolName"
+      input: "$input"
+  - id: record
+    call: recordToolEnd
+    with:
+      id: "$start"
+      output: "$result"
+  - id: out
+    action: return
+    source: $result

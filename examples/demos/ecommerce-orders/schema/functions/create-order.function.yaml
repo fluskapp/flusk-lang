@@ -1,0 +1,27 @@
+name: createOrder
+description: "Validate items, calculate total, create order"
+inputs:
+  - name: userId
+    type: string
+  - name: items
+    type: json
+output:
+  type: string
+steps:
+  - id: validated
+    call: validateItems
+    with:
+      items: "$items"
+  - id: total
+    call: calculateTotal
+    with:
+      items: "$validated"
+  - id: order
+    call: saveOrder
+    with:
+      userId: "$userId"
+      items: "$validated"
+      total: "$total"
+  - id: result
+    action: return
+    source: $order

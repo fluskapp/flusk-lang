@@ -1,0 +1,19 @@
+name: Anthropic
+description: "Anthropic messages API"
+baseUrl: "https://api.anthropic.com/v1"
+auth:
+  type: header
+  envVar: ANTHROPIC_API_KEY
+endpoints:
+  - name: createMessage
+    method: POST
+    path: /messages
+    input:
+      - name: model
+        type: string
+        required: true
+      - name: messages
+        type: json
+        required: true
+    output:
+      type: json

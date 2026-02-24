@@ -1,0 +1,15 @@
+name: PaymentProcessor
+description: "Temporal workflow for payment processing"
+type: temporal-workflow
+taskQueue: payments
+steps:
+  - id: charge
+    call: chargePayment
+  - id: verify
+    call: verifyPayment
+  - id: confirm
+    call: confirmPayment
+retry:
+  maxAttempts: 3
+  backoff: exponential
+timeout: 2m

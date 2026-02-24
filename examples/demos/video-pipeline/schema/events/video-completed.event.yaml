@@ -1,0 +1,15 @@
+name: VideoCompleted
+description: "Video processing completed"
+channel: kafka
+topic: video-events
+payload:
+  fields:
+    - name: jobId
+      type: string
+    - name: outputUrl
+      type: string
+publish:
+  - trigger: afterCreate(VideoJob)
+    transform:
+      jobId: id
+      outputUrl: outputUrl

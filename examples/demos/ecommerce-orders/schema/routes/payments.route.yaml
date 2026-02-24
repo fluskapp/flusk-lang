@@ -1,0 +1,17 @@
+name: payments
+basePath: /api/payments
+entity: Payment
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listPayments
+    description: "List payments"
+  - method: POST
+    path: /
+    call: processPayment
+    description: "Process a payment"
+  - method: GET
+    path: /:id
+    call: getPayment
+    description: "Get payment by ID"

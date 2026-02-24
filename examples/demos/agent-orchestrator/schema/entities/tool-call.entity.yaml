@@ -1,0 +1,16 @@
+name: ToolCall
+description: "Record of a tool invocation"
+storage: postgres
+fields:
+  - name: taskId
+    type: string
+  - name: toolName
+    type: string
+  - name: input
+    type: json
+  - name: output
+    type: json
+    required: false
+  - name: latencyMs
+    type: number
+    required: false

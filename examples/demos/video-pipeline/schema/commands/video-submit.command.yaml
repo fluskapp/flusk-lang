@@ -1,0 +1,21 @@
+name: video-submit
+description: "Submit a video for processing"
+args:
+  - name: url
+    type: string
+    required: true
+    description: "Video URL to process"
+options:
+  - name: format
+    type: string
+    description: "Output format"
+    default: "mp4"
+  - name: resolution
+    type: string
+    description: "Target resolution"
+    default: "1080p"
+action:
+  call: transcodeVideo
+  with:
+    url: "$url"
+    format: "$format"

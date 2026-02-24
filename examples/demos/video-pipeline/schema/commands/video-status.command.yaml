@@ -1,0 +1,11 @@
+name: video-status
+description: "Check video job status"
+args:
+  - name: jobId
+    type: string
+    required: true
+    description: "Job ID to check"
+action:
+  call: getVideoJob
+  with:
+    id: "$jobId"

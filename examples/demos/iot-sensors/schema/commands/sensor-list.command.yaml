@@ -1,0 +1,10 @@
+name: sensor-list
+description: "List sensors and status"
+options:
+  - name: status
+    type: string
+    description: "Filter by status"
+action:
+  call: listSensors
+  with:
+    status: "$status"

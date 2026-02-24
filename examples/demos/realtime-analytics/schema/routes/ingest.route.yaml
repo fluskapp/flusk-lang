@@ -1,0 +1,13 @@
+name: ingest
+basePath: /api/ingest
+entity: PageView
+auth: none
+operations:
+  - method: POST
+    path: /
+    call: ingestPageView
+    description: "Ingest a page view event"
+  - method: POST
+    path: /batch
+    call: ingestBatch
+    description: "Ingest batch of events"

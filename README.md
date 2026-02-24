@@ -321,6 +321,22 @@ examples/        → Example YAML definitions for all types
 - **Composable** — entities reference entities, functions call functions
 - **Minimal** — two dependencies (ajv + js-yaml), zero runtime overhead
 
+## Demos
+
+5 complete projects proving ANY backend can be defined in YAML and generate clean code.
+
+**77 YAMLs → 107 generated files → 1,700+ lines → 0 lint errors**
+
+| Demo | Entities | Functions | Commands | Routes | Events | Workers | Streams | Clients | Generated Files |
+|------|----------|-----------|----------|--------|--------|---------|---------|---------|-----------------|
+| Video Processing Pipeline | 2 | 3 | 2 | 1 | 2 | 1 | — | 2 | 17 |
+| Real-time Analytics | 3 | 3 | — | 2 | 1 | — | 2 | — | 17 |
+| AI Agent Orchestrator | 3 | 4 | 2 | 2 | 2 | 1 | 1 | 3 | 24 |
+| IoT Sensor Platform | 3 | 3 | 2 | 3 | 2 | 1 | 1 | — | 21 |
+| E-commerce Orders | 4 | 4 | 2 | 3 | 3 | 2 | — | 2 | 28 |
+
+Each demo lives in `examples/demos/` with full YAML schemas covering entities, functions, commands, routes, events, workers, streams, and clients.
+
 ## License
 
 MIT © [Flusk](https://github.com/fluskapp)

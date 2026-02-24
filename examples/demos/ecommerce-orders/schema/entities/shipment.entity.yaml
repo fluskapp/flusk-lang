@@ -1,0 +1,21 @@
+name: Shipment
+description: "Shipment tracking"
+storage: postgres
+fields:
+  - name: orderId
+    type: string
+  - name: carrier
+    type: string
+  - name: trackingNumber
+    type: string
+    required: false
+  - name: status
+    type: enum
+    values:
+      - preparing
+      - shipped
+      - in_transit
+      - delivered
+  - name: eta
+    type: date
+    required: false

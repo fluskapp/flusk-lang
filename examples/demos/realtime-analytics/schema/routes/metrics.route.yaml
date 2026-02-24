@@ -1,0 +1,13 @@
+name: metrics
+basePath: /api/metrics
+entity: MetricSnapshot
+auth: optional
+operations:
+  - method: GET
+    path: /
+    call: aggregateRealtime
+    description: "Get current metrics"
+  - method: GET
+    path: /:id
+    call: getMetricSnapshot
+    description: "Get specific metric"

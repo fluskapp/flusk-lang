@@ -1,0 +1,22 @@
+name: extractThumbnail
+description: "Extract frame at timestamp"
+inputs:
+  - name: jobId
+    type: string
+  - name: timestamp
+    type: number
+output:
+  type: string
+steps:
+  - id: fetchJob
+    call: getVideoJob
+    with:
+      id: "$jobId"
+  - id: frame
+    call: extractFrame
+    with:
+      url: "$fetchJob.url"
+      time: "$timestamp"
+  - id: result
+    action: return
+    source: $frame

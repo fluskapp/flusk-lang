@@ -1,0 +1,19 @@
+name: Openai
+description: "OpenAI chat completions"
+baseUrl: "https://api.openai.com/v1"
+auth:
+  type: bearer
+  envVar: OPENAI_API_KEY
+endpoints:
+  - name: chatCompletion
+    method: POST
+    path: /chat/completions
+    input:
+      - name: model
+        type: string
+        required: true
+      - name: messages
+        type: json
+        required: true
+    output:
+      type: json

@@ -1,0 +1,17 @@
+name: sensor-history
+description: "Show reading history"
+args:
+  - name: sensorId
+    type: string
+    required: true
+    description: "Sensor ID"
+options:
+  - name: limit
+    type: number
+    description: "Max readings"
+    default: 50
+action:
+  call: getRecentReadings
+  with:
+    sensorId: "$sensorId"
+    limit: "$limit"

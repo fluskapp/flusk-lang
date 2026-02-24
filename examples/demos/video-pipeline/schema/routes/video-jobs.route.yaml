@@ -1,0 +1,21 @@
+name: video-jobs
+basePath: /api/video-jobs
+entity: VideoJob
+auth: required
+operations:
+  - method: GET
+    path: /
+    call: listVideoJobs
+    description: "List all video jobs"
+  - method: POST
+    path: /
+    call: transcodeVideo
+    description: "Submit a new video job"
+  - method: GET
+    path: /:id
+    call: getVideoJob
+    description: "Get job by ID"
+  - method: DELETE
+    path: /:id
+    call: deleteVideoJob
+    description: "Delete a job"

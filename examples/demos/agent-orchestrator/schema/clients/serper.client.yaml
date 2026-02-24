@@ -1,0 +1,16 @@
+name: Serper
+description: "Serper search API"
+baseUrl: "https://google.serper.dev"
+auth:
+  type: header
+  envVar: SERPER_API_KEY
+endpoints:
+  - name: search
+    method: POST
+    path: /search
+    input:
+      - name: q
+        type: string
+        required: true
+    output:
+      type: json

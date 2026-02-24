@@ -1,0 +1,10 @@
+name: SensorOffline
+description: "Sensor went offline"
+channel: webhook
+url: https://hooks.example.com/sensor-offline
+payload:
+  fields:
+    - name: sensorId
+      type: string
+    - name: lastSeen
+      type: string
