@@ -12,6 +12,9 @@ import { generateBarrel } from './generators/node/barrel.gen.js';
 import { generateService } from './generators/node/service.gen.js';
 import { generateMiddleware } from './generators/node/middleware.gen.js';
 import { generatePlugin } from './generators/node/plugin.gen.js';
+import { generateEvent } from './generators/node/event.gen.js';
+import { generateWorker } from './generators/node/worker.gen.js';
+import { generateStream } from './generators/node/stream.gen.js';
 import { generatePythonEntity } from './generators/python/entity.gen.js';
 import { generatePythonFunction } from './generators/python/function.gen.js';
 
@@ -88,6 +91,24 @@ const buildNode = (): void => {
   for (const plugin of schema.plugins) {
     const f = `plugins/${plugin.name}.plugin.ts`;
     writeFile(join(nodeDir, f), generatePlugin(plugin));
+    allFiles.push(f);
+  }
+
+  for (const event of schema.events) {
+    const f = `events/${event.name}.event.ts`;
+    writeFile(join(nodeDir, f), generateEvent(event));
+    allFiles.push(f);
+  }
+
+  for (const worker of schema.workers) {
+    const f = `workers/${worker.name}.worker.ts`;
+    writeFile(join(nodeDir, f), generateWorker(worker));
+    allFiles.push(f);
+  }
+
+  for (const stream of schema.streams) {
+    const f = `streams/${stream.name}.stream.ts`;
+    writeFile(join(nodeDir, f), generateStream(stream));
     allFiles.push(f);
   }
 
