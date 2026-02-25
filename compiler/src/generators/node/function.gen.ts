@@ -78,7 +78,7 @@ const generateEntityCallCode = (step: FunctionStep, indent: string): string => {
       lines.push(`${indent}const ${step.id} = await platformatic.entities.${entityPath}.find({`);
       lines.push(`${indent}  where: ${where},`);
       lines.push(`${indent}  limit: 1,`);
-      lines.push(`${indent}}).then((r: any[]) => r[0]);`);
+      lines.push(`${indent}}).then((r: Record<string, unknown>[]) => r[0]);`);
       break;
     }
     case 'create': {
@@ -121,7 +121,7 @@ const generateEntityCallCode = (step: FunctionStep, indent: string): string => {
       const groupBy = params.groupBy ? resolveValue(params.groupBy) : undefined;
       lines.push(`${indent}const ${step.id} = await platformatic.entities.${entityPath}.find({`);
       lines.push(`${indent}  where: ${where},`);
-      lines.push(`${indent}}).then((rows: any[]) => {`);
+      lines.push(`${indent}}).then((rows: Record<string, unknown>[]) => {`);
       if (groupBy && sum) {
         lines.push(`${indent}  const groups: Record<string, number> = {};`);
         lines.push(`${indent}  for (const row of rows) { groups[row[${groupBy}]] = (groups[row[${groupBy}]] ?? 0) + (row[${sum}] ?? 0); }`);
@@ -129,7 +129,7 @@ const generateEntityCallCode = (step: FunctionStep, indent: string): string => {
       } else if (sum) {
         lines.push(`${indent}  return rows.reduce((acc, row) => acc + (row[${sum}] ?? 0), 0);`);
       } else if (groupBy) {
-        lines.push(`${indent}  const groups: Record<string, any[]> = {};`);
+        lines.push(`${indent}  const groups: Record<string, unknown[]> = {};`);
         lines.push(`${indent}  for (const row of rows) { (groups[row[${groupBy}]] ??= []).push(row); }`);
         lines.push(`${indent}  return Object.entries(groups).map(([key, items]) => ({ key, count: items.length }));`);
       } else {
@@ -229,7 +229,15 @@ export const generateFunction = (fn: FunctionDef): string => {
   const lines = [HEADER];
   const params = (fn.inputs ?? []).map((i) => `${i.name}: ${i.type}`).join(', ');
   const returnType = fn.output?.type ?? 'void';
-  lines.push(`export const ${fn.name} = async (platformatic: any, ${params}): Promise<${returnType}> => {`);
+  // Only inject platformatic param if function uses entity calls
+  const usesEntities = fn.steps.some((s) => s.call && isEntityCall(s.call));
+  const allParams = usesEntities
+    ? (params ? `platformatic: PlatformaticContext, ${params}` : 'platformatic: PlatformaticContext')
+    : params;
+  if (usesEntities) {
+    lines.push(`interface PlatformaticContext { entities: Record<string, Record<string, (...args: unknown[]) => Promise<unknown>>>; }\n`);
+  }
+  lines.push(`export const ${fn.name} = async (${allParams}): Promise<${returnType}> => {`);
 
   for (const step of fn.steps) {
     lines.push(generateStepCode(step, '  '));
