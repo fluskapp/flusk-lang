@@ -12,12 +12,13 @@ import { parsePlugin, type PluginDef } from './parsers/plugin.parser.js';
 import { parseEvent, type EventDef } from './parsers/event.parser.js';
 import { parseWorker, type WorkerDef } from './parsers/worker.parser.js';
 import { parseStream, type StreamDef } from './parsers/stream.parser.js';
+import { parseHook, type HookDef } from './parsers/hook.parser.js';
 import { validateRefs } from './validators/refs.validator.js';
 import { lintGeneratedCode, type LintResult, type LintIssue } from './validators/lint.validator.js';
 
 export { lintGeneratedCode, type LintResult, type LintIssue };
 
-export type { EntityDef, FunctionDef, CommandDef, RouteDef, ProviderDef, ClientDef, ServiceDef, MiddlewareDef, PluginDef, EventDef, WorkerDef, StreamDef };
+export type { EntityDef, FunctionDef, CommandDef, RouteDef, ProviderDef, ClientDef, ServiceDef, MiddlewareDef, PluginDef, EventDef, WorkerDef, StreamDef, HookDef };
 
 export interface ParsedSchema {
   entities: EntityDef[];
@@ -32,6 +33,7 @@ export interface ParsedSchema {
   events: EventDef[];
   workers: WorkerDef[];
   streams: StreamDef[];
+  hooks: HookDef[];
 }
 
 const loadDir = <T>(dir: string, parser: (f: string) => T): T[] => {
@@ -58,6 +60,7 @@ export const parseAll = (schemaDir: string): ParsedSchema => {
     events: loadDir(join(schemaDir, 'events'), parseEvent),
     workers: loadDir(join(schemaDir, 'workers'), parseWorker),
     streams: loadDir(join(schemaDir, 'streams'), parseStream),
+    hooks: loadDir(join(schemaDir, 'hooks'), parseHook),
   };
   return schema;
 };

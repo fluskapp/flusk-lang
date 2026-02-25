@@ -15,6 +15,7 @@ import { generatePlugin } from './generators/node/plugin.gen.js';
 import { generateEvent } from './generators/node/event.gen.js';
 import { generateWorker } from './generators/node/worker.gen.js';
 import { generateStream } from './generators/node/stream.gen.js';
+import { generateHook } from './generators/node/hook.gen.js';
 import { generatePythonEntity } from './generators/python/entity.gen.js';
 import { generatePythonFunction } from './generators/python/function.gen.js';
 
@@ -109,6 +110,12 @@ const buildNode = (): void => {
   for (const stream of schema.streams) {
     const f = `streams/${stream.name}.stream.ts`;
     writeFile(join(nodeDir, f), generateStream(stream));
+    allFiles.push(f);
+  }
+
+  for (const hook of schema.hooks) {
+    const f = `hooks/${hook.name}.hook.ts`;
+    writeFile(join(nodeDir, f), generateHook(hook));
     allFiles.push(f);
   }
 

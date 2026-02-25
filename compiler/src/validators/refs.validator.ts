@@ -27,6 +27,7 @@ interface AllDefs {
   services?: ServiceDef[];
   middlewares?: MiddlewareDef[];
   plugins?: PluginDef[];
+  hooks?: Array<{ name: string; entity: string; lifecycle: Array<{ call?: string }> }>;
 }
 
 // Platformatic DB built-in entity operations
@@ -111,6 +112,17 @@ export const validateRefs = (defs: AllDefs): void => {
         if (/^[A-Z]/.test(val) && !entityNames.has(val)) {
           issues.push(`Middleware "${mw.name}" output references unknown entity "${val}"`);
         }
+      }
+    }
+  }
+
+  for (const hook of defs.hooks ?? []) {
+    if (!entityNames.has(hook.entity)) {
+      issues.push(`Hook "${hook.name}" references unknown entity "${hook.entity}"`);
+    }
+    for (const lc of hook.lifecycle) {
+      if (lc.call && !isValidCall(lc.call, functionNames, entityNames, clientEndpoints)) {
+        issues.push(`Hook "${hook.name}" lifecycle calls unknown function "${lc.call}"`);
       }
     }
   }
