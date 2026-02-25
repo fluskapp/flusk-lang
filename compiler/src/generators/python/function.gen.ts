@@ -15,7 +15,10 @@ const genStep = (step: FunctionStep, indent: string): string => {
 
   if (step.call && !step.action) {
     const args = step.with
-      ? Object.entries(step.with).map(([, v]) => (v.startsWith('$') ? v.slice(1) : `"${v}"`)).join(', ')
+      ? Object.entries(step.with).map(([, v]) => {
+          const s = String(v);
+          return s.startsWith('$') ? s.slice(1) : `"${s}"`;
+        }).join(', ')
       : '';
     lines.push(`${indent}${step.id} = await ${step.call}(${args})`);
   } else if (step.action === 'filter' && step.where) {
@@ -30,7 +33,10 @@ const genStep = (step: FunctionStep, indent: string): string => {
   } else if (step.action === 'forEach') {
     const src = step.source?.startsWith('$') ? step.source.slice(1) : step.source;
     const args = step.with
-      ? Object.entries(step.with).map(([, v]) => (v === '$item' ? 'item' : v.startsWith('$') ? v.slice(1) : `"${v}"`)).join(', ')
+      ? Object.entries(step.with).map(([, v]) => {
+          const s = String(v);
+          return s === '$item' ? 'item' : s.startsWith('$') ? s.slice(1) : `"${s}"`;
+        }).join(', ')
       : 'item';
     lines.push(`${indent}for item in ${src}:`);
     if (step.onError === 'log-and-continue') {

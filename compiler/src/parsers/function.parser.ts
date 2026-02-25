@@ -7,7 +7,7 @@ export interface FunctionStep {
   id: string;
   call?: string;
   action?: string;
-  with?: Record<string, string>;
+  with?: Record<string, unknown>;
   source?: string;
   where?: { field: string; op: string; value: unknown };
   onError?: string;

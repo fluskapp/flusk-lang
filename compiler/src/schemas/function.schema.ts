@@ -8,7 +8,7 @@ const stepSchema = {
       type: 'string',
       enum: ['call', 'filter', 'forEach', 'map', 'validate', 'transform', 'condition', 'assign', 'return'],
     },
-    with: { type: 'object', additionalProperties: { type: 'string' } },
+    with: { type: 'object', additionalProperties: true },
     source: { type: 'string' },
     where: {
       type: 'object',
