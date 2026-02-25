@@ -26,6 +26,7 @@ const generatedDir = join(rootDir, 'generated');
 const command = process.argv[2];
 const target = process.argv.includes('--target')
   ? process.argv[process.argv.indexOf('--target') + 1] : 'all';
+const skipRefs = process.argv.includes('--skip-refs');
 
 const writeFile = (path: string, content: string): void => {
   mkdirSync(join(path, '..'), { recursive: true });
@@ -34,7 +35,7 @@ const writeFile = (path: string, content: string): void => {
 };
 
 const buildNode = (): void => {
-  const schema = validate(schemaDir);
+  const schema = skipRefs ? parseAll(schemaDir) : validate(schemaDir);
   const nodeDir = join(generatedDir, 'node', 'src');
   const allFiles: string[] = [];
 
@@ -124,7 +125,7 @@ const buildNode = (): void => {
 };
 
 const buildPython = (): void => {
-  const schema = validate(schemaDir);
+  const schema = skipRefs ? parseAll(schemaDir) : validate(schemaDir);
   const pyDir = join(generatedDir, 'python');
 
   for (const entity of schema.entities) {
