@@ -292,6 +292,43 @@ decorators:
     type: function
 ```
 
+### View — UI Components (React/TanStack Start)
+
+Define frontend views in YAML, generate TanStack Start route files with React components.
+
+```yaml
+name: AdminDashboard
+type: dashboard
+description: Main admin dashboard
+route: /$tenant/admin
+layout: full
+auth: true
+sections:
+  - name: Usage Stats
+    type: stat-cards
+    widgets:
+      - type: stat-card
+        source: stats.totalUsers
+        label: Total Users
+        format: number
+  - name: Usage Chart
+    type: chart
+    source: queries.byDay
+    chart:
+      type: area
+      xAxis: date
+      yAxis: count
+  - name: Solutions
+    type: data-table
+    source: solutions
+    columns: [name, status, createdAt]
+    actions: [edit, delete]
+```
+
+**Supported view types:** `page`, `dashboard`, `chat`, `form`, `table`, `detail`, `builder`
+
+**Generates:** TanStack Start route files with React components, Tailwind styling, and shadcn-style patterns.
+
 ## Project Structure
 
 ```
@@ -305,6 +342,7 @@ schema/          → YAML definitions (the source of truth)
   services/      → Service definitions (proxy, server, worker)
   middlewares/   → Middleware definitions (request/response hooks)
   plugins/       → Plugin definitions (Fastify plugins)
+  views/         → View definitions (React/TanStack Start UI)
 compiler/        → The flusk-lang compiler (TypeScript)
 generated/       → Output code (auto-generated, never hand-edit)
   node/          → Generated Node.js/TypeScript code
