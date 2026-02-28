@@ -18,6 +18,8 @@ import { generateStream } from './generators/node/stream.gen.js';
 import { generateHook } from './generators/node/hook.gen.js';
 import { generatePythonEntity } from './generators/python/entity.gen.js';
 import { generatePythonFunction } from './generators/python/function.gen.js';
+import { generateMigrations } from './generators/node/migration.gen.js';
+import { generateAllTests } from './generators/node/test.gen.js';
 const schemaDirArg = process.argv.includes('--schema-dir')
     ? resolve(process.argv[process.argv.indexOf('--schema-dir') + 1])
     : undefined;
@@ -149,6 +151,7 @@ const buildReactViews = () => {
 import { loadFeatures } from './parsers/feature.parser.js';
 import { explodeFeature } from './exploder/index.js';
 import { writeExploded } from './exploder/index.js';
+import { diffFeature } from './exploder/index.js';
 const explodeFeatures = () => {
     const featuresDir = join(schemaDir, 'features');
     const features = loadFeatures(featuresDir);
@@ -172,7 +175,93 @@ const explodeFeatures = () => {
     }
     console.log(`\n✅ Exploded ${features.length} feature(s)`);
 };
-if (command === 'explode') {
+const diffFeatures = () => {
+    const featuresDir = join(schemaDir, 'features');
+    const features = loadFeatures(featuresDir);
+    if (features.length === 0) {
+        console.log('ℹ️  No .feature.yaml files found');
+        return;
+    }
+    for (const feature of features) {
+        const exploded = explodeFeature(feature);
+        const changeset = diffFeature(exploded, schemaDir);
+        console.log(`\n📊 Diff: ${feature.name}`);
+        console.log(`   Added: ${changeset.summary.added} | Modified: ${changeset.summary.modified} | Removed: ${changeset.summary.removed} | Unchanged: ${changeset.summary.unchanged}`);
+        for (const f of changeset.files) {
+            const icon = f.kind === 'added' ? '✨' : f.kind === 'modified' ? '📝' : f.kind === 'removed' ? '🗑️' : '⏭️';
+            if (f.kind !== 'unchanged')
+                console.log(`   ${icon} ${f.path}`);
+        }
+        if (changeset.fields.length > 0) {
+            console.log('\n   Field changes:');
+            for (const fc of changeset.fields) {
+                const icon = fc.kind === 'added' ? '+' : fc.kind === 'removed' ? '-' : '~';
+                console.log(`   ${icon} ${fc.entity}.${fc.field} (${fc.kind})`);
+            }
+        }
+        if (changeset.breaking.length > 0) {
+            console.log('\n   ⚠️  Breaking changes:');
+            for (const b of changeset.breaking) {
+                console.log(`   ❌ ${b.message}`);
+            }
+        }
+    }
+};
+const buildFeatures = () => {
+    const featuresDir = join(schemaDir, 'features');
+    const features = loadFeatures(featuresDir);
+    if (features.length === 0) {
+        console.log('ℹ️  No .feature.yaml files found');
+        return;
+    }
+    for (const feature of features) {
+        console.log(`\n🔧 Building feature: ${feature.name}`);
+        // 1. Explode
+        const exploded = explodeFeature(feature);
+        // 2. Diff
+        const changeset = diffFeature(exploded, schemaDir);
+        console.log(`   Changes: +${changeset.summary.added} ~${changeset.summary.modified} -${changeset.summary.removed} =${changeset.summary.unchanged}`);
+        if (changeset.breaking.length > 0) {
+            console.log('   ⚠️  Breaking changes:');
+            for (const b of changeset.breaking)
+                console.log(`      ❌ ${b.message}`);
+        }
+        // 3. Write sub-YAMLs
+        const writeResult = writeExploded(exploded, schemaDir, { overwrite: true });
+        for (const f of writeResult.written)
+            console.log(`   ✨ ${f}`);
+        for (const f of writeResult.updated)
+            console.log(`   📝 ${f}`);
+        // 4. Generate migrations
+        if (changeset.fields.length > 0 || changeset.files.some((f) => f.type === 'entity' && f.kind === 'added')) {
+            const migrations = generateMigrations(changeset);
+            const migrationsDir = join(generatedDir, 'migrations');
+            for (const m of migrations) {
+                const path = join(migrationsDir, `${m.timestamp}_${m.name}.sql`);
+                writeFile(path, `-- Up\n${m.up}\n\n-- Down\n${m.down}\n`);
+                console.log(`   🗃️  migration: ${m.timestamp}_${m.name}.sql`);
+            }
+        }
+        // 5. Generate tests
+        const tests = generateAllTests(feature);
+        for (const t of tests) {
+            const path = join(generatedDir, t.path);
+            writeFile(path, t.content);
+            console.log(`   🧪 test: ${t.path}`);
+        }
+    }
+    console.log('\n✅ Feature build complete');
+};
+if (command === 'diff') {
+    try {
+        diffFeatures();
+    }
+    catch (err) {
+        console.error(err.message);
+        process.exit(1);
+    }
+}
+else if (command === 'explode') {
     try {
         explodeFeatures();
     }
@@ -194,6 +283,8 @@ else if (command === 'validate') {
 }
 else if (command === 'build') {
     try {
+        if (target === 'all' || target === 'features')
+            buildFeatures();
         if (target === 'all' || target === 'node')
             buildNode();
         if (target === 'all' || target === 'python')
@@ -207,5 +298,5 @@ else if (command === 'build') {
     }
 }
 else {
-    console.log('Usage: flusk-lang <explode|validate|build> [--target node|python|views] [--schema-dir path] [--dry-run]');
+    console.log('Usage: flusk-lang <diff|explode|validate|build> [--target node|python|views] [--schema-dir path] [--dry-run]');
 }

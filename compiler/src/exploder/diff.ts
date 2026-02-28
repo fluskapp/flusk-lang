@@ -1,0 +1,237 @@
+/**
+ * Diff Engine — compares exploded YAMLs against existing schema files
+ * Produces a Changeset describing what was added, modified, removed
+ */
+
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import yaml from 'js-yaml';
+import type { ExplodedFile, ExplodedFiles } from './exploder.js';
+
+export type ChangeKind = 'added' | 'modified' | 'removed' | 'unchanged';
+
+export interface FileChange {
+  path: string;
+  type: string;
+  kind: ChangeKind;
+  oldContent?: string;
+  newContent?: string;
+}
+
+export interface FieldChange {
+  entity: string;
+  field: string;
+  kind: 'added' | 'removed' | 'type-changed' | 'default-changed' | 'constraint-changed';
+  oldValue?: unknown;
+  newValue?: unknown;
+}
+
+export interface Changeset {
+  feature: string;
+  files: FileChange[];
+  fields: FieldChange[];
+  summary: {
+    added: number;
+    modified: number;
+    removed: number;
+    unchanged: number;
+  };
+  breaking: BreakingChange[];
+}
+
+export interface BreakingChange {
+  type: 'field-removed' | 'field-type-changed' | 'route-removed' | 'entity-removed';
+  message: string;
+  path: string;
+}
+
+// ── Field-level diff for entities ──────────────
+
+interface RawField {
+  name: string;
+  type: string;
+  default?: unknown;
+  unique?: boolean;
+  required?: boolean;
+  index?: boolean;
+  [key: string]: unknown;
+}
+
+const diffEntityFields = (
+  entityName: string,
+  oldFields: RawField[],
+  newFields: RawField[],
+): { fieldChanges: FieldChange[]; breaking: BreakingChange[] } => {
+  const fieldChanges: FieldChange[] = [];
+  const breaking: BreakingChange[] = [];
+
+  const oldMap = new Map(oldFields.map((f) => [f.name, f]));
+  const newMap = new Map(newFields.map((f) => [f.name, f]));
+
+  // Added fields
+  for (const [name, field] of newMap) {
+    if (!oldMap.has(name)) {
+      fieldChanges.push({ entity: entityName, field: name, kind: 'added', newValue: field });
+    }
+  }
+
+  // Removed fields
+  for (const [name, field] of oldMap) {
+    if (!newMap.has(name)) {
+      fieldChanges.push({ entity: entityName, field: name, kind: 'removed', oldValue: field });
+      breaking.push({
+        type: 'field-removed',
+        message: `Field "${name}" removed from entity "${entityName}"`,
+        path: `entities/${entityName}`,
+      });
+    }
+  }
+
+  // Modified fields
+  for (const [name, newField] of newMap) {
+    const oldField = oldMap.get(name);
+    if (!oldField) continue;
+
+    if (oldField.type !== newField.type) {
+      fieldChanges.push({
+        entity: entityName, field: name, kind: 'type-changed',
+        oldValue: oldField.type, newValue: newField.type,
+      });
+      breaking.push({
+        type: 'field-type-changed',
+        message: `Field "${name}" type changed from "${oldField.type}" to "${newField.type}" in entity "${entityName}"`,
+        path: `entities/${entityName}`,
+      });
+    }
+
+    if (JSON.stringify(oldField.default) !== JSON.stringify(newField.default)) {
+      fieldChanges.push({
+        entity: entityName, field: name, kind: 'default-changed',
+        oldValue: oldField.default, newValue: newField.default,
+      });
+    }
+
+    const constraintKeys = ['unique', 'required', 'index'] as const;
+    for (const key of constraintKeys) {
+      if (oldField[key] !== newField[key]) {
+        fieldChanges.push({
+          entity: entityName, field: name, kind: 'constraint-changed',
+          oldValue: { [key]: oldField[key] }, newValue: { [key]: newField[key] },
+        });
+      }
+    }
+  }
+
+  return { fieldChanges, breaking };
+};
+
+// ── File-level diff ────────────────────────────
+
+const diffFile = (file: ExplodedFile, schemaDir: string): FileChange => {
+  const fullPath = join(schemaDir, file.path);
+
+  if (!existsSync(fullPath)) {
+    return { path: file.path, type: file.type, kind: 'added', newContent: file.content };
+  }
+
+  const oldContent = readFileSync(fullPath, 'utf-8');
+  if (oldContent === file.content) {
+    return { path: file.path, type: file.type, kind: 'unchanged' };
+  }
+
+  return { path: file.path, type: file.type, kind: 'modified', oldContent, newContent: file.content };
+};
+
+// ── Detect removed files ───────────────────────
+
+const findRemovedFiles = (
+  exploded: ExplodedFiles,
+  schemaDir: string,
+): FileChange[] => {
+  const removed: FileChange[] = [];
+  const newPaths = new Set(exploded.files.map((f) => f.path));
+
+  const dirs = ['entities', 'functions', 'routes', 'events', 'workers', 'clients', 'middlewares', 'commands', 'views', 'widgets'];
+
+  for (const dir of dirs) {
+    const dirPath = join(schemaDir, dir);
+    try {
+      const files = readdirSync(dirPath).filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'));
+      for (const file of files) {
+        const relPath = `${dir}/${file}`;
+        if (!newPaths.has(relPath)) {
+          // Don't flag files from other features as removed
+          // Only flag if the file was previously generated by this feature
+          // For now, skip removal detection (safe default)
+        }
+      }
+    } catch {
+      // Dir doesn't exist
+    }
+  }
+
+  return removed;
+};
+
+// ── Main diff ──────────────────────────────────
+
+export const diffFeature = (
+  exploded: ExplodedFiles,
+  schemaDir: string,
+): Changeset => {
+  const files: FileChange[] = [];
+  const allFieldChanges: FieldChange[] = [];
+  const allBreaking: BreakingChange[] = [];
+
+  for (const file of exploded.files) {
+    const change = diffFile(file, schemaDir);
+    files.push(change);
+
+    // Deep diff entity fields
+    if (file.type === 'entity' && change.kind === 'modified' && change.oldContent) {
+      const oldData = yaml.load(change.oldContent) as { name: string; fields: RawField[] };
+      const newData = yaml.load(change.newContent!) as { name: string; fields: RawField[] };
+      const { fieldChanges, breaking } = diffEntityFields(
+        oldData.name,
+        oldData.fields ?? [],
+        newData.fields ?? [],
+      );
+      allFieldChanges.push(...fieldChanges);
+      allBreaking.push(...breaking);
+    }
+
+    // Detect removed entities/routes as breaking
+    if (file.type === 'entity' && change.kind === 'removed') {
+      allBreaking.push({
+        type: 'entity-removed',
+        message: `Entity file "${file.path}" removed`,
+        path: file.path,
+      });
+    }
+    if (file.type === 'route' && change.kind === 'removed') {
+      allBreaking.push({
+        type: 'route-removed',
+        message: `Route file "${file.path}" removed`,
+        path: file.path,
+      });
+    }
+  }
+
+  // Add removed files
+  files.push(...findRemovedFiles(exploded, schemaDir));
+
+  const summary = {
+    added: files.filter((f) => f.kind === 'added').length,
+    modified: files.filter((f) => f.kind === 'modified').length,
+    removed: files.filter((f) => f.kind === 'removed').length,
+    unchanged: files.filter((f) => f.kind === 'unchanged').length,
+  };
+
+  return {
+    feature: exploded.feature,
+    files,
+    fields: allFieldChanges,
+    summary,
+    breaking: allBreaking,
+  };
+};
