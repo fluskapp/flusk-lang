@@ -1,0 +1,14 @@
+name: sendEmail
+description: Send an email via external service
+inputs:
+  - name: to
+    type: string
+  - name: subject
+    type: string
+  - name: body
+    type: string
+output:
+  type: object
+steps:
+  - id: callExternal
+    call: email-service.send

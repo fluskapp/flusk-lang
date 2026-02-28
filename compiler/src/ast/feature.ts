@@ -69,6 +69,7 @@ export interface FeatureFunction {
   output?: { type: string; fields?: string[] };
   uses?: string;
   steps?: string[];
+  logic?: unknown[];
 }
 
 export interface FeatureEvent {

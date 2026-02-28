@@ -14,6 +14,8 @@ import { rotateApiKey } from '../functions/rotateApiKey.js';
 import { verifyCredentials } from '../functions/verifyCredentials.js';
 import { processInvite } from '../functions/processInvite.js';
 import { generateApiKey } from '../functions/generateApiKey.js';
+import { registerOrgHandler } from '../functions/registerOrgHandler.js';
+import { sendEmail } from '../functions/sendEmail.js';
 
 export default fp(async (app: FastifyInstance) => {
 

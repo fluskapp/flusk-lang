@@ -17,6 +17,8 @@ import type { FeatureNode } from '../../ast/feature.js';
 import { generateWattJson, generateDbConfig, generateServiceConfig, generateEnvTemplate } from './config.gen.js';
 import { generateFeatureMigrations } from './migration.gen.js';
 import { generatePlugin, generateFunction, generateRouteHandler } from './plugin.gen.js';
+import { generateLogicFunction } from './logic.gen.js';
+import { parseLogicBlock } from '../../parsers/logic.parser.js';
 import { generateClient } from './client.gen.js';
 import { generateEntityType, generateFeatureTypes } from './types.gen.js';
 import { generateEventBus, generateEventHandlers, generateWorker } from './event.gen.js';
@@ -85,10 +87,20 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
     // Functions (explicit business logic)
     const explicitFnNames = new Set(feature.functions.map((f) => toCamel(f.name)));
     for (const fn of feature.functions) {
-      files.push({
-        path: `apps/${name}/functions/${toCamel(fn.name)}.ts`,
-        content: generateFunction(fn),
-      });
+      // If function has logic DSL, use the logic compiler
+      if (fn.logic && Array.isArray(fn.logic) && fn.logic.length > 0) {
+        const logicBlock = parseLogicBlock(fn.logic);
+        const inputFields = (fn.input ?? []).map((i) => ({ name: i.name, type: i.type }));
+        files.push({
+          path: `apps/${name}/functions/${toCamel(fn.name)}.ts`,
+          content: generateLogicFunction(toCamel(fn.name), inputFields, logicBlock, name),
+        });
+      } else {
+        files.push({
+          path: `apps/${name}/functions/${toCamel(fn.name)}.ts`,
+          content: generateFunction(fn),
+        });
+      }
     }
 
     // Auto-generated route handlers (for routes without explicit functions)

@@ -199,6 +199,14 @@ functions:
     output:
       type: object
       fields: [token, member, org]
+    logic:
+      - "set: member = db.findOne(org-member, { email: input.email })"
+      - "assert: member, 401, Invalid credentials"
+      - "set: valid = verify(input.password, member.password_hash)"
+      - "assert: valid, 401, Invalid credentials"
+      - "set: org = db.findOne(organization, { id: member.org_id })"
+      - "set: token = jwt.sign({ sub: member.id, org: org.id, role: member.role })"
+      - "return: { token, member, org }"
 
   - name: process-invite
     input:
@@ -208,11 +216,57 @@ functions:
         type: string
       - name: password
         type: string
+    logic:
+      - "set: invite = db.findOne(invite, { token: input.token })"
+      - "assert: invite, 404, Invite not found"
+      - "assert: !invite.accepted, 409, Invite already used"
+      - "set: password_hash = hash(input.password)"
+      - "set: member = db.insert(org-member, { org_id: invite.org_id, email: invite.email, name: input.name, password_hash, role: invite.role, status: active })"
+      - "set: org = db.findOne(organization, { id: invite.org_id })"
+      - "set: token = jwt.sign({ sub: member.id, org: org.id, role: member.role })"
+      - "return: { token, member, org }"
 
   - name: generate-api-key
     input: []
     output:
       type: string
+    logic:
+      - "set: key = apikey.generate()"
+      - "return: key"
+
+  - name: register-org-handler
+    description: Full registration flow
+    input:
+      - name: org_name
+        type: string
+      - name: email
+        type: string
+      - name: password
+        type: string
+      - name: name
+        type: string
+    logic:
+      - "set: slug = slugify(input.org_name)"
+      - "set: existing = db.findOne(organization, { slug })"
+      - "assert: !existing, 409, Organization already exists"
+      - "set: password_hash = hash(input.password)"
+      - "set: api_key = apikey.generate()"
+      - "set: org = db.insert(organization, { name: input.org_name, slug, api_key, status: trial })"
+      - "set: member = db.insert(org-member, { org_id: org.id, email: input.email, name: input.name, password_hash, role: owner, status: active })"
+      - "set: token = jwt.sign({ sub: member.id, org: org.id, role: owner })"
+      - "emit: org-created, { org_id: org.id, name: org.name }"
+      - "return: { token, org, member }"
+
+  - name: send-email
+    description: Send an email via external service
+    input:
+      - name: to
+        type: string
+      - name: subject
+        type: string
+      - name: body
+        type: string
+    uses: email-service.send
 
 events:
   - name: org-created
