@@ -1,0 +1,105 @@
+# Demo 1: Card View — Mobile-first, responsive, accessible, semantic
+name: TeamMemberCard
+type: card
+description: Team member profile card — mobile-first, responsive, accessible
+route: /$tenant/team/:memberId
+layout: centered
+auth: true
+ssr: true
+
+accessibility:
+  role: article
+  aria-label: Team member profile
+  landmark: main
+  focus-trap: false
+  reduce-motion: true
+
+responsive:
+  strategy: mobile-first
+  breakpoints:
+    sm: 640px
+    md: 768px
+    lg: 1024px
+
+loader:
+  source: TeamMember
+  params: [tenant, memberId]
+
+sections:
+  - name: Avatar
+    type: image
+    source: member.avatar
+    alt: "{{ member.name }} profile photo"
+    aspect-ratio: 1:1
+    sizes:
+      sm: 80px
+      md: 96px
+      lg: 120px
+    rounded: full
+    loading: lazy
+    fallback: initials
+
+  - name: Header
+    type: heading
+    tag: h1
+    source: member.name
+    align: center
+    sizes:
+      sm: text-xl
+      md: text-2xl
+      lg: text-3xl
+
+  - name: Role Badge
+    type: badge
+    source: member.role
+    variant: outline
+    color: primary
+
+  - name: Bio
+    type: paragraph
+    source: member.bio
+    max-lines:
+      sm: 3
+      md: 5
+      lg: none
+    expandable: true
+
+  - name: Stats
+    type: stat-cards
+    layout:
+      sm: stack
+      md: grid-2
+      lg: grid-3
+    widgets:
+      - type: stat-card
+        source: member.stats.projects
+        label: Projects
+        format: number
+        icon: folder
+      - type: stat-card
+        source: member.stats.contributions
+        label: Contributions
+        format: number
+        icon: git-commit
+      - type: stat-card
+        source: member.stats.reviews
+        label: Reviews
+        format: number
+        icon: check-circle
+
+  - name: Contact Actions
+    type: action-group
+    layout:
+      sm: stack
+      md: inline
+    actions:
+      - label: Send Message
+        icon: mail
+        variant: primary
+        action: navigate
+        to: /$tenant/messages/new?to={{ member.id }}
+      - label: View Profile
+        icon: external-link
+        variant: secondary
+        action: navigate
+        to: /$tenant/team/{{ member.id }}/full

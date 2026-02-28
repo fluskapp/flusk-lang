@@ -1,0 +1,159 @@
+# Demo 2: Full About Page — paragraph, bar chart, info section, team
+name: AboutPage
+type: page
+description: About us page with company info, metrics bar chart, and team section
+route: /about
+layout: full
+auth: false
+ssr: true
+
+meta:
+  title: About Us — Flusk
+  description: Learn about Flusk, the AI Adoption Platform
+  og:image: /images/og-about.png
+
+accessibility:
+  landmark: main
+  skip-nav: true
+  reduce-motion: true
+
+responsive:
+  strategy: mobile-first
+  breakpoints:
+    sm: 640px
+    md: 768px
+    lg: 1024px
+
+sections:
+  - name: Hero
+    type: hero
+    tag: header
+    heading:
+      text: About Flusk
+      tag: h1
+      sizes:
+        sm: text-3xl
+        md: text-4xl
+        lg: text-5xl
+    subheading:
+      text: The AI Adoption Platform
+      color: primary
+
+  - name: Mission
+    type: paragraph
+    tag: section
+    aria-label: Our Mission
+    heading:
+      text: Our Mission
+      tag: h2
+    content: |
+      We believe every company deserves to get maximum value from AI.
+      Today, organizations spend billions on AI tools with zero visibility
+      into what works, what's wasted, and who's actually using them.
+      Flusk changes that — turning AI chaos into AI adoption, and
+      scattered spend into 30x output.
+    max-width: prose
+    align: center
+
+  - name: Key Metrics
+    type: bar-chart
+    tag: section
+    aria-label: Company metrics
+    heading:
+      text: By The Numbers
+      tag: h2
+    layout:
+      sm: vertical
+      md: horizontal
+    bars:
+      - label: Enterprise AI Spend
+        value: 37
+        max: 50
+        unit: $B
+        color: teal
+      - label: Can't Track AI Usage
+        value: 87
+        max: 100
+        unit: "%"
+        color: purple
+      - label: Output Multiplier
+        value: 30
+        max: 50
+        unit: x
+        color: teal
+      - label: Visibility for Most Orgs
+        value: 0
+        max: 100
+        unit: "%"
+        color: red
+    animate: true
+    animate-on: viewport
+
+  - name: What We Do
+    type: feature-grid
+    tag: section
+    aria-label: What we do
+    heading:
+      text: Three Pillars
+      tag: h2
+    layout:
+      sm: stack
+      md: grid-3
+    features:
+      - icon: eye
+        title: Observability
+        description: Real-time dashboards, cost attribution, shadow AI detection. See everything across all your AI providers.
+      - icon: zap
+        title: Action
+        description: No-code solution builder, smart model routing, deploy to Slack, WhatsApp & Web in one click.
+      - icon: target
+        title: Engagement
+        description: In-context nudges at friction points. Push the right AI tool to the right person at the right time.
+
+  - name: Team
+    type: team-grid
+    tag: section
+    aria-label: Our team
+    heading:
+      text: The Team
+      tag: h2
+    subheading: The team that built Digital Adoption is now building AI Adoption.
+    layout:
+      sm: grid-2
+      md: grid-4
+    members:
+      - name: Adir Ben Yosef
+        role: CEO
+        bio: WalkMe 6yr, Guesty, Payzen
+        avatar: /images/team/adir.jpg
+      - name: Yarden Cohen
+        role: CRO
+        bio: WalkMe, Akeyless
+        avatar: /images/team/yarden.jpg
+      - name: Nophry Lev Ari
+        role: CMO
+        bio: WalkMe 12yr
+        avatar: /images/team/nophry.jpg
+      - name: Omri Katz
+        role: CTO
+        bio: Payzen, Kaltura
+        avatar: /images/team/omri.jpg
+
+  - name: CTA
+    type: cta
+    tag: section
+    heading:
+      text: Ready to multiply your AI output?
+      tag: h2
+    actions:
+      - label: Get Started — Free
+        variant: primary
+        size: lg
+        action: navigate
+        to: /signup
+      - label: View on GitHub
+        variant: outline
+        size: lg
+        action: external
+        to: https://github.com/fluskapp/flusk-dev
+        icon: github
