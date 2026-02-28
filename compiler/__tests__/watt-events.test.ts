@@ -140,15 +140,15 @@ describe('Full Project with Events', () => {
     const files = generateWattProject([feature]);
     const paths = files.map((f) => f.path);
 
-    expect(paths).toContain('apps/notifications/plugins/event-bus.ts');
-    expect(paths).toContain('apps/notifications/plugins/event-handlers.ts');
-    expect(paths).toContain('apps/notifications/workers/sendWelcomeEmail.ts');
-    expect(paths).toContain('apps/notifications/workers/sendReceipt.ts');
+    expect(paths).toContain('apps/api/plugins/notifications-events.ts');
+    expect(paths).toContain('apps/api/plugins/notifications-handlers.ts');
+    expect(paths).toContain('apps/api/workers/sendWelcomeEmail.ts');
+    expect(paths).toContain('apps/api/workers/sendReceipt.ts');
   });
 
   it('plugin config loads plugins dir (which includes events)', () => {
     const files = generateWattProject([feature]);
-    const config = files.find((f) => f.path === 'apps/notifications/platformatic.json');
+    const config = files.find((f) => f.path === 'apps/api/platformatic.json');
     expect(config).toBeDefined();
     const data = JSON.parse(config!.content);
     expect(data.plugins.paths).toContain('./plugins');

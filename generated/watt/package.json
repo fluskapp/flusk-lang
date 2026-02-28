@@ -1,0 +1,17 @@
+{
+  "name": "@flusk/platform",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "wattpm start",
+    "dev": "wattpm start --hot-reload",
+    "test": "node --test tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "wattpm": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

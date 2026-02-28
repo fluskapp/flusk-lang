@@ -1,28 +1,30 @@
 /**
- * Watt Generator — orchestrates all Watt-targeted code generation
+ * Watt Generator — orchestrates all code generation for a runnable Watt project
  *
- * From a FeatureNode, generates:
- * - watt.json (root config)
- * - apps/db/platformatic.json (DB config)
- * - apps/db/migrations/*.sql (Platformatic-compatible)
- * - apps/{feature}/platformatic.json (service config)
- * - apps/{feature}/plugins/*.ts (custom Fastify plugins)
- * - apps/{feature}/functions/*.ts (business logic)
- * - apps/{feature}/clients/*.ts (external API clients)
- * - types/*.ts (shared TypeScript types)
- * - tests/*.test.ts (integration tests)
+ * Architecture (token-efficient):
+ * - apps/db/         → Platformatic DB (auto CRUD + GraphQL + auth rules)
+ * - apps/api/        → Custom routes + business logic (one plugin per feature)
+ * - types/           → Shared TypeScript types
+ * - tests/           → Integration tests
+ *
+ * From YAML → 100% runnable project. Zero manual code.
  */
 
-import type { FeatureNode } from '../../ast/feature.js';
-import { generateWattJson, generateDbConfig, generateServiceConfig, generateEnvTemplate } from './config.gen.js';
+import type { FeatureNode, FeatureEntity } from '../../ast/feature.js';
+import {
+  generateWattJson, generateDbConfig, generateApiServiceConfig,
+  generateDbPackageJson, generateApiPackageJson,
+  generateEnvTemplate, generateRootPackageJson,
+  generateDockerfile, generateRenderYaml,
+} from './config.gen.js';
 import { generateFeatureMigrations } from './migration.gen.js';
-import { generatePlugin, generateFunction, generateRouteHandler } from './plugin.gen.js';
-import { generateLogicFunction } from './logic.gen.js';
-import { parseLogicBlock } from '../../parsers/logic.parser.js';
+import { generatePlugin, generateAuthPlugin, generateRouteHandler, generateFunction } from './plugin.gen.js';
 import { generateClient } from './client.gen.js';
-import { generateEntityType, generateFeatureTypes } from './types.gen.js';
+import { generateEntityType } from './types.gen.js';
 import { generateEventBus, generateEventHandlers, generateWorker } from './event.gen.js';
 import { generateAllTests } from './test.gen.js';
+import { generateLogicFunction } from './logic.gen.js';
+import { parseLogicBlock } from '../../parsers/logic.parser.js';
 
 export interface GeneratedFile {
   path: string;
@@ -42,106 +44,118 @@ const toKebab = (s: string): string =>
 
 export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] => {
   const files: GeneratedFile[] = [];
+  const allEntities: FeatureEntity[] = [];
 
-  // 1. Root configs
-  const wattJson = generateWattJson(features);
-  files.push(wattJson);
+  // ── 1. Root configs ──
+  files.push(generateWattJson(features));
   files.push(generateEnvTemplate(features));
+  files.push(generateRootPackageJson());
+  files.push(generateDockerfile());
+  files.push(generateRenderYaml());
 
-  // 2. DB app (if any entities exist)
+  // ── 2. DB app (shared database) ──
   const hasEntities = features.some((f) => f.entities.length > 0);
   if (hasEntities) {
     files.push(generateDbConfig(features));
+    files.push(generateDbPackageJson());
   }
 
-  // Collect all entities for unified types/index.ts
-  const allEntities: import('../../ast/feature.js').FeatureEntity[] = [];
-
-  // 3. Per-feature generation
+  // Migrations — global sequential numbering
   let migrationCounter = 1;
   for (const feature of features) {
-    const name = toKebab(feature.name);
-
-    // Service config (if feature has custom logic)
-    const hasCustomLogic = feature.routes.length > 0 || feature.functions.length > 0 || feature.events.length > 0 || feature.workers.length > 0;
-    if (hasCustomLogic) {
-      files.push(generateServiceConfig(feature));
-    }
-
-    // Migrations (global sequential numbering across all features)
     const migrations = generateFeatureMigrations(feature, migrationCounter);
     for (const m of migrations) {
       files.push({ path: `apps/db/migrations/${m.number}.do.sql`, content: m.doSql + '\n' });
       files.push({ path: `apps/db/migrations/${m.number}.undo.sql`, content: m.undoSql + '\n' });
     }
     migrationCounter += migrations.length;
+  }
 
-    // Plugin (custom routes)
-    if (feature.routes.length > 0) {
-      files.push({
-        path: `apps/${name}/plugins/${name}.ts`,
-        content: generatePlugin(feature),
-      });
-    }
+  // ── 3. API app (all custom logic) ──
+  const hasCustomLogic = features.some(
+    (f) => f.routes.length > 0 || f.functions.length > 0 || f.events.length > 0 || f.workers.length > 0
+  );
+  if (hasCustomLogic) {
+    files.push(generateApiServiceConfig(features));
+    files.push(generateApiPackageJson());
 
-    // Functions (explicit business logic)
-    const explicitFnNames = new Set(feature.functions.map((f) => toCamel(f.name)));
-    for (const fn of feature.functions) {
-      // If function has logic DSL, use the logic compiler
-      if (fn.logic && Array.isArray(fn.logic) && fn.logic.length > 0) {
-        const logicBlock = parseLogicBlock(fn.logic);
-        const inputFields = (fn.input ?? []).map((i) => ({ name: i.name, type: i.type }));
+    // Auth plugin (JWT + API key)
+    files.push({
+      path: 'apps/api/plugins/auth.ts',
+      content: generateAuthPlugin(features),
+    });
+
+    // One plugin per feature (routes → handlers)
+    for (const feature of features) {
+      const name = toKebab(feature.name);
+      if (feature.routes.length > 0) {
         files.push({
-          path: `apps/${name}/functions/${toCamel(fn.name)}.ts`,
-          content: generateLogicFunction(toCamel(fn.name), inputFields, logicBlock, name),
+          path: `apps/api/plugins/${name}.ts`,
+          content: generatePlugin(feature),
         });
-      } else {
+      }
+
+      // Functions — logic-compiled or stubs
+      const explicitFnNames = new Set(feature.functions.map((f) => toCamel(f.name)));
+      for (const fn of feature.functions) {
+        const fnName = toCamel(fn.name);
+        if (fn.logic && Array.isArray(fn.logic) && fn.logic.length > 0) {
+          const logicBlock = parseLogicBlock(fn.logic);
+          const inputFields = (fn.input ?? []).map((i) => ({ name: i.name, type: i.type }));
+          files.push({
+            path: `apps/api/functions/${fnName}.ts`,
+            content: generateLogicFunction(fnName, inputFields, logicBlock, name),
+          });
+        } else {
+          files.push({
+            path: `apps/api/functions/${fnName}.ts`,
+            content: generateFunction(fn),
+          });
+        }
+      }
+
+      // Route handlers without explicit functions
+      for (const route of feature.routes) {
+        const handlerName = toCamel(route.name);
+        if (!explicitFnNames.has(handlerName)) {
+          files.push({
+            path: `apps/api/functions/${handlerName}.ts`,
+            content: generateRouteHandler(route),
+          });
+        }
+      }
+
+      // Events + Workers
+      if (feature.events.length > 0) {
         files.push({
-          path: `apps/${name}/functions/${toCamel(fn.name)}.ts`,
-          content: generateFunction(fn),
+          path: `apps/api/plugins/${name}-events.ts`,
+          content: generateEventBus(feature),
+        });
+        files.push({
+          path: `apps/api/plugins/${name}-handlers.ts`,
+          content: generateEventHandlers(feature),
+        });
+      }
+
+      for (const worker of feature.workers) {
+        files.push({
+          path: `apps/api/workers/${toCamel(worker.name)}.ts`,
+          content: generateWorker(worker, feature),
+        });
+      }
+
+      // Clients
+      for (const client of feature.clients) {
+        files.push({
+          path: `apps/api/clients/${toKebab(client.name)}.ts`,
+          content: generateClient(client),
         });
       }
     }
+  }
 
-    // Auto-generated route handlers (for routes without explicit functions)
-    for (const route of feature.routes) {
-      const handlerName = toCamel(route.name);
-      if (!explicitFnNames.has(handlerName)) {
-        files.push({
-          path: `apps/${name}/functions/${handlerName}.ts`,
-          content: generateRouteHandler(route),
-        });
-      }
-    }
-
-    // Events + Workers
-    if (feature.events.length > 0) {
-      files.push({
-        path: `apps/${name}/plugins/event-bus.ts`,
-        content: generateEventBus(feature),
-      });
-      files.push({
-        path: `apps/${name}/plugins/event-handlers.ts`,
-        content: generateEventHandlers(feature),
-      });
-    }
-
-    for (const worker of feature.workers) {
-      files.push({
-        path: `apps/${name}/workers/${toCamel(worker.name)}.ts`,
-        content: generateWorker(worker, feature),
-      });
-    }
-
-    // Clients (external APIs)
-    for (const client of feature.clients) {
-      files.push({
-        path: `apps/${name}/clients/${toKebab(client.name)}.ts`,
-        content: generateClient(client),
-      });
-    }
-
-    // Types (individual files per entity)
+  // ── 4. Types (one file per entity + barrel) ──
+  for (const feature of features) {
     for (const entity of feature.entities) {
       files.push({
         path: `types/${toPascal(entity.name)}.ts`,
@@ -149,15 +163,7 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
       });
       allEntities.push(entity);
     }
-
-    // Tests
-    const tests = generateAllTests(feature);
-    for (const t of tests) {
-      files.push(t);
-    }
   }
-
-  // 4. Unified types/index.ts (all entities from all features)
   if (allEntities.length > 0) {
     const exports = allEntities
       .map((e) => `export * from './${toPascal(e.name)}.js';`)
@@ -165,6 +171,20 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
       .join('\n');
     files.push({ path: 'types/index.ts', content: exports + '\n' });
   }
+
+  // ── 5. Tests ──
+  for (const feature of features) {
+    const tests = generateAllTests(feature);
+    for (const t of tests) {
+      files.push(t);
+    }
+  }
+
+  // ── 6. .gitignore ──
+  files.push({
+    path: '.gitignore',
+    content: 'node_modules/\ndist/\n*.sqlite\n.env\n',
+  });
 
   return files;
 };

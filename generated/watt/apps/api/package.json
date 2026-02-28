@@ -1,0 +1,8 @@
+{
+  "name": "flusk-api",
+  "version": "0.1.0",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "nanoid": "^5.0.0"
+  }
+}

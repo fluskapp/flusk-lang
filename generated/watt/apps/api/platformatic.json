@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.platformatic.dev/@platformatic/service/3.0.0.json",
+  "plugins": {
+    "paths": [
+      "./plugins"
+    ]
+  },
+  "clients": [
+    {
+      "serviceId": "db",
+      "type": "openapi"
+    }
+  ]
+}

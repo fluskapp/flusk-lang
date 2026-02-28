@@ -1,13 +1,489 @@
 {
   "$schema": "https://schemas.platformatic.dev/@platformatic/db/3.0.0.json",
   "db": {
-    "connectionString": "{DATABASE_URL}"
+    "connectionString": "{DATABASE_URL}",
+    "graphql": true,
+    "openapi": true
   },
   "migrations": {
     "dir": "./migrations",
     "autoApply": true
   },
   "authorization": {
-    "adminSecret": "{PLT_ADMIN_SECRET}"
+    "jwt": {
+      "secret": "{JWT_SECRET}"
+    },
+    "adminSecret": "{PLT_ADMIN_SECRET}",
+    "anonymousRole": "anonymous",
+    "rules": [
+      {
+        "role": "member",
+        "entity": "agent_configs",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "agent_configs",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "agent_event_logs",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "agent_event_logs",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "alert_rules",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "alert_rules",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "alerts",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "alerts",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "org_members",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "org_members",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "invites",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "invites",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "solutions",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "solutions",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "deployments",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "deployments",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "solution_conversations",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "solution_conversations",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "agent_devices",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "agent_devices",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "telemetry_events",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "telemetry_events",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "ai_tools",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "ai_tools",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "member",
+        "entity": "usage_dailys",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "delete": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      },
+      {
+        "role": "admin",
+        "entity": "usage_dailys",
+        "find": {
+          "checks": {
+            "orgId": "X-PLATFORMATIC-ORG-ID"
+          }
+        },
+        "save": true,
+        "delete": true,
+        "defaults": {
+          "orgId": "X-PLATFORMATIC-ORG-ID"
+        }
+      }
+    ]
   }
 }

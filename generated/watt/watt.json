@@ -9,5 +9,9 @@
   },
   "logger": {
     "level": "{PLT_LOG_LEVEL}"
+  },
+  "cors": {
+    "origin": "{CORS_ORIGIN}",
+    "credentials": true
   }
 }

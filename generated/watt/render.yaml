@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: flusk-platform
+    runtime: docker
+    plan: free
+    healthCheckPath: /status
+    envVars:
+      - key: PLT_SERVER_PORT
+        value: "3042"
+      - key: PLT_LOG_LEVEL
+        value: info
+      - key: PLT_ADMIN_SECRET
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///data/flusk.sqlite
+      - key: CORS_ORIGIN
+        value: "*"
+    disk:
+      name: flusk-data
+      mountPath: /data
+      sizeGB: 1
