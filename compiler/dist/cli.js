@@ -20,6 +20,7 @@ import { generatePythonEntity } from './generators/python/entity.gen.js';
 import { generatePythonFunction } from './generators/python/function.gen.js';
 import { generateMigrations } from './generators/node/migration.gen.js';
 import { generateAllTests } from './generators/node/test.gen.js';
+import { generateWattProject } from './generators/watt/index.js';
 const schemaDirArg = process.argv.includes('--schema-dir')
     ? resolve(process.argv[process.argv.indexOf('--schema-dir') + 1])
     : undefined;
@@ -250,6 +251,15 @@ const buildFeatures = () => {
             console.log(`   🧪 test: ${t.path}`);
         }
     }
+    // 6. Watt project generation
+    console.log('\n📦 Generating Watt project...');
+    const wattFiles = generateWattProject(features);
+    const wattDir = join(generatedDir, 'watt');
+    for (const file of wattFiles) {
+        const path = join(wattDir, file.path);
+        writeFile(path, file.content);
+    }
+    console.log(`   → ${wattFiles.length} files generated`);
     console.log('\n✅ Feature build complete');
 };
 if (command === 'diff') {
