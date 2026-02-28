@@ -1,0 +1,10 @@
+name: agentGetConfig
+description: Handler for GET /api/v1/agent/config
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

@@ -1,0 +1,24 @@
+name: createAlert
+inputs:
+  - name: org_id
+    type: integer
+  - name: type
+    type: string
+  - name: title
+    type: string
+  - name: message
+    type: string
+  - name: context
+    type: object
+output:
+  type: object
+steps:
+  - id: findMatchingAlertRules
+    action: call
+    source: find matching alert rules
+  - id: createAlertRecord
+    action: call
+    source: create alert record
+  - id: dispatchNotificationsToConfiguredChannels
+    action: call
+    source: dispatch notifications to configured channels

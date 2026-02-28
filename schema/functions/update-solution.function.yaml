@@ -1,0 +1,11 @@
+name: updateSolution
+description: Handler for PATCH /api/solutions/:solutionId
+inputs: []
+output:
+  type: void
+steps:
+  - id: validateSolutionInput
+    action: validate
+    source: solution-input
+  - id: updateSolution
+    call: Solution.update

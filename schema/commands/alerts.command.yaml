@@ -1,0 +1,12 @@
+name: alerts
+subcommands:
+  - name: list
+    description: List open alerts
+    args:
+      - name: org
+        type: string
+  - name: resolve
+    description: Resolve an alert
+    args:
+      - name: id
+        type: integer

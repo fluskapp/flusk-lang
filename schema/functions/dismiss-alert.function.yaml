@@ -1,0 +1,8 @@
+name: dismissAlert
+description: Handler for PATCH /api/alerts/:alertId/dismiss
+inputs: []
+output:
+  type: void
+steps:
+  - id: updateAlert
+    call: Alert.update

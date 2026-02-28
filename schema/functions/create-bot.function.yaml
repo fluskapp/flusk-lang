@@ -1,0 +1,21 @@
+name: createBot
+description: Handler for POST /api/bots
+inputs:
+  - name: name
+    type: string
+  - name: phone_number
+    type: string
+  - name: system_prompt
+    type: string
+  - name: model
+    type: string
+output:
+  type: void
+steps:
+  - id: createBot
+    call: Bot.create
+  - id: createWebhookConfig
+    call: WebhookConfig.create
+  - id: emitBotCreated
+    action: call
+    source: botCreated

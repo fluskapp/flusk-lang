@@ -1,0 +1,10 @@
+name: member-invited
+payload:
+  - name: invite_id
+    type: integer
+  - name: email
+    type: string
+  - name: org_name
+    type: string
+triggers:
+  - worker: send-invite-email

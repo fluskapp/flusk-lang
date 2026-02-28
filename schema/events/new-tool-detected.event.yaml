@@ -1,0 +1,10 @@
+name: new-tool-detected
+payload:
+  - name: org_id
+    type: integer
+  - name: tool_name
+    type: string
+  - name: provider
+    type: string
+triggers:
+  - function: auto-classify-tool

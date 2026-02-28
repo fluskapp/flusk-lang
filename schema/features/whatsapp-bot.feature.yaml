@@ -1,0 +1,404 @@
+name: whatsapp-bot
+description: WhatsApp bot builder — create, configure, and deploy WhatsApp bots from prompts
+version: 1.0.0
+
+# ── Data Layer ──────────────────────────────────
+entities:
+  - name: bot
+    fields:
+      - name: name
+        type: string
+        required: true
+      - name: phone_number
+        type: string
+        unique: true
+      - name: system_prompt
+        type: string
+      - name: model
+        type: enum
+        values: [gpt-4o, claude-sonnet, gemini-pro]
+        default: gpt-4o
+      - name: temperature
+        type: float
+        default: 0.7
+      - name: max_tokens
+        type: number
+        default: 1024
+      - name: active
+        type: boolean
+        default: true
+      - name: owner_id
+        type: string
+        indexed: true
+    queries:
+      - findByOwner: { by: owner_id }
+      - findByPhone: { by: phone_number }
+      - findActive: { where: "active = 1" }
+
+  - name: conversation
+    fields:
+      - name: bot_id
+        type: string
+        indexed: true
+      - name: contact_phone
+        type: string
+        indexed: true
+      - name: contact_name
+        type: string
+        nullable: true
+      - name: status
+        type: enum
+        values: [active, paused, archived]
+        default: active
+      - name: last_message_at
+        type: datetime
+    queries:
+      - findByBot: { by: bot_id, order: "last_message_at DESC" }
+      - findByContact: { by: contact_phone }
+
+  - name: message
+    fields:
+      - name: conversation_id
+        type: string
+        indexed: true
+      - name: role
+        type: enum
+        values: [user, assistant, system]
+      - name: content
+        type: string
+      - name: tokens_used
+        type: number
+        default: 0
+      - name: cost
+        type: float
+        default: 0
+      - name: latency_ms
+        type: number
+        default: 0
+    queries:
+      - findByConversation: { by: conversation_id, order: "created_at ASC" }
+      - countByBot: { where: "conversation_id IN (SELECT id FROM conversations WHERE bot_id = ?)" }
+
+  - name: webhook-config
+    fields:
+      - name: bot_id
+        type: string
+        unique: true
+      - name: verify_token
+        type: string
+      - name: api_secret
+        type: string
+      - name: provider
+        type: enum
+        values: [waha, twilio, meta-cloud]
+        default: waha
+      - name: webhook_url
+        type: string
+    queries:
+      - findByBot: { by: bot_id }
+
+# ── API Layer ───────────────────────────────────
+routes:
+  - name: webhook-incoming
+    method: POST
+    path: /webhooks/whatsapp/:botId
+    auth: webhook-signature
+    input:
+      - name: message
+        type: object
+        required: true
+    actions:
+      - validate: webhook-payload
+      - create: message
+      - emit: message-received
+
+  - name: webhook-verify
+    method: GET
+    path: /webhooks/whatsapp/:botId
+    auth: none
+    input:
+      - name: hub.verify_token
+        type: string
+      - name: hub.challenge
+        type: string
+
+  - name: create-bot
+    method: POST
+    path: /api/bots
+    auth: session
+    input:
+      - name: name
+        type: string
+        required: true
+      - name: phone_number
+        type: string
+        required: true
+      - name: system_prompt
+        type: string
+        required: true
+      - name: model
+        type: string
+    actions:
+      - create: bot
+      - create: webhook-config
+      - emit: bot-created
+
+  - name: update-bot
+    method: PUT
+    path: /api/bots/:id
+    auth: session
+    input:
+      - name: name
+        type: string
+      - name: system_prompt
+        type: string
+      - name: model
+        type: string
+      - name: active
+        type: boolean
+    actions:
+      - update: bot
+
+  - name: list-bots
+    method: GET
+    path: /api/bots
+    auth: session
+    loader: bot.findByOwner
+
+  - name: get-bot-stats
+    method: GET
+    path: /api/bots/:id/stats
+    auth: session
+
+  - name: list-conversations
+    method: GET
+    path: /api/bots/:id/conversations
+    auth: session
+    loader: conversation.findByBot
+
+  - name: get-conversation-messages
+    method: GET
+    path: /api/bots/:id/conversations/:conversationId/messages
+    auth: session
+    loader: message.findByConversation
+
+# ── Logic Layer ─────────────────────────────────
+functions:
+  - name: generate-ai-reply
+    description: Send conversation context to LLM and get reply
+    input:
+      - name: bot_id
+        type: string
+      - name: conversation_id
+        type: string
+      - name: user_message
+        type: string
+    output:
+      type: object
+      fields: [reply, tokens_used, cost, latency_ms]
+    uses: llm-router.complete
+
+  - name: send-whatsapp-message
+    description: Send a message via WhatsApp provider
+    input:
+      - name: phone
+        type: string
+      - name: message
+        type: string
+      - name: bot_id
+        type: string
+    uses: whatsapp-provider.sendMessage
+
+events:
+  - name: message-received
+    payload:
+      - name: bot_id
+        type: string
+      - name: conversation_id
+        type: string
+      - name: message_id
+        type: string
+      - name: contact_phone
+        type: string
+    triggers:
+      - worker: process-incoming-message
+
+  - name: bot-created
+    payload:
+      - name: bot_id
+        type: string
+      - name: owner_id
+        type: string
+    triggers:
+      - worker: setup-webhook
+
+workers:
+  - name: process-incoming-message
+    concurrency: 10
+    retry:
+      max: 3
+      backoff: exponential
+    steps:
+      - load: message
+      - call: generate-ai-reply
+      - call: send-whatsapp-message
+      - update: conversation.last_message_at
+
+  - name: setup-webhook
+    steps:
+      - load: bot
+      - call: register-webhook-url
+
+# ── External Layer ──────────────────────────────
+clients:
+  - name: llm-router
+    base_url: https://api.openai.com/v1
+    auth:
+      type: bearer
+      token: $LLM_API_KEY
+    methods:
+      - name: complete
+        method: POST
+        path: /chat/completions
+        body: { model, messages, temperature, max_tokens }
+
+  - name: whatsapp-provider
+    base_url: http://localhost:3000
+    auth:
+      type: bearer
+      token: $WHATSAPP_API_KEY
+    methods:
+      - name: sendMessage
+        method: POST
+        path: /api/sendText
+        body: { chatId, text }
+      - name: getStatus
+        method: GET
+        path: /api/sessions/status
+
+middleware:
+  - name: webhook-signature
+    type: webhook-verify
+    config:
+      header: x-webhook-signature
+      secret: $WEBHOOK_SECRET
+      algorithm: hmac-sha256
+
+# ── CLI Layer ───────────────────────────────────
+commands:
+  - name: whatsapp-bot
+    subcommands:
+      - name: list
+        description: List all bots
+        output: table
+        data: bot.findAll
+      - name: stats
+        description: Show bot statistics
+        args:
+          - name: bot_id
+            type: string
+            required: true
+      - name: test
+        description: Send a test message
+        args:
+          - name: bot_id
+            type: string
+            required: true
+          - name: message
+            type: string
+            required: true
+        action: send-whatsapp-message
+
+# ── UI Layer ────────────────────────────────────
+views:
+  - name: bot-dashboard
+    route: /dashboard
+    title: WhatsApp Bots
+    loader: list-bots
+    sections:
+      - layout: { md: grid-4 }
+        widgets:
+          - type: stat-card
+            source: data.totalBots
+            label: Total Bots
+            icon: 🤖
+          - type: stat-card
+            source: data.activeBots
+            label: Active
+            icon: ✅
+          - type: stat-card
+            source: data.totalMessages
+            label: Messages Today
+            format: number
+          - type: stat-card
+            source: data.totalCost
+            label: Cost Today
+            format: currency
+
+      - h2: Your Bots
+      - source: data.bots
+        columns: [name, phone_number, model, active, created_at]
+        actions: [edit, stats, toggle]
+
+  - name: bot-builder
+    route: /bots/new
+    title: Create WhatsApp Bot
+    sections:
+      - h1: Create Your Bot
+      - type: form
+        fields:
+          - name: name
+            label: Bot Name
+            type: text
+            required: true
+          - name: phone_number
+            label: WhatsApp Number
+            type: tel
+            required: true
+          - name: system_prompt
+            label: System Prompt
+            type: textarea
+            required: true
+          - name: model
+            label: AI Model
+            type: select
+            options: [gpt-4o, claude-sonnet, gemini-pro]
+          - name: temperature
+            label: Temperature
+            type: number
+        submit: Create Bot
+        action: create-bot
+
+  - name: conversation-view
+    route: /bots/:id/conversations/:conversationId
+    title: Conversation
+    loader: get-conversation-messages
+    sections:
+      - type: chat-messages
+        source: data.messages
+        features:
+          streaming: true
+          markdown: true
+      - type: chat-input
+
+# ── Tests ───────────────────────────────────────
+tests:
+  integration:
+    - name: bot-lifecycle
+      steps:
+        - auth: session
+        - post: /api/bots
+          body: { name: "Test Bot", phone_number: "+1234567890", system_prompt: "You are helpful" }
+          expect: { status: 200 }
+        - get: /api/bots
+          expect: { status: 200 }
+        - assert: "bots.length > 0"
+
+    - name: webhook-flow
+      steps:
+        - post: /webhooks/whatsapp/test-bot-id
+          body: { message: { from: "+1234567890", body: "Hello" } }
+          headers: { x-webhook-signature: computed }
+          expect: { status: 200 }
+        - wait: process-incoming-message
+        - assert: "messages.count > 0"

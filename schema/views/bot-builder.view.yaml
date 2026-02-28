@@ -1,0 +1,32 @@
+name: bot-builder
+type: page
+route: /bots/new
+title: Create WhatsApp Bot
+sections:
+  - h1: Create Your Bot
+  - type: form
+    fields:
+      - name: name
+        label: Bot Name
+        type: text
+        required: true
+      - name: phone_number
+        label: WhatsApp Number
+        type: tel
+        required: true
+      - name: system_prompt
+        label: System Prompt
+        type: textarea
+        required: true
+      - name: model
+        label: AI Model
+        type: select
+        options:
+          - gpt-4o
+          - claude-sonnet
+          - gemini-pro
+      - name: temperature
+        label: Temperature
+        type: number
+    submit: Create Bot
+    action: create-bot

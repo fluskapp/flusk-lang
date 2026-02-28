@@ -1,0 +1,39 @@
+name: whatsapp-bot
+basePath: /api/whatsapp-bot
+operations:
+  - method: POST
+    path: /webhooks/whatsapp/:botId
+    call: webhookIncoming
+    input: message
+    auth: webhook-signature
+  - method: GET
+    path: /webhooks/whatsapp/:botId
+    call: webhookVerify
+    input: hub.verify_token
+    auth: none
+  - method: POST
+    path: /api/bots
+    call: createBot
+    input: name
+    auth: session
+  - method: PUT
+    path: /api/bots/:id
+    call: updateBot
+    input: name
+    auth: session
+  - method: GET
+    path: /api/bots
+    call: listBots
+    auth: session
+  - method: GET
+    path: /api/bots/:id/stats
+    call: getBotStats
+    auth: session
+  - method: GET
+    path: /api/bots/:id/conversations
+    call: listConversations
+    auth: session
+  - method: GET
+    path: /api/bots/:id/conversations/:conversationId/messages
+    call: getConversationMessages
+    auth: session

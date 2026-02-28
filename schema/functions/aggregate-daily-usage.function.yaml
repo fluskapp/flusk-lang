@@ -1,0 +1,14 @@
+name: aggregateDailyUsage
+description: Roll up telemetry events into daily aggregates
+inputs:
+  - name: org_id
+    type: integer
+  - name: date
+    type: date
+output:
+  type: object
+steps:
+  - id: execute
+    action: return
+    value:
+      ok: true

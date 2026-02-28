@@ -1,0 +1,11 @@
+name: testSolution
+description: Handler for POST /api/solutions/:solutionId/test
+inputs:
+  - name: message
+    type: string
+output:
+  type: void
+steps:
+  - id: callRunSolutionSandbox
+    action: call
+    source: run-solution-sandbox

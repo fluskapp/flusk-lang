@@ -1,0 +1,30 @@
+name: createSolution
+description: Handler for POST /api/solutions
+inputs:
+  - name: name
+    type: string
+  - name: description
+    type: string
+  - name: llm_provider
+    type: string
+  - name: llm_model
+    type: string
+  - name: system_prompt
+    type: string
+  - name: temperature
+    type: number
+  - name: max_tokens
+    type: integer
+  - name: tools_config
+    type: object
+output:
+  type: void
+steps:
+  - id: validateSolutionInput
+    action: validate
+    source: solution-input
+  - id: createSolution
+    call: Solution.create
+  - id: emitSolutionCreated
+    action: call
+    source: solutionCreated

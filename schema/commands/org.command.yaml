@@ -1,0 +1,16 @@
+name: org
+subcommands:
+  - name: create
+    description: Create a new organization
+    args:
+      - name: name
+        type: string
+      - name: email
+        type: string
+  - name: list
+    description: List all organizations
+  - name: info
+    description: Show organization details
+    args:
+      - name: slug
+        type: string

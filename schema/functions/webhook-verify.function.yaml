@@ -1,0 +1,14 @@
+name: webhookVerify
+description: Handler for GET /webhooks/whatsapp/:botId
+inputs:
+  - name: hub.verify_token
+    type: string
+  - name: hub.challenge
+    type: string
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

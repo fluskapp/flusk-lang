@@ -1,0 +1,6 @@
+name: health-check-deployments
+concurrency: 5
+steps:
+  - load: deployment
+  - call: check-deployment-health
+  - update: deployment

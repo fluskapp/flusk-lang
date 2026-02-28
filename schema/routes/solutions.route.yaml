@@ -1,0 +1,55 @@
+name: solutions
+basePath: /api/solutions
+operations:
+  - method: GET
+    path: /api/solutions
+    call: listSolutions
+    auth: session
+  - method: GET
+    path: /api/solutions/:solutionId
+    call: getSolution
+    auth: session
+  - method: POST
+    path: /api/solutions
+    call: createSolution
+    input: name
+    auth: session
+  - method: PATCH
+    path: /api/solutions/:solutionId
+    call: updateSolution
+    auth: session
+  - method: DELETE
+    path: /api/solutions/:solutionId
+    call: deleteSolution
+    auth: session
+  - method: POST
+    path: /api/solutions/:solutionId/test
+    call: testSolution
+    input: message
+    auth: session
+  - method: POST
+    path: /api/solutions/:solutionId/publish
+    call: publishSolution
+    input: channel
+    auth: session
+  - method: DELETE
+    path: /api/deployments/:deploymentId
+    call: unpublishDeployment
+    auth: session
+  - method: GET
+    path: /api/deployments
+    call: listDeployments
+    auth: session
+  - method: POST
+    path: /api/solutions/:solutionId/knowledge
+    call: uploadKnowledge
+    input: name
+    auth: session
+  - method: DELETE
+    path: /api/solutions/:solutionId/knowledge/:kbId
+    call: deleteKnowledge
+    auth: session
+  - method: GET
+    path: /api/solutions/:solutionId/usage
+    call: getSolutionUsage
+    auth: session

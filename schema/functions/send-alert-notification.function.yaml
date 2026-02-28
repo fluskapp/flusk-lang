@@ -1,0 +1,13 @@
+name: sendAlertNotification
+inputs:
+  - name: alert_id
+    type: integer
+  - name: channels
+    type: array
+output:
+  type: object
+steps:
+  - id: execute
+    action: return
+    value:
+      ok: true

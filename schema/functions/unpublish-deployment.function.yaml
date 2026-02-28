@@ -1,0 +1,11 @@
+name: unpublishDeployment
+description: Handler for DELETE /api/deployments/:deploymentId
+inputs: []
+output:
+  type: void
+steps:
+  - id: callTeardownDeployment
+    action: call
+    source: teardown-deployment
+  - id: updateDeployment
+    call: Deployment.update

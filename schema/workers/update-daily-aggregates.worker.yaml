@@ -1,0 +1,5 @@
+name: update-daily-aggregates
+concurrency: 5
+steps:
+  - load: telemetry-event
+  - call: aggregate-daily-usage

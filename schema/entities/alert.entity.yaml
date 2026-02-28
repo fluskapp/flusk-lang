@@ -1,0 +1,54 @@
+name: Alert
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: rule_id
+    type: integer
+    index: true
+    required: false
+  - name: type
+    type: enum
+    values:
+      - shadow-ai
+      - usage-spike
+      - new-tool
+      - budget-exceeded
+      - device-offline
+  - name: severity
+    type: enum
+    default: medium
+    values:
+      - low
+      - medium
+      - high
+      - critical
+  - name: title
+    type: string
+  - name: message
+    type: string
+  - name: context
+    type: json
+    required: false
+  - name: status
+    type: enum
+    default: open
+    values:
+      - open
+      - acknowledged
+      - resolved
+      - dismissed
+  - name: resolved_at
+    type: datetime
+    required: false
+queries:
+  - name: findByOrg
+    sql: SELECT * FROM alert WHERE org_id = ?
+  - name: findOpenByOrg
+    sql: SELECT * FROM alert WHERE org_id = ? AND status = 'open' ORDER BY created_at DESC
+  - name: findByType
+    sql: SELECT * FROM alert WHERE org_id = ? AND type = ? ORDER BY created_at DESC
+relations:
+  - entity: AlertRule
+    type: belongs-to
+    foreignKey: rule_id

@@ -1,0 +1,18 @@
+name: llm-router
+baseUrl: https://api.openai.com/v1
+auth:
+  type: bearer
+  envVar: LLM_API_KEY
+endpoints:
+  - name: complete
+    method: POST
+    path: /chat/completions
+    input:
+      - name: model
+        type: string
+      - name: messages
+        type: string
+      - name: temperature
+        type: string
+      - name: max_tokens
+        type: string

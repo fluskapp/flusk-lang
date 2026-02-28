@@ -1,0 +1,12 @@
+name: shadow-ai-detected
+payload:
+  - name: org_id
+    type: integer
+  - name: device_id
+    type: string
+  - name: tool_name
+    type: string
+  - name: provider
+    type: string
+triggers:
+  - worker: create-shadow-alert

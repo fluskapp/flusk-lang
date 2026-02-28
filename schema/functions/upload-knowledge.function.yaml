@@ -1,0 +1,17 @@
+name: uploadKnowledge
+description: Handler for POST /api/solutions/:solutionId/knowledge
+inputs:
+  - name: name
+    type: string
+  - name: type
+    type: string
+  - name: source
+    type: string
+output:
+  type: void
+steps:
+  - id: createKnowledgeBase
+    call: KnowledgeBase.create
+  - id: emitKnowledgeUploaded
+    action: call
+    source: knowledgeUploaded

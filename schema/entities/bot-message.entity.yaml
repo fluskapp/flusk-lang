@@ -1,0 +1,20 @@
+name: BotMessage
+fields:
+  - name: slack_ts
+    type: string
+    unique: true
+  - name: channel
+    type: string
+    index: true
+  - name: text
+    type: string
+  - name: status
+    type: enum
+    default: pending
+    values:
+      - pending
+      - sent
+      - failed
+queries:
+  - name: findPending
+    sql: SELECT * FROM bot-message WHERE status = 'pending' LIMIT 50

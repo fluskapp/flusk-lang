@@ -1,0 +1,10 @@
+name: process-incoming-message
+concurrency: 10
+retry:
+  max: 3
+  backoff: exponential
+steps:
+  - load: message
+  - call: generate-ai-reply
+  - call: send-whatsapp-message
+  - update: conversation.last_message_at

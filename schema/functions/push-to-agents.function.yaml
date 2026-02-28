@@ -1,0 +1,14 @@
+name: pushToAgents
+description: Push update to all connected desktop agents via SSE/WebSocket
+inputs:
+  - name: org_id
+    type: integer
+  - name: payload
+    type: object
+output:
+  type: object
+steps:
+  - id: execute
+    action: return
+    value:
+      ok: true

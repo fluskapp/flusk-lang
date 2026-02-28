@@ -1,0 +1,11 @@
+name: rotateApiKey
+description: Handler for POST /api/org/rotate-key
+inputs: []
+output:
+  type: void
+steps:
+  - id: callGenerateApiKey
+    action: call
+    source: generate-api-key
+  - id: updateOrganization
+    call: Organization.update

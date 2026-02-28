@@ -1,0 +1,5 @@
+name: process-slack-queue
+concurrency: 5
+steps:
+  - load: bot-message
+  - call: send-slack-message

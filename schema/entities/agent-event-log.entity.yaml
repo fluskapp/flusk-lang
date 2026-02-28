@@ -1,0 +1,25 @@
+name: AgentEventLog
+description: Audit log of agent actions
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: device_id
+    type: string
+    index: true
+  - name: event_type
+    type: enum
+    values:
+      - connected
+      - disconnected
+      - config-updated
+      - error
+      - solution-received
+  - name: details
+    type: json
+    required: false
+queries:
+  - name: findByDevice
+    sql: SELECT * FROM agent-event-log WHERE org_id = ? AND device_id = ? ORDER BY created_at DESC
+  - name: findByOrg
+    sql: SELECT * FROM agent-event-log WHERE org_id = ?

@@ -1,0 +1,18 @@
+name: inviteMember
+description: Handler for POST /api/org/invite
+inputs:
+  - name: email
+    type: string
+  - name: role
+    type: string
+output:
+  type: void
+steps:
+  - id: validateInviteInput
+    action: validate
+    source: invite-input
+  - id: createInvite
+    call: Invite.create
+  - id: emitMemberInvited
+    action: call
+    source: memberInvited

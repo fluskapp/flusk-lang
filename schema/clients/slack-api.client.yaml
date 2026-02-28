@@ -1,0 +1,6 @@
+name: slack-api
+baseUrl: https://slack.com/api
+endpoints:
+  - name: postMessage
+    method: POST
+    path: /chat.postMessage

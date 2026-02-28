@@ -1,0 +1,19 @@
+name: registerOrUpdateDevice
+inputs:
+  - name: device_id
+    type: string
+  - name: hostname
+    type: string
+  - name: os
+    type: string
+  - name: agent_version
+    type: string
+  - name: org_id
+    type: integer
+output:
+  type: object
+steps:
+  - id: execute
+    action: return
+    value:
+      ok: true

@@ -1,0 +1,49 @@
+name: telemetry
+basePath: /api/telemetry
+operations:
+  - method: POST
+    path: /api/v1/telemetry/ingest
+    call: ingestOtel
+    auth: api-key
+  - method: POST
+    path: /api/v1/telemetry/heartbeat
+    call: agentHeartbeat
+    input: device_id
+    auth: api-key
+  - method: GET
+    path: /api/dashboard/usage
+    call: getUsageSummary
+    auth: session
+  - method: GET
+    path: /api/dashboard/usage/providers
+    call: getUsageByProvider
+    auth: session
+  - method: GET
+    path: /api/dashboard/usage/employees
+    call: getUsageByEmployee
+    auth: session
+  - method: GET
+    path: /api/dashboard/shadow-ai
+    call: getShadowAi
+    auth: session
+  - method: GET
+    path: /api/dashboard/trends
+    call: getUsageTrends
+    auth: session
+  - method: GET
+    path: /api/devices
+    call: listDevices
+    auth: session
+  - method: DELETE
+    path: /api/devices/:deviceId
+    call: revokeDevice
+    auth: session
+  - method: GET
+    path: /api/tools
+    call: listTools
+    auth: session
+  - method: PATCH
+    path: /api/tools/:toolId
+    call: approveTool
+    input: approved
+    auth: session

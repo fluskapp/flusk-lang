@@ -1,0 +1,9 @@
+name: email-service
+baseUrl: ${EMAIL_SERVICE_URL}
+auth:
+  type: bearer
+  envVar: "{EMAIL_API_KEY}"
+endpoints:
+  - name: send
+    method: POST
+    path: /send

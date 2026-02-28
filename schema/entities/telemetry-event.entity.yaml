@@ -1,0 +1,53 @@
+name: TelemetryEvent
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: device_id
+    type: string
+    index: true
+  - name: trace_id
+    type: string
+    index: true
+  - name: span_id
+    type: string
+  - name: provider
+    type: string
+    index: true
+  - name: model
+    type: string
+    index: true
+  - name: tool_name
+    type: string
+    index: true
+    required: false
+  - name: input_tokens
+    type: integer
+    default: 0
+  - name: output_tokens
+    type: integer
+    default: 0
+  - name: latency_ms
+    type: integer
+    default: 0
+  - name: cost_usd
+    type: float
+    default: 0
+  - name: status_code
+    type: integer
+    default: 200
+  - name: is_approved
+    type: boolean
+    default: false
+  - name: metadata
+    type: json
+    required: false
+queries:
+  - name: findByOrg
+    sql: SELECT * FROM telemetry-event WHERE org_id = ?
+  - name: findByDevice
+    sql: SELECT * FROM telemetry-event WHERE org_id = ? AND device_id = ? ORDER BY created_at DESC
+  - name: findByProvider
+    sql: SELECT * FROM telemetry-event WHERE org_id = ? AND provider = ? ORDER BY created_at DESC
+  - name: findShadowAI
+    sql: SELECT * FROM telemetry-event WHERE org_id = ? AND is_approved = false ORDER BY created_at DESC

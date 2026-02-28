@@ -1,0 +1,6 @@
+name: push-config-to-agents
+concurrency: 10
+steps:
+  - load: agent-config
+  - load: agent-device
+  - call: push-to-agents

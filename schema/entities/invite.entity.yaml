@@ -1,0 +1,27 @@
+name: Invite
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: email
+    type: string
+  - name: role
+    type: enum
+    default: member
+    values:
+      - admin
+      - member
+      - viewer
+  - name: token
+    type: string
+    unique: true
+  - name: expires_at
+    type: datetime
+  - name: accepted
+    type: boolean
+    default: false
+queries:
+  - name: findByToken
+    sql: SELECT * FROM invite WHERE token = ?
+  - name: findPendingByOrg
+    sql: SELECT * FROM invite WHERE org_id = ? AND accepted = false AND expires_at > datetime('now')

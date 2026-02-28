@@ -1,0 +1,13 @@
+name: login
+description: Handler for POST /api/auth/login
+inputs:
+  - name: email
+    type: string
+  - name: password
+    type: string
+output:
+  type: void
+steps:
+  - id: callVerifyCredentials
+    action: call
+    source: verify-credentials

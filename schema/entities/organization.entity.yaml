@@ -1,0 +1,38 @@
+name: Organization
+fields:
+  - name: name
+    type: string
+  - name: slug
+    type: string
+    unique: true
+  - name: plan
+    type: enum
+    default: starter
+    values:
+      - starter
+      - growth
+      - enterprise
+  - name: max_seats
+    type: integer
+    default: 50
+  - name: api_key
+    type: string
+    unique: true
+    description: "encrypted: api_key"
+  - name: status
+    type: enum
+    default: trial
+    values:
+      - active
+      - suspended
+      - trial
+  - name: trial_ends_at
+    type: datetime
+    required: false
+queries:
+  - name: findBySlug
+    sql: SELECT * FROM organization WHERE slug = ?
+  - name: findByApiKey
+    sql: SELECT * FROM organization WHERE api_key = ?
+  - name: findActive
+    sql: SELECT * FROM organization WHERE status != 'suspended'

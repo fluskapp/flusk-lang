@@ -1,0 +1,10 @@
+name: approveTool
+description: Handler for PATCH /api/tools/:toolId
+inputs:
+  - name: approved
+    type: boolean
+output:
+  type: void
+steps:
+  - id: updateAiTool
+    call: AiTool.update

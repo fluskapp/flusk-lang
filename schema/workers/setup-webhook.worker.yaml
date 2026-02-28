@@ -1,0 +1,5 @@
+name: setup-webhook
+concurrency: 1
+steps:
+  - load: bot
+  - call: register-webhook-url

@@ -1,0 +1,10 @@
+name: listAlertRules
+description: Handler for GET /api/alert-rules
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

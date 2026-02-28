@@ -1,0 +1,35 @@
+name: SolutionConversation
+description: Track conversations through deployed solutions
+fields:
+  - name: deployment_id
+    type: integer
+    index: true
+  - name: org_id
+    type: integer
+    index: true
+  - name: user_identifier
+    type: string
+    index: true
+  - name: message_count
+    type: integer
+    default: 0
+  - name: input_tokens
+    type: integer
+    default: 0
+  - name: output_tokens
+    type: integer
+    default: 0
+  - name: cost_usd
+    type: float
+    default: 0
+  - name: satisfaction
+    type: integer
+    required: false
+    description: 1-5 rating if collected
+  - name: last_message_at
+    type: datetime
+queries:
+  - name: findByDeployment
+    sql: SELECT * FROM solution-conversation WHERE deployment_id = ?
+  - name: findByOrg
+    sql: SELECT * FROM solution-conversation WHERE org_id = ?

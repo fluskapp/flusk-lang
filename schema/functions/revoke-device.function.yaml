@@ -1,0 +1,8 @@
+name: revokeDevice
+description: Handler for DELETE /api/devices/:deviceId
+inputs: []
+output:
+  type: void
+steps:
+  - id: updateAgentDevice
+    call: AgentDevice.update

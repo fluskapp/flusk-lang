@@ -1,0 +1,11 @@
+name: sendSlackMessage
+inputs:
+  - name: channel
+    type: string
+  - name: text
+    type: string
+output:
+  type: object
+steps:
+  - id: callExternal
+    call: slack-api.postMessage

@@ -1,0 +1,31 @@
+name: AlertRule
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: name
+    type: string
+  - name: type
+    type: enum
+    values:
+      - shadow-ai
+      - usage-spike
+      - new-tool
+      - budget-exceeded
+      - device-offline
+  - name: threshold
+    type: json
+    required: false
+  - name: channels
+    type: json
+    description: Array of notification channels (email, slack, webhook)
+  - name: enabled
+    type: boolean
+    default: true
+queries:
+  - name: findByOrg
+    sql: SELECT * FROM alert-rule WHERE org_id = ?
+  - name: findEnabledByOrg
+    sql: SELECT * FROM alert-rule WHERE org_id = ? AND enabled = true
+  - name: findByType
+    sql: SELECT * FROM alert-rule WHERE org_id = ? AND type = ? AND enabled = true

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schemas.platformatic.dev/@platformatic/db/3.0.0.json",
+  "db": {
+    "connectionString": "{DATABASE_URL}"
+  },
+  "migrations": {
+    "dir": "./migrations",
+    "autoApply": true
+  },
+  "authorization": {
+    "adminSecret": "{PLT_ADMIN_SECRET}"
+  }
+}

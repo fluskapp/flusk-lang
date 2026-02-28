@@ -1,0 +1,12 @@
+name: message-received
+payload:
+  - name: bot_id
+    type: string
+  - name: conversation_id
+    type: string
+  - name: message_id
+    type: string
+  - name: contact_phone
+    type: string
+triggers:
+  - worker: process-incoming-message

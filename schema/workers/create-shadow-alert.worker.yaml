@@ -1,0 +1,5 @@
+name: create-shadow-alert
+concurrency: 3
+steps:
+  - load: ai-tool
+  - call: create-alert

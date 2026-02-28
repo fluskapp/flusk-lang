@@ -1,0 +1,40 @@
+name: organizations
+basePath: /api/organizations
+operations:
+  - method: POST
+    path: /api/auth/register
+    call: registerOrg
+    input: org_name
+    auth: none
+  - method: POST
+    path: /api/auth/login
+    call: login
+    input: email
+    auth: none
+  - method: POST
+    path: /api/org/invite
+    call: inviteMember
+    input: email
+    auth: session
+  - method: POST
+    path: /api/auth/accept-invite
+    call: acceptInvite
+    input: token
+    auth: none
+  - method: GET
+    path: /api/org
+    call: getOrg
+    auth: session
+  - method: GET
+    path: /api/org/members
+    call: listMembers
+    auth: session
+  - method: PATCH
+    path: /api/org/members/:memberId
+    call: updateMemberRole
+    input: role
+    auth: session
+  - method: POST
+    path: /api/org/rotate-key
+    call: rotateApiKey
+    auth: session

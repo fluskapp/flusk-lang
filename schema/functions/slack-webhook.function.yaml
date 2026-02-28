@@ -1,0 +1,11 @@
+name: slackWebhook
+description: Handler for POST /integrations/slack/webhook
+inputs: []
+output:
+  type: void
+steps:
+  - id: createBotMessage
+    call: BotMessage.create
+  - id: emitSlackMessageReceived
+    action: call
+    source: slackMessageReceived

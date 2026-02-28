@@ -1,0 +1,7 @@
+name: agent-connected
+payload:
+  - name: org_id
+    type: integer
+  - name: device_id
+    type: string
+triggers: []

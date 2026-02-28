@@ -1,0 +1,16 @@
+name: updateAgentConfig
+description: Handler for PUT /api/org/agent-config
+inputs:
+  - name: heartbeat_interval_ms
+    type: integer
+  - name: intercept_patterns
+    type: array
+output:
+  type: void
+steps:
+  - id: callBumpAgentConfig
+    action: call
+    source: bump-agent-config
+  - id: emitConfigUpdated
+    action: call
+    source: configUpdated

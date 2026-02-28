@@ -1,0 +1,16 @@
+name: agentReportError
+description: Handler for POST /api/v1/agent/error
+inputs:
+  - name: device_id
+    type: string
+  - name: error_type
+    type: string
+  - name: message
+    type: string
+  - name: stack
+    type: string
+output:
+  type: void
+steps:
+  - id: createAgentEventLog
+    call: AgentEventLog.create

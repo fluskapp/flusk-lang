@@ -1,0 +1,8 @@
+name: resolveAlert
+description: Handler for PATCH /api/alerts/:alertId/resolve
+inputs: []
+output:
+  type: void
+steps:
+  - id: updateAlert
+    call: Alert.update

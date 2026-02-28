@@ -1,0 +1,64 @@
+name: Solution
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: name
+    type: string
+  - name: description
+    type: string
+    required: false
+  - name: type
+    type: enum
+    default: openclaw
+    values:
+      - openclaw
+      - custom
+  - name: llm_provider
+    type: enum
+    values:
+      - openai
+      - anthropic
+      - google
+      - azure-openai
+      - custom
+  - name: llm_model
+    type: string
+  - name: system_prompt
+    type: string
+    required: false
+  - name: temperature
+    type: float
+    default: 0.7
+  - name: max_tokens
+    type: integer
+    default: 4096
+  - name: tools_config
+    type: json
+    required: false
+    description: Tool/skill configuration for the AI agent
+  - name: status
+    type: enum
+    default: draft
+    values:
+      - draft
+      - testing
+      - published
+      - archived
+  - name: created_by
+    type: integer
+    index: true
+  - name: published_at
+    type: datetime
+    required: false
+queries:
+  - name: findByOrg
+    sql: SELECT * FROM solution WHERE org_id = ?
+  - name: findPublished
+    sql: SELECT * FROM solution WHERE org_id = ? AND status = 'published'
+  - name: findByStatus
+    sql: SELECT * FROM solution WHERE org_id = ? AND status = ?
+relations:
+  - entity: Organization
+    type: belongs-to
+    foreignKey: org_id

@@ -1,0 +1,10 @@
+name: getOrg
+description: Handler for GET /api/org
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

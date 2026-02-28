@@ -1,0 +1,10 @@
+name: listDevices
+description: Handler for GET /api/devices
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

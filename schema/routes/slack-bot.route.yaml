@@ -1,0 +1,11 @@
+name: slack-bot
+basePath: /api/slack-bot
+operations:
+  - method: POST
+    path: /integrations/slack/webhook
+    call: slackWebhook
+    auth: webhook-signature
+  - method: GET
+    path: /api/slack/settings
+    call: getSettings
+    auth: session

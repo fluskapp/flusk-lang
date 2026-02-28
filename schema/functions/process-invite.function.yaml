@@ -1,0 +1,15 @@
+name: processInvite
+inputs:
+  - name: token
+    type: string
+  - name: name
+    type: string
+  - name: password
+    type: string
+output:
+  type: object
+steps:
+  - id: execute
+    action: return
+    value:
+      ok: true

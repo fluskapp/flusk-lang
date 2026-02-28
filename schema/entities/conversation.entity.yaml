@@ -1,0 +1,25 @@
+name: Conversation
+fields:
+  - name: bot_id
+    type: string
+    index: true
+  - name: contact_phone
+    type: string
+    index: true
+  - name: contact_name
+    type: string
+    required: false
+  - name: status
+    type: enum
+    default: active
+    values:
+      - active
+      - paused
+      - archived
+  - name: last_message_at
+    type: datetime
+queries:
+  - name: findByBot
+    sql: SELECT * FROM conversation WHERE bot_id = ?
+  - name: findByContact
+    sql: SELECT * FROM conversation WHERE contact_phone = ?

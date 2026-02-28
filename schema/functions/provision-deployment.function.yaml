@@ -1,0 +1,19 @@
+name: provisionDeployment
+description: Spin up an OpenClaw instance or configure channel integration
+inputs:
+  - name: solution_id
+    type: integer
+  - name: channel
+    type: string
+  - name: channel_config
+    type: object
+output:
+  type: object
+  fields:
+    - instance_id
+    - endpoint
+steps:
+  - id: execute
+    action: return
+    value:
+      ok: true

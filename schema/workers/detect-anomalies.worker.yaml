@@ -1,0 +1,7 @@
+name: detect-anomalies
+concurrency: 3
+steps:
+  - load: usage-daily
+  - call: check-usage-spike
+  - condition: spike-detected
+  - emit: alert-triggered

@@ -1,0 +1,27 @@
+name: Message
+fields:
+  - name: conversation_id
+    type: string
+    index: true
+  - name: role
+    type: enum
+    values:
+      - user
+      - assistant
+      - system
+  - name: content
+    type: string
+  - name: tokens_used
+    type: number
+    default: 0
+  - name: cost
+    type: float
+    default: 0
+  - name: latency_ms
+    type: number
+    default: 0
+queries:
+  - name: findByConversation
+    sql: SELECT * FROM message WHERE conversation_id = ?
+  - name: countByBot
+    sql: SELECT * FROM message WHERE conversation_id IN (SELECT id FROM conversations WHERE bot_id = ?)

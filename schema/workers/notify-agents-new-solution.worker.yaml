@@ -1,0 +1,6 @@
+name: notify-agents-new-solution
+concurrency: 10
+steps:
+  - load: deployment
+  - load: agent-device
+  - call: push-to-agents

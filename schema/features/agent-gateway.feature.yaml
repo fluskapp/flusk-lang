@@ -1,0 +1,168 @@
+name: agent-gateway
+description: Desktop agent communication gateway — heartbeat, config push, OTel relay
+version: 1.0.0
+
+entities:
+  - name: agent-config
+    description: Configuration pushed to desktop agents
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: version
+        type: integer
+        default: 1
+      - name: otel_endpoint
+        type: string
+      - name: heartbeat_interval_ms
+        type: integer
+        default: 60000
+      - name: approved_tools
+        type: json
+        description: List of approved AI tool identifiers
+      - name: intercept_patterns
+        type: json
+        description: URL patterns to intercept for OTel (e.g., api.openai.com, api.anthropic.com)
+      - name: solutions
+        type: json
+        description: Active solution deployments for this org
+    queries:
+      - findByOrg: { by: org_id }
+      - findLatest: { where: "org_id = ?", order: "version DESC", limit: 1 }
+
+  - name: agent-event-log
+    description: Audit log of agent actions
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: device_id
+        type: string
+        indexed: true
+      - name: event_type
+        type: enum
+        values: [connected, disconnected, config-updated, error, solution-received]
+      - name: details
+        type: json
+        nullable: true
+    queries:
+      - findByDevice: { where: "org_id = ? AND device_id = ?", order: "created_at DESC" }
+      - findByOrg: { by: org_id, order: "created_at DESC" }
+
+routes:
+  - name: agent-register
+    method: POST
+    path: /api/v1/agent/register
+    auth: api-key
+    input:
+      - name: device_id
+        type: string
+        required: true
+      - name: hostname
+        type: string
+        required: true
+      - name: os
+        type: string
+        required: true
+      - name: arch
+        type: string
+        required: true
+      - name: agent_version
+        type: string
+        required: true
+    actions:
+      - call: register-or-update-device
+      - emit: agent-connected
+
+  - name: agent-get-config
+    method: GET
+    path: /api/v1/agent/config
+    auth: api-key
+    loader: agent-config-latest
+
+  - name: agent-report-error
+    method: POST
+    path: /api/v1/agent/error
+    auth: api-key
+    input:
+      - name: device_id
+        type: string
+        required: true
+      - name: error_type
+        type: string
+        required: true
+      - name: message
+        type: string
+        required: true
+      - name: stack
+        type: string
+    actions:
+      - create: agent-event-log
+
+  - name: update-agent-config
+    method: PUT
+    path: /api/org/agent-config
+    auth: session
+    input:
+      - name: heartbeat_interval_ms
+        type: integer
+      - name: intercept_patterns
+        type: array
+    actions:
+      - call: bump-agent-config
+      - emit: config-updated
+
+  - name: get-agent-logs
+    method: GET
+    path: /api/org/agent-logs
+    auth: session
+    loader: agent-event-logs
+
+  - name: get-agent-config
+    method: GET
+    path: /api/org/agent-config
+    auth: session
+    loader: org-agent-config
+
+functions:
+  - name: bump-agent-config
+    description: Create new config version and notify connected agents
+    input:
+      - name: org_id
+        type: integer
+      - name: changes
+        type: object
+
+  - name: push-to-agents
+    description: Push update to all connected desktop agents via SSE/WebSocket
+    input:
+      - name: org_id
+        type: integer
+      - name: payload
+        type: object
+
+events:
+  - name: agent-connected
+    payload:
+      - name: org_id
+        type: integer
+      - name: device_id
+        type: string
+    triggers: []
+
+  - name: config-updated
+    payload:
+      - name: org_id
+        type: integer
+      - name: version
+        type: integer
+    triggers:
+      - worker: push-config-to-agents
+
+workers:
+  - name: push-config-to-agents
+    concurrency: 10
+    steps:
+      - load: agent-config
+      - load: agent-device
+      - call: push-to-agents

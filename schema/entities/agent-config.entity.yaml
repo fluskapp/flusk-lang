@@ -1,0 +1,28 @@
+name: AgentConfig
+description: Configuration pushed to desktop agents
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: version
+    type: integer
+    default: 1
+  - name: otel_endpoint
+    type: string
+  - name: heartbeat_interval_ms
+    type: integer
+    default: 60000
+  - name: approved_tools
+    type: json
+    description: List of approved AI tool identifiers
+  - name: intercept_patterns
+    type: json
+    description: URL patterns to intercept for OTel (e.g., api.openai.com, api.anthropic.com)
+  - name: solutions
+    type: json
+    description: Active solution deployments for this org
+queries:
+  - name: findByOrg
+    sql: SELECT * FROM agent-config WHERE org_id = ?
+  - name: findLatest
+    sql: SELECT * FROM agent-config WHERE org_id = ? ORDER BY version DESC LIMIT 1

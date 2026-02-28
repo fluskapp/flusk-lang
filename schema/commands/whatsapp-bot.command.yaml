@@ -1,0 +1,22 @@
+name: whatsapp-bot
+subcommands:
+  - name: list
+    description: List all bots
+    output: table
+    data: bot.findAll
+  - name: stats
+    description: Show bot statistics
+    args:
+      - name: bot_id
+        type: string
+        required: true
+  - name: test
+    description: Send a test message
+    args:
+      - name: bot_id
+        type: string
+        required: true
+      - name: message
+        type: string
+        required: true
+    action: send-whatsapp-message

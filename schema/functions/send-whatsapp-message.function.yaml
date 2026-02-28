@@ -1,0 +1,14 @@
+name: sendWhatsappMessage
+description: Send a message via WhatsApp provider
+inputs:
+  - name: phone
+    type: string
+  - name: message
+    type: string
+  - name: bot_id
+    type: string
+output:
+  type: object
+steps:
+  - id: callExternal
+    call: whatsapp-provider.sendMessage

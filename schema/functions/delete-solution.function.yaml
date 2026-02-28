@@ -1,0 +1,8 @@
+name: deleteSolution
+description: Handler for DELETE /api/solutions/:solutionId
+inputs: []
+output:
+  type: void
+steps:
+  - id: deleteSolution
+    call: Solution.delete

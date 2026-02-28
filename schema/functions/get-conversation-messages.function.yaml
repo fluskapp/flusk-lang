@@ -1,0 +1,10 @@
+name: getConversationMessages
+description: Handler for GET /api/bots/:id/conversations/:conversationId/messages
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

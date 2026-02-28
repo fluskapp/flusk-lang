@@ -1,0 +1,37 @@
+name: bot-dashboard
+type: page
+route: /dashboard
+title: WhatsApp Bots
+loader: list-bots
+sections:
+  - layout:
+      md: grid-4
+    widgets:
+      - type: stat-card
+        source: data.totalBots
+        label: Total Bots
+        icon: 🤖
+      - type: stat-card
+        source: data.activeBots
+        label: Active
+        icon: ✅
+      - type: stat-card
+        source: data.totalMessages
+        label: Messages Today
+        format: number
+      - type: stat-card
+        source: data.totalCost
+        label: Cost Today
+        format: currency
+  - h2: Your Bots
+  - source: data.bots
+    columns:
+      - name
+      - phone_number
+      - model
+      - active
+      - created_at
+    actions:
+      - edit
+      - stats
+      - toggle

@@ -1,0 +1,8 @@
+name: deleteAlertRule
+description: Handler for DELETE /api/alert-rules/:ruleId
+inputs: []
+output:
+  type: void
+steps:
+  - id: deleteAlertRule
+    call: AlertRule.delete

@@ -1,0 +1,55 @@
+name: Deployment
+fields:
+  - name: solution_id
+    type: integer
+    index: true
+  - name: org_id
+    type: integer
+    index: true
+  - name: channel
+    type: enum
+    values:
+      - slack
+      - teams
+      - whatsapp
+      - telegram
+      - desktop
+  - name: channel_config
+    type: json
+    description: Channel-specific config (bot token, webhook URL, etc.)
+  - name: status
+    type: enum
+    default: active
+    values:
+      - active
+      - paused
+      - error
+      - removed
+  - name: instance_id
+    type: string
+    unique: true
+    description: Unique identifier for the running instance
+  - name: health_status
+    type: enum
+    default: unknown
+    values:
+      - healthy
+      - degraded
+      - down
+      - unknown
+  - name: last_health_check
+    type: datetime
+    required: false
+queries:
+  - name: findBySolution
+    sql: SELECT * FROM deployment WHERE solution_id = ?
+  - name: findByOrg
+    sql: SELECT * FROM deployment WHERE org_id = ?
+  - name: findActive
+    sql: SELECT * FROM deployment WHERE org_id = ? AND status = 'active'
+  - name: findByInstance
+    sql: SELECT * FROM deployment WHERE instance_id = ?
+relations:
+  - entity: Solution
+    type: belongs-to
+    foreignKey: solution_id

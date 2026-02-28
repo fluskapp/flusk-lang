@@ -1,0 +1,10 @@
+name: listConversations
+description: Handler for GET /api/bots/:id/conversations
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

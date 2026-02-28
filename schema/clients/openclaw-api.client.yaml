@@ -1,0 +1,15 @@
+name: openclaw-api
+baseUrl: ${OPENCLAW_API_URL}
+auth:
+  type: bearer
+  envVar: "{OPENCLAW_API_KEY}"
+endpoints:
+  - name: createGateway
+    method: POST
+    path: /api/gateways
+  - name: deleteGateway
+    method: DELETE
+    path: /api/gateways/:id
+  - name: getStatus
+    method: GET
+    path: /api/gateways/:id/status

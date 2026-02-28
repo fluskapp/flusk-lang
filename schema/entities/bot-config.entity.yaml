@@ -1,0 +1,13 @@
+name: BotConfig
+fields:
+  - name: workspace_id
+    type: string
+    unique: true
+  - name: bot_token
+    type: string
+  - name: active
+    type: boolean
+    default: true
+queries:
+  - name: findByWorkspace
+    sql: SELECT * FROM bot-config WHERE workspace_id = ?

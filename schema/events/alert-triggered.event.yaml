@@ -1,0 +1,12 @@
+name: alert-triggered
+payload:
+  - name: org_id
+    type: integer
+  - name: alert_id
+    type: integer
+  - name: type
+    type: string
+  - name: severity
+    type: string
+triggers:
+  - worker: dispatch-alert-notifications

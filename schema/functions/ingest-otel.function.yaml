@@ -1,0 +1,15 @@
+name: ingestOtel
+description: Handler for POST /api/v1/telemetry/ingest
+inputs: []
+output:
+  type: void
+steps:
+  - id: validateOtelPayload
+    action: validate
+    source: otel-payload
+  - id: callProcessTelemetryBatch
+    action: call
+    source: process-telemetry-batch
+  - id: emitTelemetryReceived
+    action: call
+    source: telemetryReceived

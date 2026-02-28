@@ -1,0 +1,15 @@
+name: acceptInvite
+description: Handler for POST /api/auth/accept-invite
+inputs:
+  - name: token
+    type: string
+  - name: name
+    type: string
+  - name: password
+    type: string
+output:
+  type: void
+steps:
+  - id: callProcessInvite
+    action: call
+    source: process-invite

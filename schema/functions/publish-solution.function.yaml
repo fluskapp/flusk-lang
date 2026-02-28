@@ -1,0 +1,21 @@
+name: publishSolution
+description: Handler for POST /api/solutions/:solutionId/publish
+inputs:
+  - name: channel
+    type: string
+  - name: channel_config
+    type: object
+output:
+  type: void
+steps:
+  - id: validateDeploymentInput
+    action: validate
+    source: deployment-input
+  - id: callProvisionDeployment
+    action: call
+    source: provision-deployment
+  - id: createDeployment
+    call: Deployment.create
+  - id: emitSolutionPublished
+    action: call
+    source: solutionPublished

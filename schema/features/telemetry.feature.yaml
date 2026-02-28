@@ -1,0 +1,360 @@
+name: telemetry
+description: OTel ingestion and AI usage tracking — the Observation pillar
+version: 1.0.0
+
+entities:
+  - name: agent-device
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: device_id
+        type: string
+        unique: true
+      - name: hostname
+        type: string
+      - name: os
+        type: string
+      - name: arch
+        type: string
+      - name: agent_version
+        type: string
+      - name: employee_email
+        type: string
+        indexed: true
+        nullable: true
+      - name: last_seen_at
+        type: datetime
+      - name: status
+        type: enum
+        values: [active, offline, revoked]
+        default: active
+    queries:
+      - findByDeviceId: { by: device_id }
+      - findByOrg: { by: org_id }
+      - findActiveByOrg: { where: "org_id = ? AND status = 'active'" }
+      - findOffline: { where: "status = 'active' AND last_seen_at < datetime('now', '-24 hours')" }
+
+  - name: telemetry-event
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: device_id
+        type: string
+        indexed: true
+      - name: trace_id
+        type: string
+        indexed: true
+      - name: span_id
+        type: string
+      - name: provider
+        type: string
+        indexed: true
+      - name: model
+        type: string
+        indexed: true
+      - name: tool_name
+        type: string
+        indexed: true
+        nullable: true
+      - name: input_tokens
+        type: integer
+        default: 0
+      - name: output_tokens
+        type: integer
+        default: 0
+      - name: latency_ms
+        type: integer
+        default: 0
+      - name: cost_usd
+        type: float
+        default: 0
+      - name: status_code
+        type: integer
+        default: 200
+      - name: is_approved
+        type: boolean
+        default: false
+      - name: metadata
+        type: json
+        nullable: true
+    queries:
+      - findByOrg: { by: org_id, order: "created_at DESC" }
+      - findByDevice: { where: "org_id = ? AND device_id = ?", order: "created_at DESC" }
+      - findByProvider: { where: "org_id = ? AND provider = ?", order: "created_at DESC" }
+      - findShadowAI: { where: "org_id = ? AND is_approved = false", order: "created_at DESC" }
+
+  - name: ai-tool
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: name
+        type: string
+      - name: provider
+        type: string
+      - name: category
+        type: enum
+        values: [chat, coding, image, voice, search, other]
+        default: other
+      - name: approved
+        type: boolean
+        default: false
+      - name: detection_pattern
+        type: string
+        nullable: true
+      - name: first_seen_at
+        type: datetime
+      - name: last_seen_at
+        type: datetime
+    queries:
+      - findByOrg: { by: org_id }
+      - findByOrgAndName: { where: "org_id = ? AND name = ?" }
+      - findUnapproved: { where: "org_id = ? AND approved = false" }
+    capabilities:
+      - time-range
+
+  - name: usage-daily
+    description: Aggregated daily usage stats per org/device/provider
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: device_id
+        type: string
+        indexed: true
+      - name: provider
+        type: string
+        indexed: true
+      - name: model
+        type: string
+      - name: date
+        type: date
+        indexed: true
+      - name: request_count
+        type: integer
+        default: 0
+      - name: total_input_tokens
+        type: integer
+        default: 0
+      - name: total_output_tokens
+        type: integer
+        default: 0
+      - name: total_cost_usd
+        type: float
+        default: 0
+      - name: total_latency_ms
+        type: integer
+        default: 0
+      - name: shadow_count
+        type: integer
+        default: 0
+    queries:
+      - findByOrgAndDate: { where: "org_id = ? AND date = ?" }
+      - findByOrgRange: { where: "org_id = ? AND date BETWEEN ? AND ?", order: "date ASC" }
+      - findByDevice: { where: "org_id = ? AND device_id = ? AND date BETWEEN ? AND ?", order: "date ASC" }
+
+routes:
+  - name: ingest-otel
+    method: POST
+    path: /api/v1/telemetry/ingest
+    auth: api-key
+    actions:
+      - validate: otel-payload
+      - call: process-telemetry-batch
+      - emit: telemetry-received
+
+  - name: agent-heartbeat
+    method: POST
+    path: /api/v1/telemetry/heartbeat
+    auth: api-key
+    input:
+      - name: device_id
+        type: string
+        required: true
+      - name: hostname
+        type: string
+      - name: os
+        type: string
+      - name: arch
+        type: string
+      - name: agent_version
+        type: string
+    actions:
+      - call: register-or-update-device
+
+  - name: get-usage-summary
+    method: GET
+    path: /api/dashboard/usage
+    auth: session
+    loader: usage-summary
+
+  - name: get-usage-by-provider
+    method: GET
+    path: /api/dashboard/usage/providers
+    auth: session
+    loader: usage-by-provider
+
+  - name: get-usage-by-employee
+    method: GET
+    path: /api/dashboard/usage/employees
+    auth: session
+    loader: usage-by-employee
+
+  - name: get-shadow-ai
+    method: GET
+    path: /api/dashboard/shadow-ai
+    auth: session
+    loader: shadow-ai-report
+
+  - name: get-usage-trends
+    method: GET
+    path: /api/dashboard/trends
+    auth: session
+    loader: usage-trends
+
+  - name: list-devices
+    method: GET
+    path: /api/devices
+    auth: session
+    loader: org-devices
+
+  - name: revoke-device
+    method: DELETE
+    path: /api/devices/:deviceId
+    auth: session
+    actions:
+      - update: agent-device
+
+  - name: list-tools
+    method: GET
+    path: /api/tools
+    auth: session
+    loader: org-tools
+
+  - name: approve-tool
+    method: PATCH
+    path: /api/tools/:toolId
+    auth: session
+    input:
+      - name: approved
+        type: boolean
+        required: true
+    actions:
+      - update: ai-tool
+
+functions:
+  - name: process-telemetry-batch
+    description: Parse OTel spans, detect provider/model, calculate cost, store events
+    input:
+      - name: spans
+        type: array
+      - name: org_id
+        type: integer
+      - name: device_id
+        type: string
+    steps:
+      - parse OTel span attributes (gen_ai.system, gen_ai.request.model, gen_ai.usage.*)
+      - detect AI tool from span data
+      - check if tool is approved
+      - calculate cost based on provider pricing
+      - batch insert telemetry-event records
+
+  - name: register-or-update-device
+    input:
+      - name: device_id
+        type: string
+      - name: hostname
+        type: string
+      - name: os
+        type: string
+      - name: agent_version
+        type: string
+      - name: org_id
+        type: integer
+
+  - name: setup-default-tools
+    description: Pre-populate known AI tools for a new org
+    input:
+      - name: org_id
+        type: integer
+
+  - name: aggregate-daily-usage
+    description: Roll up telemetry events into daily aggregates
+    input:
+      - name: org_id
+        type: integer
+      - name: date
+        type: date
+
+events:
+  - name: telemetry-received
+    payload:
+      - name: org_id
+        type: integer
+      - name: device_id
+        type: string
+      - name: event_count
+        type: integer
+    triggers:
+      - worker: detect-anomalies
+      - worker: update-daily-aggregates
+
+  - name: shadow-ai-detected
+    payload:
+      - name: org_id
+        type: integer
+      - name: device_id
+        type: string
+      - name: tool_name
+        type: string
+      - name: provider
+        type: string
+    triggers:
+      - worker: create-shadow-alert
+
+  - name: new-tool-detected
+    payload:
+      - name: org_id
+        type: integer
+      - name: tool_name
+        type: string
+      - name: provider
+        type: string
+    triggers:
+      - function: auto-classify-tool
+
+workers:
+  - name: detect-anomalies
+    concurrency: 3
+    steps:
+      - load: usage-daily
+      - call: check-usage-spike
+      - condition: spike-detected
+      - emit: alert-triggered
+
+  - name: update-daily-aggregates
+    concurrency: 5
+    steps:
+      - load: telemetry-event
+      - call: aggregate-daily-usage
+
+  - name: create-shadow-alert
+    concurrency: 3
+    steps:
+      - load: ai-tool
+      - call: create-alert
+
+commands:
+  - name: telemetry
+    subcommands:
+      - name: stats
+        description: Show telemetry statistics
+        args:
+          - name: org
+            type: string
+      - name: tools
+        description: List detected AI tools
+      - name: shadow
+        description: Show shadow AI report

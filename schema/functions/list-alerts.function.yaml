@@ -1,0 +1,10 @@
+name: listAlerts
+description: Handler for GET /api/alerts
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

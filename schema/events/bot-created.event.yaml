@@ -1,0 +1,8 @@
+name: bot-created
+payload:
+  - name: bot_id
+    type: string
+  - name: owner_id
+    type: string
+triggers:
+  - worker: setup-webhook

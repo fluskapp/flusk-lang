@@ -1,0 +1,11 @@
+name: telemetry-received
+payload:
+  - name: org_id
+    type: integer
+  - name: device_id
+    type: string
+  - name: event_count
+    type: integer
+triggers:
+  - worker: detect-anomalies
+  - worker: update-daily-aggregates

@@ -1,0 +1,16 @@
+name: updateBot
+description: Handler for PUT /api/bots/:id
+inputs:
+  - name: name
+    type: string
+  - name: system_prompt
+    type: string
+  - name: model
+    type: string
+  - name: active
+    type: boolean
+output:
+  type: void
+steps:
+  - id: updateBot
+    call: Bot.update

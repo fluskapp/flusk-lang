@@ -1,0 +1,38 @@
+name: AgentDevice
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: device_id
+    type: string
+    unique: true
+  - name: hostname
+    type: string
+  - name: os
+    type: string
+  - name: arch
+    type: string
+  - name: agent_version
+    type: string
+  - name: employee_email
+    type: string
+    index: true
+    required: false
+  - name: last_seen_at
+    type: datetime
+  - name: status
+    type: enum
+    default: active
+    values:
+      - active
+      - offline
+      - revoked
+queries:
+  - name: findByDeviceId
+    sql: SELECT * FROM agent-device WHERE device_id = ?
+  - name: findByOrg
+    sql: SELECT * FROM agent-device WHERE org_id = ?
+  - name: findActiveByOrg
+    sql: SELECT * FROM agent-device WHERE org_id = ? AND status = 'active'
+  - name: findOffline
+    sql: SELECT * FROM agent-device WHERE status = 'active' AND last_seen_at < datetime('now', '-24 hours')

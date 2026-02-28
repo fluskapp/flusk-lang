@@ -1,0 +1,10 @@
+name: getSolutionUsage
+description: Handler for GET /api/solutions/:solutionId/usage
+inputs: []
+output:
+  type: void
+steps:
+  - id: handle
+    action: return
+    value:
+      ok: true

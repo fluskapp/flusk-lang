@@ -1,0 +1,8 @@
+name: updateAlertRule
+description: Handler for PATCH /api/alert-rules/:ruleId
+inputs: []
+output:
+  type: void
+steps:
+  - id: updateAlertRule
+    call: AlertRule.update

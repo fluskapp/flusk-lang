@@ -1,0 +1,17 @@
+name: whatsapp-provider
+baseUrl: http://localhost:3000
+auth:
+  type: bearer
+  envVar: WHATSAPP_API_KEY
+endpoints:
+  - name: sendMessage
+    method: POST
+    path: /api/sendText
+    input:
+      - name: chatId
+        type: string
+      - name: text
+        type: string
+  - name: getStatus
+    method: GET
+    path: /api/sessions/status

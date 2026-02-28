@@ -1,0 +1,12 @@
+name: conversation-view
+type: page
+route: /bots/:id/conversations/:conversationId
+title: Conversation
+loader: get-conversation-messages
+sections:
+  - type: chat-messages
+    source: data.messages
+    features:
+      streaming: true
+      markdown: true
+  - type: chat-input

@@ -1,0 +1,36 @@
+name: Bot
+fields:
+  - name: name
+    type: string
+    required: true
+  - name: phone_number
+    type: string
+    unique: true
+  - name: system_prompt
+    type: string
+  - name: model
+    type: enum
+    default: gpt-4o
+    values:
+      - gpt-4o
+      - claude-sonnet
+      - gemini-pro
+  - name: temperature
+    type: float
+    default: 0.7
+  - name: max_tokens
+    type: number
+    default: 1024
+  - name: active
+    type: boolean
+    default: true
+  - name: owner_id
+    type: string
+    index: true
+queries:
+  - name: findByOwner
+    sql: SELECT * FROM bot WHERE owner_id = ?
+  - name: findByPhone
+    sql: SELECT * FROM bot WHERE phone_number = ?
+  - name: findActive
+    sql: SELECT * FROM bot WHERE active = 1

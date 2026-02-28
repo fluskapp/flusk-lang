@@ -1,0 +1,22 @@
+name: agentRegister
+description: Handler for POST /api/v1/agent/register
+inputs:
+  - name: device_id
+    type: string
+  - name: hostname
+    type: string
+  - name: os
+    type: string
+  - name: arch
+    type: string
+  - name: agent_version
+    type: string
+output:
+  type: void
+steps:
+  - id: callRegisterOrUpdateDevice
+    action: call
+    source: register-or-update-device
+  - id: emitAgentConnected
+    action: call
+    source: agentConnected

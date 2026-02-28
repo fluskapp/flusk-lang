@@ -1,0 +1,40 @@
+name: alerts
+basePath: /api/alerts
+operations:
+  - method: GET
+    path: /api/alerts
+    call: listAlerts
+    auth: session
+  - method: GET
+    path: /api/alerts/:alertId
+    call: getAlert
+    auth: session
+  - method: PATCH
+    path: /api/alerts/:alertId/ack
+    call: acknowledgeAlert
+    auth: session
+  - method: PATCH
+    path: /api/alerts/:alertId/resolve
+    call: resolveAlert
+    auth: session
+  - method: PATCH
+    path: /api/alerts/:alertId/dismiss
+    call: dismissAlert
+    auth: session
+  - method: GET
+    path: /api/alert-rules
+    call: listAlertRules
+    auth: session
+  - method: POST
+    path: /api/alert-rules
+    call: createAlertRule
+    input: name
+    auth: session
+  - method: PATCH
+    path: /api/alert-rules/:ruleId
+    call: updateAlertRule
+    auth: session
+  - method: DELETE
+    path: /api/alert-rules/:ruleId
+    call: deleteAlertRule
+    auth: session

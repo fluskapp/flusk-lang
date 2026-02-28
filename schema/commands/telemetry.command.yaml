@@ -1,0 +1,11 @@
+name: telemetry
+subcommands:
+  - name: stats
+    description: Show telemetry statistics
+    args:
+      - name: org
+        type: string
+  - name: tools
+    description: List detected AI tools
+  - name: shadow
+    description: Show shadow AI report

@@ -1,0 +1,43 @@
+name: KnowledgeBase
+fields:
+  - name: solution_id
+    type: integer
+    index: true
+  - name: name
+    type: string
+  - name: type
+    type: enum
+    values:
+      - file
+      - url
+      - text
+      - api
+  - name: source
+    type: string
+    description: URL, file path, or raw text
+  - name: content_hash
+    type: string
+    required: false
+  - name: chunk_count
+    type: integer
+    default: 0
+  - name: status
+    type: enum
+    default: pending
+    values:
+      - pending
+      - processing
+      - ready
+      - error
+  - name: error_message
+    type: string
+    required: false
+queries:
+  - name: findBySolution
+    sql: SELECT * FROM knowledge-base WHERE solution_id = ?
+  - name: findReady
+    sql: SELECT * FROM knowledge-base WHERE solution_id = ? AND status = 'ready'
+relations:
+  - entity: Solution
+    type: belongs-to
+    foreignKey: solution_id

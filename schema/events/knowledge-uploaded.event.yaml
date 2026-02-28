@@ -1,0 +1,8 @@
+name: knowledge-uploaded
+payload:
+  - name: kb_id
+    type: integer
+  - name: solution_id
+    type: integer
+triggers:
+  - worker: process-knowledge-base

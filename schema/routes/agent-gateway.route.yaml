@@ -1,0 +1,30 @@
+name: agent-gateway
+basePath: /api/agent-gateway
+operations:
+  - method: POST
+    path: /api/v1/agent/register
+    call: agentRegister
+    input: device_id
+    auth: api-key
+  - method: GET
+    path: /api/v1/agent/config
+    call: agentGetConfig
+    auth: api-key
+  - method: POST
+    path: /api/v1/agent/error
+    call: agentReportError
+    input: device_id
+    auth: api-key
+  - method: PUT
+    path: /api/org/agent-config
+    call: updateAgentConfig
+    input: heartbeat_interval_ms
+    auth: session
+  - method: GET
+    path: /api/org/agent-logs
+    call: getAgentLogs
+    auth: session
+  - method: GET
+    path: /api/org/agent-config
+    call: getAgentConfig
+    auth: session

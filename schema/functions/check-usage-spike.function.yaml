@@ -1,0 +1,15 @@
+name: checkUsageSpike
+inputs:
+  - name: org_id
+    type: integer
+  - name: current_count
+    type: integer
+  - name: average_count
+    type: integer
+output:
+  type: boolean
+steps:
+  - id: execute
+    action: return
+    value:
+      ok: true

@@ -1,0 +1,5 @@
+name: send-invite-email
+concurrency: 3
+steps:
+  - load: invite
+  - call: send-email

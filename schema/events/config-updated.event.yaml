@@ -1,0 +1,8 @@
+name: config-updated
+payload:
+  - name: org_id
+    type: integer
+  - name: version
+    type: integer
+triggers:
+  - worker: push-config-to-agents

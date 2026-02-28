@@ -1,0 +1,213 @@
+name: alerts
+description: Alert rules and notifications for AI usage anomalies
+version: 1.0.0
+
+entities:
+  - name: alert-rule
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: name
+        type: string
+      - name: type
+        type: enum
+        values: [shadow-ai, usage-spike, new-tool, budget-exceeded, device-offline]
+      - name: threshold
+        type: json
+        nullable: true
+      - name: channels
+        type: json
+        description: Array of notification channels (email, slack, webhook)
+      - name: enabled
+        type: boolean
+        default: true
+    queries:
+      - findByOrg: { by: org_id }
+      - findEnabledByOrg: { where: "org_id = ? AND enabled = true" }
+      - findByType: { where: "org_id = ? AND type = ? AND enabled = true" }
+
+  - name: alert
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: rule_id
+        type: integer
+        indexed: true
+        nullable: true
+      - name: type
+        type: enum
+        values: [shadow-ai, usage-spike, new-tool, budget-exceeded, device-offline]
+      - name: severity
+        type: enum
+        values: [low, medium, high, critical]
+        default: medium
+      - name: title
+        type: string
+      - name: message
+        type: string
+      - name: context
+        type: json
+        nullable: true
+      - name: status
+        type: enum
+        values: [open, acknowledged, resolved, dismissed]
+        default: open
+      - name: resolved_at
+        type: datetime
+        nullable: true
+    queries:
+      - findByOrg: { by: org_id, order: "created_at DESC" }
+      - findOpenByOrg: { where: "org_id = ? AND status = 'open'", order: "created_at DESC" }
+      - findByType: { where: "org_id = ? AND type = ?", order: "created_at DESC" }
+    relations:
+      - entity: alert-rule
+        type: belongs-to
+        foreignKey: rule_id
+
+routes:
+  - name: list-alerts
+    method: GET
+    path: /api/alerts
+    auth: session
+    loader: org-alerts
+
+  - name: get-alert
+    method: GET
+    path: /api/alerts/:alertId
+    auth: session
+    loader: single-alert
+
+  - name: acknowledge-alert
+    method: PATCH
+    path: /api/alerts/:alertId/ack
+    auth: session
+    actions:
+      - update: alert
+
+  - name: resolve-alert
+    method: PATCH
+    path: /api/alerts/:alertId/resolve
+    auth: session
+    actions:
+      - update: alert
+
+  - name: dismiss-alert
+    method: PATCH
+    path: /api/alerts/:alertId/dismiss
+    auth: session
+    actions:
+      - update: alert
+
+  - name: list-alert-rules
+    method: GET
+    path: /api/alert-rules
+    auth: session
+    loader: org-alert-rules
+
+  - name: create-alert-rule
+    method: POST
+    path: /api/alert-rules
+    auth: session
+    input:
+      - name: name
+        type: string
+        required: true
+      - name: type
+        type: string
+        required: true
+      - name: threshold
+        type: object
+      - name: channels
+        type: array
+        required: true
+    actions:
+      - validate: alert-rule-input
+      - create: alert-rule
+
+  - name: update-alert-rule
+    method: PATCH
+    path: /api/alert-rules/:ruleId
+    auth: session
+    actions:
+      - update: alert-rule
+
+  - name: delete-alert-rule
+    method: DELETE
+    path: /api/alert-rules/:ruleId
+    auth: session
+    actions:
+      - delete: alert-rule
+
+functions:
+  - name: create-alert
+    input:
+      - name: org_id
+        type: integer
+      - name: type
+        type: string
+      - name: title
+        type: string
+      - name: message
+        type: string
+      - name: context
+        type: object
+    steps:
+      - find matching alert rules
+      - create alert record
+      - dispatch notifications to configured channels
+
+  - name: check-usage-spike
+    input:
+      - name: org_id
+        type: integer
+      - name: current_count
+        type: integer
+      - name: average_count
+        type: integer
+    output:
+      type: boolean
+
+  - name: send-alert-notification
+    input:
+      - name: alert_id
+        type: integer
+      - name: channels
+        type: array
+
+events:
+  - name: alert-triggered
+    payload:
+      - name: org_id
+        type: integer
+      - name: alert_id
+        type: integer
+      - name: type
+        type: string
+      - name: severity
+        type: string
+    triggers:
+      - worker: dispatch-alert-notifications
+
+workers:
+  - name: dispatch-alert-notifications
+    concurrency: 5
+    steps:
+      - load: alert
+      - load: alert-rule
+      - call: send-alert-notification
+
+commands:
+  - name: alerts
+    subcommands:
+      - name: list
+        description: List open alerts
+        args:
+          - name: org
+            type: string
+      - name: resolve
+        description: Resolve an alert
+        args:
+          - name: id
+            type: integer

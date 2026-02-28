@@ -1,0 +1,6 @@
+name: webhook-signature
+type: webhook-verify
+config:
+  header: x-webhook-signature
+  secret: $WEBHOOK_SECRET
+  algorithm: hmac-sha256

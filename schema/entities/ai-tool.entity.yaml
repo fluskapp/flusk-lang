@@ -1,0 +1,38 @@
+name: AiTool
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: name
+    type: string
+  - name: provider
+    type: string
+  - name: category
+    type: enum
+    default: other
+    values:
+      - chat
+      - coding
+      - image
+      - voice
+      - search
+      - other
+  - name: approved
+    type: boolean
+    default: false
+  - name: detection_pattern
+    type: string
+    required: false
+  - name: first_seen_at
+    type: datetime
+  - name: last_seen_at
+    type: datetime
+queries:
+  - name: findByOrg
+    sql: SELECT * FROM ai-tool WHERE org_id = ?
+  - name: findByOrgAndName
+    sql: SELECT * FROM ai-tool WHERE org_id = ? AND name = ?
+  - name: findUnapproved
+    sql: SELECT * FROM ai-tool WHERE org_id = ? AND approved = false
+capabilities:
+  - time-range

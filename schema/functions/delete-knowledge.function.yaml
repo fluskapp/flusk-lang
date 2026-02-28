@@ -1,0 +1,8 @@
+name: deleteKnowledge
+description: Handler for DELETE /api/solutions/:solutionId/knowledge/:kbId
+inputs: []
+output:
+  type: void
+steps:
+  - id: deleteKnowledgeBase
+    call: KnowledgeBase.delete

@@ -1,0 +1,6 @@
+name: dispatch-alert-notifications
+concurrency: 5
+steps:
+  - load: alert
+  - load: alert-rule
+  - call: send-alert-notification

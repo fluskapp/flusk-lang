@@ -1,0 +1,42 @@
+name: UsageDaily
+description: Aggregated daily usage stats per org/device/provider
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: device_id
+    type: string
+    index: true
+  - name: provider
+    type: string
+    index: true
+  - name: model
+    type: string
+  - name: date
+    type: date
+    index: true
+  - name: request_count
+    type: integer
+    default: 0
+  - name: total_input_tokens
+    type: integer
+    default: 0
+  - name: total_output_tokens
+    type: integer
+    default: 0
+  - name: total_cost_usd
+    type: float
+    default: 0
+  - name: total_latency_ms
+    type: integer
+    default: 0
+  - name: shadow_count
+    type: integer
+    default: 0
+queries:
+  - name: findByOrgAndDate
+    sql: SELECT * FROM usage-daily WHERE org_id = ? AND date = ?
+  - name: findByOrgRange
+    sql: SELECT * FROM usage-daily WHERE org_id = ? AND date BETWEEN ? AND ? ORDER BY date ASC
+  - name: findByDevice
+    sql: SELECT * FROM usage-daily WHERE org_id = ? AND device_id = ? AND date BETWEEN ? AND ? ORDER BY date ASC

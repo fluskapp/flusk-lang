@@ -1,0 +1,9 @@
+name: process-knowledge-base
+concurrency: 2
+retry:
+  max: 3
+  backoff: exponential
+steps:
+  - load: knowledge-base
+  - call: chunk-and-embed-content
+  - update: knowledge-base

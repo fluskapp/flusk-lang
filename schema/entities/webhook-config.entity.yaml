@@ -1,0 +1,21 @@
+name: WebhookConfig
+fields:
+  - name: bot_id
+    type: string
+    unique: true
+  - name: verify_token
+    type: string
+  - name: api_secret
+    type: string
+  - name: provider
+    type: enum
+    default: waha
+    values:
+      - waha
+      - twilio
+      - meta-cloud
+  - name: webhook_url
+    type: string
+queries:
+  - name: findByBot
+    sql: SELECT * FROM webhook-config WHERE bot_id = ?

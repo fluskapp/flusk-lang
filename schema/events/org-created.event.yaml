@@ -1,0 +1,8 @@
+name: org-created
+payload:
+  - name: org_id
+    type: integer
+  - name: name
+    type: string
+triggers:
+  - function: setup-default-tools

@@ -1,0 +1,41 @@
+name: OrgMember
+fields:
+  - name: org_id
+    type: integer
+    index: true
+  - name: email
+    type: string
+    index: true
+  - name: name
+    type: string
+  - name: role
+    type: enum
+    default: member
+    values:
+      - owner
+      - admin
+      - member
+      - viewer
+  - name: password_hash
+    type: string
+  - name: status
+    type: enum
+    default: invited
+    values:
+      - active
+      - invited
+      - disabled
+  - name: last_login_at
+    type: datetime
+    required: false
+queries:
+  - name: findByEmail
+    sql: SELECT * FROM org-member WHERE email = ?
+  - name: findByOrg
+    sql: SELECT * FROM org-member WHERE org_id = ?
+  - name: findByOrgAndEmail
+    sql: SELECT * FROM org-member WHERE org_id = ? AND email = ?
+relations:
+  - entity: Organization
+    type: belongs-to
+    foreignKey: org_id

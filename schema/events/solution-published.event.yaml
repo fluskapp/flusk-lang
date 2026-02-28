@@ -1,0 +1,12 @@
+name: solution-published
+payload:
+  - name: solution_id
+    type: integer
+  - name: deployment_id
+    type: integer
+  - name: channel
+    type: string
+  - name: org_id
+    type: integer
+triggers:
+  - worker: notify-agents-new-solution

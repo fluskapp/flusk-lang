@@ -1,0 +1,19 @@
+name: generateAiReply
+description: Send conversation context to LLM and get reply
+inputs:
+  - name: bot_id
+    type: string
+  - name: conversation_id
+    type: string
+  - name: user_message
+    type: string
+output:
+  type: object
+  fields:
+    - reply
+    - tokens_used
+    - cost
+    - latency_ms
+steps:
+  - id: callExternal
+    call: llm-router.complete

@@ -1,0 +1,19 @@
+name: createAlertRule
+description: Handler for POST /api/alert-rules
+inputs:
+  - name: name
+    type: string
+  - name: type
+    type: string
+  - name: threshold
+    type: object
+  - name: channels
+    type: array
+output:
+  type: void
+steps:
+  - id: validateAlertRuleInput
+    action: validate
+    source: alert-rule-input
+  - id: createAlertRule
+    call: AlertRule.create

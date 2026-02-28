@@ -1,0 +1,272 @@
+name: organizations
+description: Multi-tenant organization management — the foundation of Flusk
+version: 1.0.0
+
+entities:
+  - name: organization
+    fields:
+      - name: name
+        type: string
+      - name: slug
+        type: string
+        unique: true
+      - name: plan
+        type: enum
+        values: [starter, growth, enterprise]
+        default: starter
+      - name: max_seats
+        type: integer
+        default: 50
+      - name: api_key
+        type: string
+        unique: true
+        encrypted: true
+      - name: status
+        type: enum
+        values: [active, suspended, trial]
+        default: trial
+      - name: trial_ends_at
+        type: datetime
+        nullable: true
+    queries:
+      - findBySlug: { by: slug }
+      - findByApiKey: { by: api_key }
+      - findActive: { where: "status != 'suspended'" }
+
+  - name: org-member
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: email
+        type: string
+        indexed: true
+      - name: name
+        type: string
+      - name: role
+        type: enum
+        values: [owner, admin, member, viewer]
+        default: member
+      - name: password_hash
+        type: string
+      - name: status
+        type: enum
+        values: [active, invited, disabled]
+        default: invited
+      - name: last_login_at
+        type: datetime
+        nullable: true
+    queries:
+      - findByEmail: { by: email }
+      - findByOrg: { by: org_id }
+      - findByOrgAndEmail: { where: "org_id = ? AND email = ?" }
+    relations:
+      - entity: organization
+        type: belongs-to
+        foreignKey: org_id
+
+  - name: invite
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: email
+        type: string
+      - name: role
+        type: enum
+        values: [admin, member, viewer]
+        default: member
+      - name: token
+        type: string
+        unique: true
+      - name: expires_at
+        type: datetime
+      - name: accepted
+        type: boolean
+        default: false
+    queries:
+      - findByToken: { by: token }
+      - findPendingByOrg: { where: "org_id = ? AND accepted = false AND expires_at > datetime('now')" }
+
+routes:
+  - name: register-org
+    method: POST
+    path: /api/auth/register
+    auth: none
+    input:
+      - name: org_name
+        type: string
+        required: true
+      - name: email
+        type: string
+        required: true
+      - name: password
+        type: string
+        required: true
+      - name: name
+        type: string
+        required: true
+    actions:
+      - validate: register-input
+      - create: organization
+      - create: org-member
+      - emit: org-created
+
+  - name: login
+    method: POST
+    path: /api/auth/login
+    auth: none
+    input:
+      - name: email
+        type: string
+        required: true
+      - name: password
+        type: string
+        required: true
+    actions:
+      - call: verify-credentials
+
+  - name: invite-member
+    method: POST
+    path: /api/org/invite
+    auth: session
+    input:
+      - name: email
+        type: string
+        required: true
+      - name: role
+        type: string
+    actions:
+      - validate: invite-input
+      - create: invite
+      - emit: member-invited
+
+  - name: accept-invite
+    method: POST
+    path: /api/auth/accept-invite
+    auth: none
+    input:
+      - name: token
+        type: string
+        required: true
+      - name: name
+        type: string
+        required: true
+      - name: password
+        type: string
+        required: true
+    actions:
+      - call: process-invite
+
+  - name: get-org
+    method: GET
+    path: /api/org
+    auth: session
+    loader: current-org
+
+  - name: list-members
+    method: GET
+    path: /api/org/members
+    auth: session
+    loader: org-members
+
+  - name: update-member-role
+    method: PATCH
+    path: /api/org/members/:memberId
+    auth: session
+    input:
+      - name: role
+        type: string
+        required: true
+    actions:
+      - update: org-member
+
+  - name: rotate-api-key
+    method: POST
+    path: /api/org/rotate-key
+    auth: session
+    actions:
+      - call: generate-api-key
+      - update: organization
+
+functions:
+  - name: verify-credentials
+    input:
+      - name: email
+        type: string
+      - name: password
+        type: string
+    output:
+      type: object
+      fields: [token, member, org]
+
+  - name: process-invite
+    input:
+      - name: token
+        type: string
+      - name: name
+        type: string
+      - name: password
+        type: string
+
+  - name: generate-api-key
+    input: []
+    output:
+      type: string
+
+events:
+  - name: org-created
+    payload:
+      - name: org_id
+        type: integer
+      - name: name
+        type: string
+    triggers:
+      - function: setup-default-tools
+
+  - name: member-invited
+    payload:
+      - name: invite_id
+        type: integer
+      - name: email
+        type: string
+      - name: org_name
+        type: string
+    triggers:
+      - worker: send-invite-email
+
+workers:
+  - name: send-invite-email
+    concurrency: 3
+    steps:
+      - load: invite
+      - call: send-email
+
+clients:
+  - name: email-service
+    base_url: ${EMAIL_SERVICE_URL}
+    auth:
+      type: bearer
+      token: ${EMAIL_API_KEY}
+    methods:
+      - name: send
+        method: POST
+        path: /send
+
+commands:
+  - name: org
+    subcommands:
+      - name: create
+        description: Create a new organization
+        args:
+          - name: name
+            type: string
+          - name: email
+            type: string
+      - name: list
+        description: List all organizations
+      - name: info
+        description: Show organization details
+        args:
+          - name: slug
+            type: string

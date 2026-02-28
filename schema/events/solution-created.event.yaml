@@ -1,0 +1,7 @@
+name: solution-created
+payload:
+  - name: solution_id
+    type: integer
+  - name: org_id
+    type: integer
+triggers: []

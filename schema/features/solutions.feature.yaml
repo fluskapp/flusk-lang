@@ -1,0 +1,417 @@
+name: solutions
+description: AI Solution Builder — the Action pillar. Build, configure, and publish AI solutions.
+version: 1.0.0
+
+entities:
+  - name: solution
+    fields:
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: name
+        type: string
+      - name: description
+        type: string
+        nullable: true
+      - name: type
+        type: enum
+        values: [openclaw, custom]
+        default: openclaw
+      - name: llm_provider
+        type: enum
+        values: [openai, anthropic, google, azure-openai, custom]
+      - name: llm_model
+        type: string
+      - name: system_prompt
+        type: string
+        nullable: true
+      - name: temperature
+        type: float
+        default: 0.7
+      - name: max_tokens
+        type: integer
+        default: 4096
+      - name: tools_config
+        type: json
+        nullable: true
+        description: Tool/skill configuration for the AI agent
+      - name: status
+        type: enum
+        values: [draft, testing, published, archived]
+        default: draft
+      - name: created_by
+        type: integer
+        indexed: true
+      - name: published_at
+        type: datetime
+        nullable: true
+    queries:
+      - findByOrg: { by: org_id, order: "created_at DESC" }
+      - findPublished: { where: "org_id = ? AND status = 'published'" }
+      - findByStatus: { where: "org_id = ? AND status = ?" }
+    relations:
+      - entity: organization
+        type: belongs-to
+        foreignKey: org_id
+
+  - name: knowledge-base
+    fields:
+      - name: solution_id
+        type: integer
+        indexed: true
+      - name: name
+        type: string
+      - name: type
+        type: enum
+        values: [file, url, text, api]
+      - name: source
+        type: string
+        description: URL, file path, or raw text
+      - name: content_hash
+        type: string
+        nullable: true
+      - name: chunk_count
+        type: integer
+        default: 0
+      - name: status
+        type: enum
+        values: [pending, processing, ready, error]
+        default: pending
+      - name: error_message
+        type: string
+        nullable: true
+    queries:
+      - findBySolution: { by: solution_id }
+      - findReady: { where: "solution_id = ? AND status = 'ready'" }
+    relations:
+      - entity: solution
+        type: belongs-to
+        foreignKey: solution_id
+
+  - name: deployment
+    fields:
+      - name: solution_id
+        type: integer
+        indexed: true
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: channel
+        type: enum
+        values: [slack, teams, whatsapp, telegram, desktop]
+      - name: channel_config
+        type: json
+        description: Channel-specific config (bot token, webhook URL, etc.)
+      - name: status
+        type: enum
+        values: [active, paused, error, removed]
+        default: active
+      - name: instance_id
+        type: string
+        unique: true
+        description: Unique identifier for the running instance
+      - name: health_status
+        type: enum
+        values: [healthy, degraded, down, unknown]
+        default: unknown
+      - name: last_health_check
+        type: datetime
+        nullable: true
+    queries:
+      - findBySolution: { by: solution_id }
+      - findByOrg: { by: org_id }
+      - findActive: { where: "org_id = ? AND status = 'active'" }
+      - findByInstance: { by: instance_id }
+    relations:
+      - entity: solution
+        type: belongs-to
+        foreignKey: solution_id
+
+  - name: solution-conversation
+    description: Track conversations through deployed solutions
+    fields:
+      - name: deployment_id
+        type: integer
+        indexed: true
+      - name: org_id
+        type: integer
+        indexed: true
+      - name: user_identifier
+        type: string
+        indexed: true
+      - name: message_count
+        type: integer
+        default: 0
+      - name: input_tokens
+        type: integer
+        default: 0
+      - name: output_tokens
+        type: integer
+        default: 0
+      - name: cost_usd
+        type: float
+        default: 0
+      - name: satisfaction
+        type: integer
+        nullable: true
+        description: 1-5 rating if collected
+      - name: last_message_at
+        type: datetime
+    queries:
+      - findByDeployment: { by: deployment_id, order: "last_message_at DESC" }
+      - findByOrg: { by: org_id, order: "last_message_at DESC" }
+
+routes:
+  - name: list-solutions
+    method: GET
+    path: /api/solutions
+    auth: session
+    loader: org-solutions
+
+  - name: get-solution
+    method: GET
+    path: /api/solutions/:solutionId
+    auth: session
+    loader: single-solution
+
+  - name: create-solution
+    method: POST
+    path: /api/solutions
+    auth: session
+    input:
+      - name: name
+        type: string
+        required: true
+      - name: description
+        type: string
+      - name: llm_provider
+        type: string
+        required: true
+      - name: llm_model
+        type: string
+        required: true
+      - name: system_prompt
+        type: string
+      - name: temperature
+        type: number
+      - name: max_tokens
+        type: integer
+      - name: tools_config
+        type: object
+    actions:
+      - validate: solution-input
+      - create: solution
+      - emit: solution-created
+
+  - name: update-solution
+    method: PATCH
+    path: /api/solutions/:solutionId
+    auth: session
+    actions:
+      - validate: solution-input
+      - update: solution
+
+  - name: delete-solution
+    method: DELETE
+    path: /api/solutions/:solutionId
+    auth: session
+    actions:
+      - delete: solution
+
+  - name: test-solution
+    method: POST
+    path: /api/solutions/:solutionId/test
+    auth: session
+    input:
+      - name: message
+        type: string
+        required: true
+    actions:
+      - call: run-solution-sandbox
+
+  - name: publish-solution
+    method: POST
+    path: /api/solutions/:solutionId/publish
+    auth: session
+    input:
+      - name: channel
+        type: string
+        required: true
+      - name: channel_config
+        type: object
+        required: true
+    actions:
+      - validate: deployment-input
+      - call: provision-deployment
+      - create: deployment
+      - emit: solution-published
+
+  - name: unpublish-deployment
+    method: DELETE
+    path: /api/deployments/:deploymentId
+    auth: session
+    actions:
+      - call: teardown-deployment
+      - update: deployment
+
+  - name: list-deployments
+    method: GET
+    path: /api/deployments
+    auth: session
+    loader: org-deployments
+
+  - name: upload-knowledge
+    method: POST
+    path: /api/solutions/:solutionId/knowledge
+    auth: session
+    input:
+      - name: name
+        type: string
+        required: true
+      - name: type
+        type: string
+        required: true
+      - name: source
+        type: string
+        required: true
+    actions:
+      - create: knowledge-base
+      - emit: knowledge-uploaded
+
+  - name: delete-knowledge
+    method: DELETE
+    path: /api/solutions/:solutionId/knowledge/:kbId
+    auth: session
+    actions:
+      - delete: knowledge-base
+
+  - name: get-solution-usage
+    method: GET
+    path: /api/solutions/:solutionId/usage
+    auth: session
+    loader: solution-usage-stats
+
+functions:
+  - name: run-solution-sandbox
+    description: Run a test conversation against a solution config
+    input:
+      - name: solution_id
+        type: integer
+      - name: message
+        type: string
+    output:
+      type: object
+      fields: [response, tokens_used, latency_ms]
+
+  - name: provision-deployment
+    description: Spin up an OpenClaw instance or configure channel integration
+    input:
+      - name: solution_id
+        type: integer
+      - name: channel
+        type: string
+      - name: channel_config
+        type: object
+    output:
+      type: object
+      fields: [instance_id, endpoint]
+
+  - name: teardown-deployment
+    description: Stop and clean up a deployment instance
+    input:
+      - name: deployment_id
+        type: integer
+
+events:
+  - name: solution-created
+    payload:
+      - name: solution_id
+        type: integer
+      - name: org_id
+        type: integer
+    triggers: []
+
+  - name: solution-published
+    payload:
+      - name: solution_id
+        type: integer
+      - name: deployment_id
+        type: integer
+      - name: channel
+        type: string
+      - name: org_id
+        type: integer
+    triggers:
+      - worker: notify-agents-new-solution
+
+  - name: knowledge-uploaded
+    payload:
+      - name: kb_id
+        type: integer
+      - name: solution_id
+        type: integer
+    triggers:
+      - worker: process-knowledge-base
+
+workers:
+  - name: process-knowledge-base
+    concurrency: 2
+    retry:
+      max: 3
+      backoff: exponential
+    steps:
+      - load: knowledge-base
+      - call: chunk-and-embed-content
+      - update: knowledge-base
+
+  - name: notify-agents-new-solution
+    description: Push new solution availability to desktop agents
+    concurrency: 10
+    steps:
+      - load: deployment
+      - load: agent-device
+      - call: push-to-agents
+
+  - name: health-check-deployments
+    concurrency: 5
+    steps:
+      - load: deployment
+      - call: check-deployment-health
+      - update: deployment
+
+clients:
+  - name: openclaw-api
+    base_url: ${OPENCLAW_API_URL}
+    auth:
+      type: bearer
+      token: ${OPENCLAW_API_KEY}
+    methods:
+      - name: createGateway
+        method: POST
+        path: /api/gateways
+      - name: deleteGateway
+        method: DELETE
+        path: /api/gateways/:id
+      - name: getStatus
+        method: GET
+        path: /api/gateways/:id/status
+
+commands:
+  - name: solutions
+    subcommands:
+      - name: list
+        description: List solutions
+      - name: create
+        description: Create a new solution
+      - name: publish
+        description: Publish a solution to a channel
+        args:
+          - name: id
+            type: integer
+          - name: channel
+            type: string
+      - name: test
+        description: Test a solution interactively
+        args:
+          - name: id
+            type: integer

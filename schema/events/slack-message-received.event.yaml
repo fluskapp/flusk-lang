@@ -1,0 +1,6 @@
+name: slack-message-received
+payload:
+  - name: message_id
+    type: string
+triggers:
+  - worker: process-slack-queue

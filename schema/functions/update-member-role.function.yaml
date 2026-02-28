@@ -1,0 +1,10 @@
+name: updateMemberRole
+description: Handler for PATCH /api/org/members/:memberId
+inputs:
+  - name: role
+    type: string
+output:
+  type: void
+steps:
+  - id: updateOrgMember
+    call: OrgMember.update

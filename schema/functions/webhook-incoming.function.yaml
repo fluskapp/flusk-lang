@@ -1,0 +1,16 @@
+name: webhookIncoming
+description: Handler for POST /webhooks/whatsapp/:botId
+inputs:
+  - name: message
+    type: object
+output:
+  type: void
+steps:
+  - id: validateWebhookPayload
+    action: validate
+    source: webhook-payload
+  - id: createMessage
+    call: Message.create
+  - id: emitMessageReceived
+    action: call
+    source: messageReceived
