@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS conversations;
+DROP TABLE IF EXISTS agent_event_logs;

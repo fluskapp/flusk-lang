@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS bots;
+DROP TABLE IF EXISTS agent_configs;

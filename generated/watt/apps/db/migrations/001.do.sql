@@ -1,15 +1,13 @@
-CREATE TABLE IF NOT EXISTS bots (
+CREATE TABLE IF NOT EXISTS agent_configs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  phone_number TEXT UNIQUE,
-  system_prompt TEXT,
-  model TEXT DEFAULT 'gpt-4o',
-  temperature REAL DEFAULT 0.7,
-  max_tokens INTEGER DEFAULT 1024,
-  active INTEGER DEFAULT 1,
-  owner_id TEXT,
+  org_id TEXT,
+  version TEXT DEFAULT 1,
+  otel_endpoint TEXT,
+  heartbeat_interval_ms TEXT DEFAULT 60000,
+  approved_tools TEXT,
+  intercept_patterns TEXT,
+  solutions TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_bots_phone_number ON bots (phone_number);
-CREATE INDEX IF NOT EXISTS idx_bots_owner_id ON bots (owner_id);
+CREATE INDEX IF NOT EXISTS idx_agent_configs_org_id ON agent_configs (org_id);

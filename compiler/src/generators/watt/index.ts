@@ -52,7 +52,11 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
     files.push(generateDbConfig(features));
   }
 
+  // Collect all entities for unified types/index.ts
+  const allEntities: import('../../ast/feature.js').FeatureEntity[] = [];
+
   // 3. Per-feature generation
+  let migrationCounter = 1;
   for (const feature of features) {
     const name = toKebab(feature.name);
 
@@ -62,12 +66,13 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
       files.push(generateServiceConfig(feature));
     }
 
-    // Migrations
-    const migrations = generateFeatureMigrations(feature);
+    // Migrations (global sequential numbering across all features)
+    const migrations = generateFeatureMigrations(feature, migrationCounter);
     for (const m of migrations) {
       files.push({ path: `apps/db/migrations/${m.number}.do.sql`, content: m.doSql + '\n' });
       files.push({ path: `apps/db/migrations/${m.number}.undo.sql`, content: m.undoSql + '\n' });
     }
+    migrationCounter += migrations.length;
 
     // Plugin (custom routes)
     if (feature.routes.length > 0) {
@@ -124,18 +129,13 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
       });
     }
 
-    // Types
+    // Types (individual files per entity)
     for (const entity of feature.entities) {
       files.push({
         path: `types/${toPascal(entity.name)}.ts`,
         content: generateEntityType(entity),
       });
-    }
-    if (feature.entities.length > 0) {
-      files.push({
-        path: `types/index.ts`,
-        content: generateFeatureTypes(feature),
-      });
+      allEntities.push(entity);
     }
 
     // Tests
@@ -143,6 +143,15 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
     for (const t of tests) {
       files.push(t);
     }
+  }
+
+  // 4. Unified types/index.ts (all entities from all features)
+  if (allEntities.length > 0) {
+    const exports = allEntities
+      .map((e) => `export * from './${toPascal(e.name)}.js';`)
+      .sort()
+      .join('\n');
+    files.push({ path: 'types/index.ts', content: exports + '\n' });
   }
 
   return files;

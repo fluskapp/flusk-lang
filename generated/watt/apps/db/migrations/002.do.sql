@@ -1,12 +1,11 @@
-CREATE TABLE IF NOT EXISTS conversations (
+CREATE TABLE IF NOT EXISTS agent_event_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  bot_id TEXT,
-  contact_phone TEXT,
-  contact_name TEXT,
-  status TEXT DEFAULT 'active',
-  last_message_at TEXT,
+  org_id TEXT,
+  device_id TEXT,
+  event_type TEXT,
+  details TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-CREATE INDEX IF NOT EXISTS idx_conversations_bot_id ON conversations (bot_id);
-CREATE INDEX IF NOT EXISTS idx_conversations_contact_phone ON conversations (contact_phone);
+CREATE INDEX IF NOT EXISTS idx_agent_event_logs_org_id ON agent_event_logs (org_id);
+CREATE INDEX IF NOT EXISTS idx_agent_event_logs_device_id ON agent_event_logs (device_id);
