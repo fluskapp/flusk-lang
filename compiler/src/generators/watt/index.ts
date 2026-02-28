@@ -16,9 +16,10 @@
 import type { FeatureNode } from '../../ast/feature.js';
 import { generateWattJson, generateDbConfig, generateServiceConfig, generateEnvTemplate } from './config.gen.js';
 import { generateFeatureMigrations } from './migration.gen.js';
-import { generatePlugin, generateFunction } from './plugin.gen.js';
+import { generatePlugin, generateFunction, generateRouteHandler } from './plugin.gen.js';
 import { generateClient } from './client.gen.js';
 import { generateEntityType, generateFeatureTypes } from './types.gen.js';
+import { generateEventBus, generateEventHandlers, generateWorker } from './event.gen.js';
 import { generateAllTests } from './test.gen.js';
 
 export interface GeneratedFile {
@@ -55,8 +56,9 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
   for (const feature of features) {
     const name = toKebab(feature.name);
 
-    // Service config (only if feature has custom routes/functions)
-    if (feature.routes.length > 0 || feature.functions.length > 0) {
+    // Service config (if feature has custom logic)
+    const hasCustomLogic = feature.routes.length > 0 || feature.functions.length > 0 || feature.events.length > 0 || feature.workers.length > 0;
+    if (hasCustomLogic) {
       files.push(generateServiceConfig(feature));
     }
 
@@ -75,11 +77,42 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
       });
     }
 
-    // Functions (business logic)
+    // Functions (explicit business logic)
+    const explicitFnNames = new Set(feature.functions.map((f) => toCamel(f.name)));
     for (const fn of feature.functions) {
       files.push({
         path: `apps/${name}/functions/${toCamel(fn.name)}.ts`,
         content: generateFunction(fn),
+      });
+    }
+
+    // Auto-generated route handlers (for routes without explicit functions)
+    for (const route of feature.routes) {
+      const handlerName = toCamel(route.name);
+      if (!explicitFnNames.has(handlerName)) {
+        files.push({
+          path: `apps/${name}/functions/${handlerName}.ts`,
+          content: generateRouteHandler(route),
+        });
+      }
+    }
+
+    // Events + Workers
+    if (feature.events.length > 0) {
+      files.push({
+        path: `apps/${name}/plugins/event-bus.ts`,
+        content: generateEventBus(feature),
+      });
+      files.push({
+        path: `apps/${name}/plugins/event-handlers.ts`,
+        content: generateEventHandlers(feature),
+      });
+    }
+
+    for (const worker of feature.workers) {
+      files.push({
+        path: `apps/${name}/workers/${toCamel(worker.name)}.ts`,
+        content: generateWorker(worker, feature),
       });
     }
 

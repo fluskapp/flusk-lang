@@ -15,6 +15,23 @@ const toCamel = (s: string): string => {
 const toPascal = (s: string): string =>
   s.split(/[-_ ]+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('');
 
+/** Collect all handler names needed by routes */
+const collectHandlers = (feature: FeatureNode): string[] => {
+  const explicitFns = new Set(feature.functions.map((f) => toCamel(f.name)));
+  const allHandlers = new Set<string>();
+
+  // Every route needs a handler
+  for (const route of feature.routes) {
+    allHandlers.add(toCamel(route.name));
+  }
+  // Plus explicit functions
+  for (const fn of feature.functions) {
+    allHandlers.add(toCamel(fn.name));
+  }
+
+  return [...allHandlers];
+};
+
 /** Generate a Fastify plugin with custom routes (non-CRUD) */
 export const generatePlugin = (feature: FeatureNode): string => {
   const lines: string[] = [HEADER];
@@ -22,9 +39,10 @@ export const generatePlugin = (feature: FeatureNode): string => {
   lines.push(`import fp from 'fastify-plugin';`);
   lines.push('');
 
-  // Import function handlers
-  for (const fn of feature.functions) {
-    lines.push(`import { ${toCamel(fn.name)} } from '../functions/${toCamel(fn.name)}.js';`);
+  // Import ALL handlers (explicit + auto-generated for routes)
+  const handlers = collectHandlers(feature);
+  for (const handler of handlers) {
+    lines.push(`import { ${handler} } from '../functions/${handler}.js';`);
   }
   lines.push('');
 
@@ -67,6 +85,61 @@ export const generatePlugin = (feature: FeatureNode): string => {
   }
 
   lines.push(`});`);
+  lines.push('');
+
+  return lines.join('\n');
+};
+
+/** Generate a route handler function (auto-generated for routes without explicit functions) */
+export const generateRouteHandler = (route: FeatureRoute): string => {
+  const lines: string[] = [HEADER];
+  const name = toCamel(route.name);
+
+  lines.push(`import type { PlatformaticApp } from '@platformatic/db';`);
+  lines.push(`import type { FastifyRequest } from 'fastify';`);
+  lines.push('');
+
+  lines.push(`export const ${name} = async (`);
+  lines.push(`  platformatic: PlatformaticApp,`);
+  lines.push(`  request: FastifyRequest,`);
+  lines.push(`): Promise<unknown> => {`);
+
+  // Generate body from route actions
+  if (route.actions?.length) {
+    for (const action of route.actions) {
+      if (action.type === 'create') {
+        const entity = toCamel(action.target);
+        lines.push(`  const created = await platformatic.entities.${entity}.save({`);
+        lines.push(`    input: request.body as Record<string, unknown>,`);
+        lines.push(`  });`);
+      } else if (action.type === 'update') {
+        const entity = toCamel(action.target);
+        lines.push(`  const updated = await platformatic.entities.${entity}.save({`);
+        lines.push(`    input: request.body as Record<string, unknown>,`);
+        lines.push(`  });`);
+      } else if (action.type === 'delete') {
+        const entity = toCamel(action.target);
+        lines.push(`  await platformatic.entities.${entity}.delete({`);
+        lines.push(`    where: { id: { eq: (request.params as Record<string, string>).id } },`);
+        lines.push(`  });`);
+      } else if (action.type === 'emit') {
+        lines.push(`  // Emit event via request context`);
+        lines.push(`  (request.server as any).events?.emit('${action.target}', request.body);`);
+      } else if (action.type === 'validate') {
+        lines.push(`  // Validate: ${action.target}`);
+      }
+    }
+    lines.push(`  return { ok: true };`);
+  } else if (route.loader) {
+    // GET route with loader
+    const entity = toCamel(route.loader.split('.')[0]);
+    lines.push(`  return platformatic.entities.${entity}.find({});`);
+  } else {
+    lines.push(`  // TODO: implement ${name}`);
+    lines.push(`  return { ok: true };`);
+  }
+
+  lines.push(`};`);
   lines.push('');
 
   return lines.join('\n');
