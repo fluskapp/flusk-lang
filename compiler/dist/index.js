@@ -13,7 +13,6 @@ import { parseEvent } from './parsers/event.parser.js';
 import { parseWorker } from './parsers/worker.parser.js';
 import { parseStream } from './parsers/stream.parser.js';
 import { parseHook } from './parsers/hook.parser.js';
-import { parseView } from './parsers/view.parser.js';
 import { validateRefs } from './validators/refs.validator.js';
 import { lintGeneratedCode } from './validators/lint.validator.js';
 export { lintGeneratedCode };
@@ -42,7 +41,6 @@ export const parseAll = (schemaDir) => {
         workers: loadDir(join(schemaDir, 'workers'), parseWorker),
         streams: loadDir(join(schemaDir, 'streams'), parseStream),
         hooks: loadDir(join(schemaDir, 'hooks'), parseHook),
-        views: loadDir(join(schemaDir, 'views'), parseView),
     };
     return schema;
 };

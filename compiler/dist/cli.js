@@ -16,7 +16,6 @@ import { generateEvent } from './generators/node/event.gen.js';
 import { generateWorker } from './generators/node/worker.gen.js';
 import { generateStream } from './generators/node/stream.gen.js';
 import { generateHook } from './generators/node/hook.gen.js';
-import { generateView } from './generators/node/view.gen.js';
 import { generatePythonEntity } from './generators/python/entity.gen.js';
 import { generatePythonFunction } from './generators/python/function.gen.js';
 const rootDir = resolve(process.cwd(), '..');
@@ -101,11 +100,6 @@ const buildNode = () => {
     for (const hook of schema.hooks) {
         const f = `hooks/${hook.name}.hook.ts`;
         writeFile(join(nodeDir, f), generateHook(hook));
-        allFiles.push(f);
-    }
-    for (const view of schema.views) {
-        const f = `views/${view.name}.view.tsx`;
-        writeFile(join(nodeDir, f), generateView(view));
         allFiles.push(f);
     }
     writeFile(join(nodeDir, 'index.ts'), generateBarrel(allFiles));
