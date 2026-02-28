@@ -38,6 +38,41 @@ const parseChild = (
   raw: Record<string, unknown>,
   file: string,
 ): SectionChild => {
+  // ─── Shorthand expansion ─────────────────────────────────────
+  // "h1: About Us" → { type: heading, tag: h1, text: "About Us" }
+  // "line-chart: data.byDay" → { type: chart, source: "data.byDay", chart: { type: "line" } }
+  const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  const CHART_SHORTHANDS: Record<string, string> = {
+    'line-chart': 'line', 'area-chart': 'area', 'bar-chart': 'bar', 'donut-chart': 'donut',
+  };
+
+  for (const tag of HEADING_TAGS) {
+    if (tag in raw && typeof raw[tag] === 'string') {
+      raw.type = 'heading';
+      raw.tag = tag;
+      raw.text = raw[tag];
+      delete raw[tag];
+      break;
+    }
+  }
+
+  for (const [shorthand, chartType] of Object.entries(CHART_SHORTHANDS)) {
+    if (shorthand in raw && typeof raw[shorthand] === 'string') {
+      raw.type = 'chart';
+      raw.source = raw[shorthand];
+      raw.chart = { type: chartType, ...(raw.x ? { xAxis: raw.x } : {}), ...(raw.y ? { yAxis: raw.y } : {}) };
+      delete raw[shorthand];
+      delete raw.x;
+      delete raw.y;
+      break;
+    }
+  }
+
+  // "columns: [...]" without type → data-table
+  if (!raw.type && Array.isArray(raw.columns) && raw.source) {
+    raw.type = 'data-table';
+  }
+
   // $ref node
   if (raw.$ref && typeof raw.$ref === 'string') {
     const [page, section] = raw.$ref.split('#');

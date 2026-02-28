@@ -10,6 +10,7 @@ import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseView } from './parsers/view.parser.js';
 import { createRegistry } from './parsers/widget.parser.js';
+import { loadPartials } from './parsers/partial.parser.js';
 import { resolveAll } from './resolvers/view.resolver.js';
 import { validateViews, type ViewDiagnostic } from './validators/view.validator.js';
 import { generatePage } from './generators/react/page.gen.js';
@@ -36,6 +37,7 @@ export interface PipelineResult {
 export const buildViews = (
   viewsDir: string,
   widgetsDir?: string,
+  partialsDir?: string,
 ): PipelineResult => {
   // 1. Discover
   const viewFiles = discoverFiles(viewsDir, '.view.yaml');
@@ -50,8 +52,11 @@ export const buildViews = (
   // 3. Widget registry
   const registry = createRegistry(widgetsDir);
 
-  // 4. Resolve
-  const { pages: resolved, errors: resolveErrors } = resolveAll(pages, registry);
+  // 4. Load partials
+  const partials = partialsDir ? loadPartials(partialsDir) : undefined;
+
+  // 5. Resolve
+  const { pages: resolved, errors: resolveErrors } = resolveAll(pages, registry, partials);
 
   // 5. Validate
   const diagnostics: ViewDiagnostic[] = [

@@ -19,8 +19,11 @@ import { generateHook } from './generators/node/hook.gen.js';
 import { generatePythonEntity } from './generators/python/entity.gen.js';
 import { generatePythonFunction } from './generators/python/function.gen.js';
 
-const rootDir = resolve(process.cwd(), '..');
-const schemaDir = join(rootDir, 'schema');
+const schemaDirArg = process.argv.includes('--schema-dir')
+  ? resolve(process.argv[process.argv.indexOf('--schema-dir') + 1])
+  : undefined;
+const rootDir = schemaDirArg ? resolve(schemaDirArg, '..') : resolve(process.cwd(), '..');
+const schemaDir = schemaDirArg ?? join(rootDir, 'schema');
 const generatedDir = join(rootDir, 'generated');
 
 const command = process.argv[2];
@@ -139,6 +142,40 @@ const buildPython = (): void => {
   console.log('✅ Python generation complete');
 };
 
+import { buildViews } from './pipeline.js';
+import { dirname } from 'node:path';
+
+const buildReactViews = (): void => {
+  const viewsDir = join(schemaDir, 'views');
+  const widgetsDir = join(schemaDir, 'widgets');
+  const partialsDir = join(schemaDir, 'partials');
+  const outDir = join(generatedDir, 'views');
+
+  const result = buildViews(viewsDir, widgetsDir, partialsDir);
+
+  // Report diagnostics
+  for (const d of result.diagnostics) {
+    const icon = d.severity === 'error' ? '❌' : d.severity === 'warning' ? '⚠️' : 'ℹ️';
+    console.log(`  ${icon} ${d.code}: ${d.message} (${d.file}:${d.line})`);
+  }
+
+  const errors = result.diagnostics.filter((d) => d.severity === 'error');
+  if (errors.length > 0) {
+    console.error(`\n❌ ${errors.length} error(s) found`);
+    process.exit(1);
+  }
+
+  // Write files
+  for (const file of result.files) {
+    const fullPath = join(outDir, file.path);
+    mkdirSync(dirname(fullPath), { recursive: true });
+    writeFileSync(fullPath, file.content, 'utf-8');
+    console.log(`  wrote ${fullPath}`);
+  }
+
+  console.log(`\n✅ Generated ${result.files.length} files from ${result.pages.length} views`);
+};
+
 if (command === 'validate') {
   try {
     const schema = validate(schemaDir);
@@ -152,10 +189,11 @@ if (command === 'validate') {
   try {
     if (target === 'all' || target === 'node') buildNode();
     if (target === 'all' || target === 'python') buildPython();
+    if (target === 'all' || target === 'views') buildReactViews();
   } catch (err) {
     console.error((err as Error).message);
     process.exit(1);
   }
 } else {
-  console.log('Usage: flusk-lang <validate|build> [--target node|python]');
+  console.log('Usage: flusk-lang <validate|build> [--target node|python|views]');
 }
