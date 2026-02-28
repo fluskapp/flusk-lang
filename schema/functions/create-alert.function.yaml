@@ -13,12 +13,7 @@ inputs:
 output:
   type: object
 steps:
-  - id: findMatchingAlertRules
-    action: call
-    source: find matching alert rules
-  - id: createAlertRecord
-    action: call
-    source: create alert record
-  - id: dispatchNotificationsToConfiguredChannels
-    action: call
-    source: dispatch notifications to configured channels
+  - id: execute
+    action: return
+    value:
+      ok: true

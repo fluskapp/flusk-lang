@@ -54,7 +54,11 @@ functions:
         type: string
       - name: text
         type: string
-    uses: slack-api.postMessage
+    logic:
+      - "set: config = db.findOne(bot-config, { active: true })"
+      - "assert: config, 500, No active Slack bot configured"
+      - "set: result = http.post('https://slack.com/api/chat.postMessage', { channel: input.channel, text: input.text })"
+      - "return: { ok: result.ok, ts: result.ts }"
 
 events:
   - name: slack-message-received

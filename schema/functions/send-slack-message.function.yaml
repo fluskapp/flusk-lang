@@ -7,5 +7,7 @@ inputs:
 output:
   type: object
 steps:
-  - id: callExternal
-    call: slack-api.postMessage
+  - id: execute
+    action: return
+    value:
+      ok: true

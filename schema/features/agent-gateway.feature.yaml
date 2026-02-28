@@ -132,6 +132,13 @@ functions:
         type: integer
       - name: changes
         type: object
+    logic:
+      - "set: current = db.findOne(agent-config, { org_id: input.org_id })"
+      - "set: new_version = current ? current.version + 1 : 1"
+      - "set: approved_tools = db.find(ai-tool, { org_id: input.org_id, approved: true })"
+      - "set: solutions = db.find(deployment, { org_id: input.org_id, status: 'active' })"
+      - "set: config = db.insert(agent-config, { org_id: input.org_id, version: new_version, otel_endpoint: '/api/v1/telemetry/ingest', heartbeat_interval_ms: input.changes.heartbeat_interval_ms ?? 60000, approved_tools, intercept_patterns: input.changes.intercept_patterns ?? ['api.openai.com', 'api.anthropic.com', 'generativelanguage.googleapis.com', 'api.cursor.sh'], solutions })"
+      - "return: config"
 
   - name: push-to-agents
     description: Push update to all connected desktop agents via SSE/WebSocket
@@ -140,6 +147,12 @@ functions:
         type: integer
       - name: payload
         type: object
+    logic:
+      - "set: devices = db.find(agent-device, { org_id: input.org_id, status: 'active' })"
+      - map: device in devices
+        steps:
+          - "db.insert: agent-event-log, { org_id: input.org_id, device_id: device.device_id, event_type: 'config-updated', details: input.payload }"
+      - "return: { notified: devices.length }"
 
 events:
   - name: agent-connected

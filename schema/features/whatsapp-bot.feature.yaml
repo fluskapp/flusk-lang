@@ -196,7 +196,23 @@ functions:
     output:
       type: object
       fields: [reply, tokens_used, cost, latency_ms]
-    uses: llm-router.complete
+    logic:
+      - "set: bot = db.findOne(bot, { id: input.bot_id })"
+      - "assert: bot, 404, Bot not found"
+      - "assert: bot.active, 400, Bot is not active"
+      - "set: history = db.find(message, { conversation_id: input.conversation_id })"
+      - "set: messages = [{ role: 'system', content: bot.system_prompt }]"
+      - map: msg in history
+        steps:
+          - "set: messages = messages.concat([{ role: msg.direction == 'in' ? 'user' : 'assistant', content: msg.body }])"
+      - "set: messages = messages.concat([{ role: 'user', content: input.user_message }])"
+      - "set: start = Date.now()"
+      - "set: result = http.post('https://api.openai.com/v1/chat/completions', { model: bot.model, messages, temperature: bot.temperature, max_tokens: bot.max_tokens })"
+      - "set: latency_ms = Date.now() - start"
+      - "set: reply = result.choices[0].message.content"
+      - "set: tokens_used = result.usage.total_tokens ?? 0"
+      - "set: cost = tokens_used * 0.00001"
+      - "return: { reply, tokens_used, cost, latency_ms }"
 
   - name: send-whatsapp-message
     description: Send a message via WhatsApp provider
@@ -207,7 +223,12 @@ functions:
         type: string
       - name: bot_id
         type: string
-    uses: whatsapp-provider.sendMessage
+    logic:
+      - "set: bot = db.findOne(bot, { id: input.bot_id })"
+      - "assert: bot, 404, Bot not found"
+      - "set: config = db.findOne(webhook-config, { bot_id: input.bot_id })"
+      - "set: result = http.post(config.provider_url + '/api/sendText', { chatId: input.phone, text: input.message })"
+      - "return: { sent: true, message_id: result.id }"
 
 events:
   - name: message-received

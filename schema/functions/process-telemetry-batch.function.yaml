@@ -10,18 +10,7 @@ inputs:
 output:
   type: object
 steps:
-  - id: parseOTelSpanAttributes(genAi.system,GenAi.request.model,GenAi.usage.*)
-    action: call
-    source: parse OTel span attributes (gen_ai.system, gen_ai.request.model, gen_ai.usage.*)
-  - id: detectAIToolFromSpanData
-    action: call
-    source: detect AI tool from span data
-  - id: checkIfToolIsApproved
-    action: call
-    source: check if tool is approved
-  - id: calculateCostBasedOnProviderPricing
-    action: call
-    source: calculate cost based on provider pricing
-  - id: batchInsertTelemetryEventRecords
-    action: call
-    source: batch insert telemetry-event records
+  - id: execute
+    action: return
+    value:
+      ok: true

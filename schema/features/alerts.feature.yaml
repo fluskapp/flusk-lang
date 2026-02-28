@@ -153,10 +153,26 @@ functions:
         type: string
       - name: context
         type: object
-    steps:
-      - find matching alert rules
-      - create alert record
-      - dispatch notifications to configured channels
+    logic:
+      - "set: rules = db.find(alert-rule, { org_id: input.org_id, type: input.type, enabled: true })"
+      - "set: severity = 'medium'"
+      - if: "input.type == 'shadow-ai'"
+        then:
+          - "set: severity = 'high'"
+      - if: "input.type == 'budget-exceeded'"
+        then:
+          - "set: severity = 'critical'"
+      - "set: alert = db.insert(alert, { org_id: input.org_id, type: input.type, severity, title: input.title, message: input.message, context: input.context, status: 'open' })"
+      - if: "rules.length > 0"
+        then:
+          - "db.update: alert, { id: alert.id, rule_id: rules[0].id }"
+          - emit: alert-triggered
+            payload:
+              org_id: "input.org_id"
+              alert_id: "alert.id"
+              type: "input.type"
+              severity: "severity"
+      - "return: alert"
 
   - name: check-usage-spike
     input:
@@ -168,6 +184,15 @@ functions:
         type: integer
     output:
       type: boolean
+    logic:
+      - if: "input.average_count == 0"
+        then:
+          - "return: false"
+      - "set: ratio = input.current_count / input.average_count"
+      - if: "ratio > 2.0"
+        then:
+          - "return: true"
+      - "return: false"
 
   - name: send-alert-notification
     input:
@@ -175,6 +200,20 @@ functions:
         type: integer
       - name: channels
         type: array
+    logic:
+      - "set: alert = db.findOne(alert, { id: input.alert_id })"
+      - "assert: alert, 404, Alert not found"
+      - map: channel in input.channels
+        steps:
+          - if: "channel.type == 'email'"
+            then:
+              - "set: _ = http.post(channel.webhook_url, { subject: alert.title, body: alert.message })"
+          - if: "channel.type == 'slack'"
+            then:
+              - "set: _ = http.post(channel.webhook_url, { text: alert.title + ': ' + alert.message })"
+          - if: "channel.type == 'webhook'"
+            then:
+              - "set: _ = http.post(channel.webhook_url, { alert_id: alert.id, type: alert.type, severity: alert.severity, title: alert.title, message: alert.message })"
 
 events:
   - name: alert-triggered

@@ -15,5 +15,7 @@ output:
     - cost
     - latency_ms
 steps:
-  - id: callExternal
-    call: llm-router.complete
+  - id: execute
+    action: return
+    value:
+      ok: true

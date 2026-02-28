@@ -302,6 +302,14 @@ functions:
     output:
       type: object
       fields: [response, tokens_used, latency_ms]
+    logic:
+      - "set: solution = db.findOne(solution, { id: input.solution_id })"
+      - "assert: solution, 404, Solution not found"
+      - "set: start = Date.now()"
+      - "set: result = http.post(solution.llm_provider + '/chat/completions', { model: solution.llm_model, messages: [{ role: 'system', content: solution.system_prompt }, { role: 'user', content: input.message }], temperature: solution.temperature, max_tokens: solution.max_tokens })"
+      - "set: latency_ms = Date.now() - start"
+      - "set: tokens_used = result.usage.total_tokens ?? 0"
+      - "return: { response: result.choices[0].message.content, tokens_used, latency_ms }"
 
   - name: provision-deployment
     description: Spin up an OpenClaw instance or configure channel integration
@@ -315,12 +323,35 @@ functions:
     output:
       type: object
       fields: [instance_id, endpoint]
+    logic:
+      - "set: solution = db.findOne(solution, { id: input.solution_id })"
+      - "assert: solution, 404, Solution not found"
+      - "set: instance_id = crypto.randomUUID()"
+      - if: "input.channel == 'slack'"
+        then:
+          - "set: endpoint = http.post(openclaw-api.createGateway, { name: solution.name, llm_provider: solution.llm_provider, llm_model: solution.llm_model, system_prompt: solution.system_prompt, channel: 'slack', channel_config: input.channel_config })"
+      - if: "input.channel == 'whatsapp'"
+        then:
+          - "set: endpoint = http.post(openclaw-api.createGateway, { name: solution.name, llm_provider: solution.llm_provider, llm_model: solution.llm_model, system_prompt: solution.system_prompt, channel: 'whatsapp', channel_config: input.channel_config })"
+      - "set: deployment = db.insert(deployment, { solution_id: input.solution_id, org_id: solution.org_id, channel: input.channel, channel_config: input.channel_config, status: 'active', instance_id, health_status: 'healthy', last_health_check: now() })"
+      - "db.update: solution, { id: solution.id, status: 'published', published_at: now() }"
+      - "return: { instance_id, endpoint }"
 
   - name: teardown-deployment
     description: Stop and clean up a deployment instance
     input:
       - name: deployment_id
         type: integer
+    logic:
+      - "set: deployment = db.findOne(deployment, { id: input.deployment_id })"
+      - "assert: deployment, 404, Deployment not found"
+      - "set: _ = http.delete(openclaw-api.deleteGateway, { id: deployment.instance_id })"
+      - "db.update: deployment, { id: deployment.id, status: 'removed' }"
+      - "set: active = db.find(deployment, { solution_id: deployment.solution_id, status: 'active' })"
+      - if: "active.length == 0"
+        then:
+          - "db.update: solution, { id: deployment.solution_id, status: 'draft' }"
+      - "return: { success: true }"
 
 events:
   - name: solution-created
