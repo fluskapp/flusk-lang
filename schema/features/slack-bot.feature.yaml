@@ -1,0 +1,93 @@
+name: slack-bot
+description: Slack bot integration
+version: 1.0.0
+
+entities:
+  - name: bot-config
+    fields:
+      - name: workspace_id
+        type: string
+        unique: true
+      - name: bot_token
+        type: string
+      - name: active
+        type: boolean
+        default: true
+    queries:
+      - findByWorkspace: { by: workspace_id }
+
+  - name: bot-message
+    fields:
+      - name: slack_ts
+        type: string
+        unique: true
+      - name: channel
+        type: string
+        indexed: true
+      - name: text
+        type: string
+      - name: status
+        type: enum
+        values: [pending, sent, failed]
+        default: pending
+    queries:
+      - findPending: { where: "status = 'pending'", limit: 50 }
+
+routes:
+  - name: slack-webhook
+    method: POST
+    path: /integrations/slack/webhook
+    auth: webhook-signature
+    actions:
+      - create: bot-message
+      - emit: slack-message-received
+
+  - name: get-settings
+    method: GET
+    path: /api/slack/settings
+    auth: session
+
+functions:
+  - name: send-slack-message
+    input:
+      - name: channel
+        type: string
+      - name: text
+        type: string
+    uses: slack-api.postMessage
+
+events:
+  - name: slack-message-received
+    payload:
+      - name: message_id
+        type: string
+    triggers:
+      - worker: process-slack-queue
+
+workers:
+  - name: process-slack-queue
+    concurrency: 5
+    steps:
+      - load: bot-message
+      - call: send-slack-message
+
+clients:
+  - name: slack-api
+    base_url: https://slack.com/api
+    methods:
+      - name: postMessage
+        method: POST
+        path: /chat.postMessage
+
+commands:
+  - name: slack-bot
+    subcommands:
+      - name: status
+        description: Show bot status
+
+views:
+  - name: slack-settings
+    route: /settings/slack
+    title: Slack Settings
+    sections:
+      - h2: Configuration

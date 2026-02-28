@@ -1,0 +1,6 @@
+name: slack-settings
+type: page
+route: /settings/slack
+title: Slack Settings
+sections:
+  - h2: Configuration

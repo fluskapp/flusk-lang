@@ -1,0 +1,21 @@
+export const featureSchema = {
+  type: 'object',
+  required: ['name'],
+  additionalProperties: true,
+  properties: {
+    name: { type: 'string', pattern: '^[a-z][a-z0-9-]+$' },
+    description: { type: 'string' },
+    version: { type: 'string' },
+    entities: { type: 'array', items: { type: 'object' } },
+    routes: { type: 'array', items: { type: 'object' } },
+    functions: { type: 'array', items: { type: 'object' } },
+    events: { type: 'array', items: { type: 'object' } },
+    workers: { type: 'array', items: { type: 'object' } },
+    clients: { type: 'array', items: { type: 'object' } },
+    middleware: { type: 'array', items: { type: 'object' } },
+    commands: { type: 'array', items: { type: 'object' } },
+    views: { type: 'array', items: { type: 'object' } },
+    widgets: { type: 'array', items: { type: 'object' } },
+    tests: { type: 'object' },
+  },
+} as const;

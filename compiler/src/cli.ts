@@ -176,7 +176,45 @@ const buildReactViews = (): void => {
   console.log(`\n✅ Generated ${result.files.length} files from ${result.pages.length} views`);
 };
 
-if (command === 'validate') {
+import { loadFeatures } from './parsers/feature.parser.js';
+import { explodeFeature } from './exploder/index.js';
+import { writeExploded } from './exploder/index.js';
+
+const explodeFeatures = (): void => {
+  const featuresDir = join(schemaDir, 'features');
+  const features = loadFeatures(featuresDir);
+
+  if (features.length === 0) {
+    console.log('ℹ️  No .feature.yaml files found');
+    return;
+  }
+
+  const dryRun = process.argv.includes('--dry-run');
+
+  for (const feature of features) {
+    console.log(`\n🔧 Exploding: ${feature.name}`);
+    const exploded = explodeFeature(feature);
+    const result = writeExploded(exploded, schemaDir, { overwrite: true, dryRun });
+
+    for (const f of result.written) console.log(`  ✨ new: ${f}`);
+    for (const f of result.updated) console.log(`  📝 updated: ${f}`);
+    for (const f of result.skipped) console.log(`  ⏭️  unchanged: ${f}`);
+
+    const total = result.written.length + result.updated.length;
+    console.log(`  → ${exploded.files.length} files (${total} changed)`);
+  }
+
+  console.log(`\n✅ Exploded ${features.length} feature(s)`);
+};
+
+if (command === 'explode') {
+  try {
+    explodeFeatures();
+  } catch (err) {
+    console.error((err as Error).message);
+    process.exit(1);
+  }
+} else if (command === 'validate') {
   try {
     const schema = validate(schemaDir);
     const count = Object.values(schema).reduce((sum, arr) => sum + arr.length, 0);
@@ -195,5 +233,5 @@ if (command === 'validate') {
     process.exit(1);
   }
 } else {
-  console.log('Usage: flusk-lang <validate|build> [--target node|python|views]');
+  console.log('Usage: flusk-lang <explode|validate|build> [--target node|python|views] [--schema-dir path] [--dry-run]');
 }
