@@ -5,10 +5,13 @@
  * parsers, generators, and the exploder.
  */
 
-export const toCamel = (s: string): string =>
-  s.split(/[-_ ]+/)
+export const toCamel = (s: string): string => {
+  const parts = s.split(/[-_ ]+/);
+  if (parts.length === 1) return s; // already camelCase or single word — preserve
+  return parts
     .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join('');
+};
 
 export const toPascal = (s: string): string =>
   s.split(/[-_ ]+/)

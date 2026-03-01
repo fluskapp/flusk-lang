@@ -7,6 +7,7 @@ describe('naming utilities', () => {
     it('converts snake_case', () => expect(toCamel('my_thing')).toBe('myThing'));
     it('converts space separated', () => expect(toCamel('my thing')).toBe('myThing'));
     it('handles single word', () => expect(toCamel('thing')).toBe('thing'));
+    it('preserves camelCase input', () => expect(toCamel('registerOrg')).toBe('registerOrg'));
     it('handles multiple segments', () => expect(toCamel('a-b-c')).toBe('aBC'));
   });
 

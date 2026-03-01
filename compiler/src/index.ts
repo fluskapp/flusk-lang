@@ -37,13 +37,16 @@ export interface ParsedSchema {
 }
 
 const loadDir = <T>(dir: string, parser: (f: string) => T): T[] => {
+  let files: string[];
   try {
-    return readdirSync(dir)
-      .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
-      .map((f) => parser(join(dir, f)));
-  } catch {
-    return [];
+    files = readdirSync(dir);
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw err;
   }
+  return files
+    .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+    .map((f) => parser(join(dir, f)));
 };
 
 export const parseAll = (schemaDir: string): ParsedSchema => {
