@@ -17,14 +17,18 @@ import { validateRefs } from './validators/refs.validator.js';
 import { lintGeneratedCode } from './validators/lint.validator.js';
 export { lintGeneratedCode };
 const loadDir = (dir, parser) => {
+    let files;
     try {
-        return readdirSync(dir)
-            .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
-            .map((f) => parser(join(dir, f)));
+        files = readdirSync(dir);
     }
-    catch {
-        return [];
+    catch (err) {
+        if (err.code === 'ENOENT')
+            return [];
+        throw err;
     }
+    return files
+        .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+        .map((f) => parser(join(dir, f)));
 };
 export const parseAll = (schemaDir) => {
     const schema = {

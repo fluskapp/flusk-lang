@@ -11,6 +11,8 @@ import { buildNode } from './commands/build-node.js';
 import { buildPython } from './commands/build-python.js';
 import { buildReactViews } from './commands/build-views.js';
 import { explodeFeatures, diffFeatures, buildFeatures } from './commands/features.js';
+import { watchSchemas } from './commands/watch.js';
+import type { WatchEvent } from './commands/watch-types.js';
 
 const schemaDirArg = process.argv.includes('--schema-dir')
   ? resolve(process.argv[process.argv.indexOf('--schema-dir') + 1]!)
@@ -49,6 +51,27 @@ if (command === 'diff') {
     if (target === 'all' || target === 'python') buildPython(schemaDir, generatedDir, skipRefs, writeFile);
     if (target === 'all' || target === 'views') buildReactViews(schemaDir, generatedDir);
   } catch (err) { console.error((err as Error).message); process.exit(1); }
+} else if (command === 'watch') {
+  const formatEvent = (event: WatchEvent): void => {
+    switch (event.type) {
+      case 'start':
+        console.log(`👀 Watching ${event.schemaDir} for changes...`);
+        break;
+      case 'change':
+        console.log(`\n🔄 Changed: ${event.filePath}`);
+        break;
+      case 'success':
+        console.log(`✅ Rebuilt in ${event.durationMs}ms`);
+        break;
+      case 'error':
+        console.error(`❌ Error: ${event.error}`);
+        break;
+      case 'stop':
+        console.log('🛑 Watcher stopped');
+        break;
+    }
+  };
+  watchSchemas({ schemaDir, generatedDir, onEvent: formatEvent });
 } else {
-  console.log('Usage: flusk-lang <diff|explode|validate|build> [--target node|python|views] [--schema-dir path] [--dry-run]');
+  console.log('Usage: flusk-lang <diff|explode|validate|build|watch> [--target node|python|views] [--schema-dir path] [--dry-run]');
 }
