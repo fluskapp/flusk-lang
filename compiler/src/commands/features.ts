@@ -9,32 +9,35 @@ import { generateMigrations } from '../generators/node/migration.gen.js';
 import { generateAllTests } from '../generators/node/test.gen.js';
 import { generateWattProject } from '../generators/watt/index.js';
 import type { WriteFileFn } from './types.js';
+import { createChildLogger } from '../logger.js';
+
+const log = createChildLogger('features');
 
 export const explodeFeatures = (schemaDir: string): void => {
   const featuresDir = join(schemaDir, 'features');
   const features = loadFeatures(featuresDir);
 
   if (features.length === 0) {
-    console.log('ℹ️  No .feature.yaml files found');
+    log.info('no .feature.yaml files found');
     return;
   }
 
   const dryRun = process.argv.includes('--dry-run');
 
   for (const feature of features) {
-    console.log(`\n🔧 Exploding: ${feature.name}`);
+    log.info({ feature: feature.name }, 'exploding feature');
     const exploded = explodeFeature(feature);
     const result = writeExploded(exploded, schemaDir, { overwrite: true, dryRun });
 
-    for (const f of result.written) console.log(`  ✨ new: ${f}`);
-    for (const f of result.updated) console.log(`  📝 updated: ${f}`);
-    for (const f of result.skipped) console.log(`  ⏭️  unchanged: ${f}`);
+    for (const f of result.written) log.debug({ file: f }, 'new file');
+    for (const f of result.updated) log.debug({ file: f }, 'updated file');
+    for (const f of result.skipped) log.debug({ file: f }, 'unchanged file');
 
     const total = result.written.length + result.updated.length;
-    console.log(`  → ${exploded.files.length} files (${total} changed)`);
+    log.info({ files: exploded.files.length, changed: total }, 'exploded');
   }
 
-  console.log(`\n✅ Exploded ${features.length} feature(s)`);
+  log.info({ count: features.length }, 'explode complete');
 };
 
 export const diffFeatures = (schemaDir: string): void => {
@@ -42,7 +45,7 @@ export const diffFeatures = (schemaDir: string): void => {
   const features = loadFeatures(featuresDir);
 
   if (features.length === 0) {
-    console.log('ℹ️  No .feature.yaml files found');
+    log.info('no .feature.yaml files found');
     return;
   }
 
@@ -50,26 +53,26 @@ export const diffFeatures = (schemaDir: string): void => {
     const exploded = explodeFeature(feature);
     const changeset = diffFeature(exploded, schemaDir);
 
-    console.log(`\n📊 Diff: ${feature.name}`);
-    console.log(`   Added: ${changeset.summary.added} | Modified: ${changeset.summary.modified} | Removed: ${changeset.summary.removed} | Unchanged: ${changeset.summary.unchanged}`);
+    log.info({ feature: feature.name }, 'diff');
+    log.info(changeset.summary, 'diff summary');
 
     for (const f of changeset.files) {
       const icon = f.kind === 'added' ? '✨' : f.kind === 'modified' ? '📝' : f.kind === 'removed' ? '🗑️' : '⏭️';
-      if (f.kind !== 'unchanged') console.log(`   ${icon} ${f.path}`);
+      if (f.kind !== 'unchanged') log.debug({ kind: f.kind, path: f.path }, 'file change');
     }
 
     if (changeset.fields.length > 0) {
-      console.log('\n   Field changes:');
+      log.debug('field changes');
       for (const fc of changeset.fields) {
         const icon = fc.kind === 'added' ? '+' : fc.kind === 'removed' ? '-' : '~';
-        console.log(`   ${icon} ${fc.entity}.${fc.field} (${fc.kind})`);
+        log.debug({ entity: fc.entity, field: fc.field, kind: fc.kind }, 'field change');
       }
     }
 
     if (changeset.breaking.length > 0) {
-      console.log('\n   ⚠️  Breaking changes:');
+      log.warn('breaking changes detected');
       for (const b of changeset.breaking) {
-        console.log(`   ❌ ${b.message}`);
+        log.warn({ message: b.message }, 'breaking change');
       }
     }
   }
@@ -84,25 +87,25 @@ export const buildFeatures = (
   const features = loadFeatures(featuresDir);
 
   if (features.length === 0) {
-    console.log('ℹ️  No .feature.yaml files found');
+    log.info('no .feature.yaml files found');
     return;
   }
 
   for (const feature of features) {
-    console.log(`\n🔧 Building feature: ${feature.name}`);
+    log.info({ feature: feature.name }, 'building feature');
 
     const exploded = explodeFeature(feature);
     const changeset = diffFeature(exploded, schemaDir);
-    console.log(`   Changes: +${changeset.summary.added} ~${changeset.summary.modified} -${changeset.summary.removed} =${changeset.summary.unchanged}`);
+    log.info(changeset.summary, 'changeset');
 
     if (changeset.breaking.length > 0) {
-      console.log('   ⚠️  Breaking changes:');
-      for (const b of changeset.breaking) console.log(`      ❌ ${b.message}`);
+      log.warn('breaking changes');
+      for (const b of changeset.breaking) log.warn({ message: b.message }, 'breaking');
     }
 
     const writeResult = writeExploded(exploded, schemaDir, { overwrite: true });
-    for (const f of writeResult.written) console.log(`   ✨ ${f}`);
-    for (const f of writeResult.updated) console.log(`   📝 ${f}`);
+    for (const f of writeResult.written) log.debug({ file: f }, 'written');
+    for (const f of writeResult.updated) log.debug({ file: f }, 'updated');
 
     if (changeset.fields.length > 0 || changeset.files.some((f) => f.type === 'entity' && f.kind === 'added')) {
       const migrations = generateMigrations(changeset);
@@ -110,7 +113,7 @@ export const buildFeatures = (
       for (const m of migrations) {
         const path = join(migrationsDir, `${m.timestamp}_${m.name}.sql`);
         writeFile(path, `-- Up\n${m.up}\n\n-- Down\n${m.down}\n`);
-        console.log(`   🗃️  migration: ${m.timestamp}_${m.name}.sql`);
+        log.info({ migration: m.name }, 'migration generated');
       }
     }
 
@@ -118,18 +121,18 @@ export const buildFeatures = (
     for (const t of tests) {
       const path = join(generatedDir, t.path);
       writeFile(path, t.content);
-      console.log(`   🧪 test: ${t.path}`);
+      log.debug({ test: t.path }, 'test generated');
     }
   }
 
-  console.log('\n📦 Generating Watt project...');
+  log.info('generating Watt project');
   const wattFiles = generateWattProject(features);
   const wattDir = join(generatedDir, 'watt');
   for (const file of wattFiles) {
     const path = join(wattDir, file.path);
     writeFile(path, file.content);
   }
-  console.log(`   → ${wattFiles.length} files generated`);
+  log.info({ files: wattFiles.length }, 'Watt files generated');
 
-  console.log('\n✅ Feature build complete');
+  log.info('feature build complete');
 };

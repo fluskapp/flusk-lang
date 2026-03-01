@@ -7,6 +7,9 @@ import { parseAll, validate } from '../index.js';
 import { generatePythonEntity } from '../generators/python/entity.gen.js';
 import { generatePythonFunction } from '../generators/python/function.gen.js';
 import type { WriteFileFn } from './types.js';
+import { createChildLogger } from '../logger.js';
+
+const log = createChildLogger('build-python');
 
 export const buildPython = (
   schemaDir: string,
@@ -25,5 +28,5 @@ export const buildPython = (
     writeFile(join(pyDir, 'functions', `${fn.name}.py`), generatePythonFunction(fn));
   }
 
-  console.log('✅ Python generation complete');
+  log.info('Python generation complete');
 };

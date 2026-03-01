@@ -19,6 +19,9 @@ import { generateWorker } from '../generators/node/worker.gen.js';
 import { generateStream } from '../generators/node/stream.gen.js';
 import { generateHook } from '../generators/node/hook.gen.js';
 import type { WriteFileFn } from './types.js';
+import { createChildLogger } from '../logger.js';
+
+const log = createChildLogger('build-node');
 
 export const buildNode = (
   schemaDir: string,
@@ -112,5 +115,5 @@ export const buildNode = (
   }
 
   writeFile(join(nodeDir, 'index.ts'), generateBarrel(allFiles));
-  console.log('✅ Node.js generation complete');
+  log.info({ files: allFiles.length }, 'Node.js generation complete');
 };

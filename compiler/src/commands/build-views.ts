@@ -5,6 +5,9 @@
 import { join, dirname } from 'node:path';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { buildViews } from '../pipeline.js';
+import { createChildLogger } from '../logger.js';
+
+const log = createChildLogger('build-views');
 
 export const buildReactViews = (
   schemaDir: string,
@@ -18,13 +21,14 @@ export const buildReactViews = (
   const result = buildViews(viewsDir, widgetsDir, partialsDir);
 
   for (const d of result.diagnostics) {
-    const icon = d.severity === 'error' ? '❌' : d.severity === 'warning' ? '⚠️' : 'ℹ️';
-    console.log(`  ${icon} ${d.code}: ${d.message} (${d.file}:${d.line})`);
+    if (d.severity === 'error') log.error({ code: d.code, file: d.file, line: d.line }, d.message);
+    else if (d.severity === 'warning') log.warn({ code: d.code, file: d.file, line: d.line }, d.message);
+    else log.info({ code: d.code, file: d.file, line: d.line }, d.message);
   }
 
   const errors = result.diagnostics.filter((d) => d.severity === 'error');
   if (errors.length > 0) {
-    console.error(`\n❌ ${errors.length} error(s) found`);
+    log.error({ count: errors.length }, 'errors found');
     process.exit(1);
   }
 
@@ -32,8 +36,8 @@ export const buildReactViews = (
     const fullPath = join(outDir, file.path);
     mkdirSync(dirname(fullPath), { recursive: true });
     writeFileSync(fullPath, file.content, 'utf-8');
-    console.log(`  wrote ${fullPath}`);
+    log.debug({ path: fullPath }, 'wrote file');
   }
 
-  console.log(`\n✅ Generated ${result.files.length} files from ${result.pages.length} views`);
+  log.info({ files: result.files.length, pages: result.pages.length }, 'views generation complete');
 };

@@ -12,7 +12,17 @@ import { buildPython } from './commands/build-python.js';
 import { buildReactViews } from './commands/build-views.js';
 import { explodeFeatures, diffFeatures, buildFeatures } from './commands/features.js';
 import { watchSchemas } from './commands/watch.js';
+import { generateOpenApi } from './commands/openapi.js';
+import { generateClient } from './commands/client-sdk.js';
 import type { WatchEvent } from './commands/watch-types.js';
+import { setLogLevel, createChildLogger } from './logger.js';
+
+const verbose = process.argv.includes('--verbose');
+const quiet = process.argv.includes('--quiet');
+if (verbose) setLogLevel('debug');
+else if (quiet) setLogLevel('silent');
+
+const log = createChildLogger('cli');
 
 const schemaDirArg = process.argv.includes('--schema-dir')
   ? resolve(process.argv[process.argv.indexOf('--schema-dir') + 1]!)
@@ -29,49 +39,65 @@ const skipRefs = process.argv.includes('--skip-refs');
 const writeFile = (path: string, content: string): void => {
   mkdirSync(join(path, '..'), { recursive: true });
   writeFileSync(path, content, 'utf-8');
-  console.log(`  wrote ${path}`);
+  log.info({ path }, 'wrote file');
 };
 
 if (command === 'diff') {
   try { diffFeatures(schemaDir); }
-  catch (err) { console.error((err as Error).message); process.exit(1); }
+  catch (err) { log.error({ err }, 'diff failed'); process.exit(1); }
 } else if (command === 'explode') {
   try { explodeFeatures(schemaDir); }
-  catch (err) { console.error((err as Error).message); process.exit(1); }
+  catch (err) { log.error({ err }, 'explode failed'); process.exit(1); }
 } else if (command === 'validate') {
+  const vlog = createChildLogger('validate');
   try {
     const schema = validate(schemaDir);
     const count = Object.values(schema).reduce((sum, arr) => sum + arr.length, 0);
-    console.log(`✅ Validated ${count} definitions`);
-  } catch (err) { console.error((err as Error).message); process.exit(1); }
+    vlog.info({ count }, 'validation passed');
+  } catch (err) { vlog.error({ err }, 'validation failed'); process.exit(1); }
 } else if (command === 'build') {
+  const blog = createChildLogger('build');
   try {
     if (target === 'all' || target === 'features') buildFeatures(schemaDir, generatedDir, writeFile);
     if (target === 'all' || target === 'node') buildNode(schemaDir, generatedDir, skipRefs, writeFile);
     if (target === 'all' || target === 'python') buildPython(schemaDir, generatedDir, skipRefs, writeFile);
     if (target === 'all' || target === 'views') buildReactViews(schemaDir, generatedDir);
-  } catch (err) { console.error((err as Error).message); process.exit(1); }
+    blog.info('build complete');
+  } catch (err) { blog.error({ err }, 'build failed'); process.exit(1); }
 } else if (command === 'watch') {
+  const wlog = createChildLogger('watch');
   const formatEvent = (event: WatchEvent): void => {
     switch (event.type) {
       case 'start':
-        console.log(`👀 Watching ${event.schemaDir} for changes...`);
+        wlog.info({ schemaDir: event.schemaDir }, 'watching for changes');
         break;
       case 'change':
-        console.log(`\n🔄 Changed: ${event.filePath}`);
+        wlog.info({ file: event.filePath }, 'file changed');
         break;
       case 'success':
-        console.log(`✅ Rebuilt in ${event.durationMs}ms`);
+        wlog.info({ durationMs: event.durationMs }, 'rebuilt');
         break;
       case 'error':
-        console.error(`❌ Error: ${event.error}`);
+        wlog.error({ error: event.error }, 'rebuild error');
         break;
       case 'stop':
-        console.log('🛑 Watcher stopped');
+        wlog.info('watcher stopped');
         break;
     }
   };
   watchSchemas({ schemaDir, generatedDir, onEvent: formatEvent });
+} else if (command === 'openapi') {
+  const olog = createChildLogger('openapi');
+  try {
+    const outputPath = generateOpenApi(schemaDir, generatedDir);
+    olog.info({ outputPath }, 'OpenAPI spec generated');
+  } catch (err) { olog.error({ err }, 'openapi generation failed'); process.exit(1); }
+} else if (command === 'client') {
+  const clog = createChildLogger('client');
+  try {
+    const outputDir = generateClient(schemaDir, generatedDir);
+    clog.info({ outputDir }, 'client SDK generated');
+  } catch (err) { clog.error({ err }, 'client generation failed'); process.exit(1); }
 } else {
-  console.log('Usage: flusk-lang <diff|explode|validate|build|watch> [--target node|python|views] [--schema-dir path] [--dry-run]');
+  log.info('Usage: flusk-lang <diff|explode|validate|build|watch|openapi|client> [--target node|python|views] [--schema-dir path] [--verbose] [--quiet]');
 }
