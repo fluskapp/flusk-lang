@@ -3,12 +3,12 @@ basePath: /api/organizations
 operations:
   - method: POST
     path: /api/auth/register
-    call: registerOrg
+    call: registerOrgHandler
     input: org_name
     auth: none
   - method: POST
     path: /api/auth/login
-    call: login
+    call: verifyCredentials
     input: email
     auth: none
   - method: POST
@@ -18,7 +18,7 @@ operations:
     auth: session
   - method: POST
     path: /api/auth/accept-invite
-    call: acceptInvite
+    call: processInvite
     input: token
     auth: none
   - method: GET
@@ -36,5 +36,5 @@ operations:
     auth: session
   - method: POST
     path: /api/org/rotate-key
-    call: rotateApiKey
+    call: generateApiKey
     auth: session

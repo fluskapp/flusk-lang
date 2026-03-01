@@ -21,6 +21,24 @@ describe('Logic Generator', () => {
     expect(code).toContain('Not found');
   });
 
+  it('avoids double negation in assert with !', () => {
+    const block = parseLogicBlock([{
+      assert: '!existing',
+      status: 409,
+      message: 'Already exists',
+    }]);
+    const code = generateLogicFunction('test', [], block, 'test');
+    expect(code).toContain('if (existing)');
+    expect(code).not.toContain('!(!(');
+  });
+
+  it('quotes known enum values', () => {
+    const block = parseLogicBlock(['set: x = db.insert(org, { status: active, role: owner })']);
+    const code = generateLogicFunction('test', [], block, 'test');
+    expect(code).toContain("status: 'active'");
+    expect(code).toContain("role: 'owner'");
+  });
+
   it('generates if/else blocks', () => {
     const block = parseLogicBlock([{
       if: '!tool',

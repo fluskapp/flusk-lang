@@ -12,21 +12,12 @@ import type {
   SetNode, AssertNode, IfNode, MapNode,
   EmitNode, ReturnNode, DbCallNode, PrimitiveCallNode,
 } from '../../ast/logic.js';
+import { toCamel, capitalize, escStr } from '../../utils/naming.js';
 
 const INDENT = '  ';
 
-/** Map of entity names (kebab) to Platformatic table names (camelCase plural) */
-const toEntityName = (s: string): string => {
-  const camel = s.split(/[-_ ]+/)
-    .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join('');
-  return camel;
-};
-
-const toCamel = (s: string): string =>
-  s.split(/[-_ ]+/)
-    .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join('');
+/** Map of entity names (kebab) to Platformatic table names (camelCase) */
+const toEntityName = toCamel;
 
 /** Detect which primitives are used so we can generate imports */
 export const collectImports = (block: LogicBlock): Set<string> => {
@@ -176,8 +167,15 @@ const generateStep = (node: LogicNode, depth: number): string => {
     }
     case 'assert': {
       const n = node as AssertNode;
+      // Smart negation: if condition is already negated (!x), use (x) instead of !(!(x))
+      let negated: string;
+      if (n.condition.type === 'unary' && n.condition.op === '!') {
+        negated = emitExpr(n.condition.operand);
+      } else {
+        negated = `!(${emitExpr(n.condition)})`;
+      }
       const lines = [
-        `${pad}if (!(${emitExpr(n.condition)})) {`,
+        `${pad}if (${negated}) {`,
         `${pad}${INDENT}return reply.code(${n.statusCode}).send({ error: '${escStr(n.message)}' });`,
         `${pad}}`,
       ];
@@ -242,8 +240,29 @@ const emitExpr = (expr: Expression): string => {
       if (typeof expr.value === 'string') return `'${escStr(expr.value)}'`;
       return String(expr.value);
 
-    case 'variable':
+    case 'variable': {
+      // Known enum-like bare words should be quoted as strings
+      const KNOWN_ENUMS = new Set([
+        'active', 'inactive', 'trial', 'suspended', 'draft', 'testing', 'published', 'archived',
+        'owner', 'admin', 'member', 'viewer', 'anonymous',
+        'pending', 'sent', 'failed', 'processing', 'ready', 'error',
+        'open', 'acknowledged', 'resolved', 'dismissed',
+        'healthy', 'degraded', 'down', 'unknown', 'removed', 'paused', 'revoked',
+        'invited', 'disabled', 'offline',
+        'chat', 'coding', 'image', 'voice', 'search', 'other',
+        'low', 'medium', 'high', 'critical',
+        'email', 'slack', 'webhook', 'whatsapp', 'telegram', 'teams', 'desktop',
+        'openclaw', 'custom', 'openai', 'anthropic', 'google',
+        'file', 'url', 'text', 'api',
+        'starter', 'growth', 'enterprise',
+        'connected', 'disconnected',
+        'in', 'out',
+      ]);
+      if (KNOWN_ENUMS.has(expr.name)) {
+        return `'${expr.name}'`;
+      }
       return expr.name;
+    }
 
     case 'property':
       return `${emitExpr(expr.object)}.${expr.property}`;
@@ -367,18 +386,6 @@ const emitPrimitive = (node: PrimitiveCallNode): string => {
 };
 
 // --- Helpers ---
-
-const capitalize = (s: string): string => {
-  // If already camelCase, just uppercase first char
-  if (!s.includes('-') && !s.includes('_') && !s.includes(' ')) {
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  }
-  const c = toCamel(s);
-  return c.charAt(0).toUpperCase() + c.slice(1);
-};
-
-const escStr = (s: string): string =>
-  s.replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
 const tsType = (t: string): string => {
   const map: Record<string, string> = {

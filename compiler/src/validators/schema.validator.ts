@@ -1,8 +1,10 @@
+import type { ValidateFunction } from 'ajv';
 import _Ajv from 'ajv';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Ajv = _Ajv as any;
-const ajv = new Ajv({ allErrors: true });
+// AJV ESM/CJS interop — runtime default is the Ajv class constructor
+interface AjvInstance { compile(schema: object): ValidateFunction; }
+const AjvClass = _Ajv as unknown as new (opts: { allErrors: boolean }) => AjvInstance;
+const ajv = new AjvClass({ allErrors: true });
 
 export class SchemaValidationError extends Error {
   constructor(

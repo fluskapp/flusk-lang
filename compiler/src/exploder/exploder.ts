@@ -8,6 +8,7 @@
 
 import yaml from 'js-yaml';
 import type { FeatureNode } from '../ast/feature.js';
+import { toKebab, toPascal, toCamel } from '../utils/naming.js';
 
 export interface ExplodedFile {
   path: string;
@@ -19,17 +20,6 @@ export interface ExplodedFiles {
   files: ExplodedFile[];
   feature: string;
 }
-
-const toKebab = (s: string): string =>
-  s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase().replace(/[_ ]+/g, '-');
-
-const toPascal = (s: string): string =>
-  s.split(/[-_ ]+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('');
-
-const toCamel = (s: string): string => {
-  const pascal = toPascal(s);
-  return pascal.charAt(0).toLowerCase() + pascal.slice(1);
-};
 
 const dump = (obj: unknown): string =>
   yaml.dump(obj, { lineWidth: 120, noRefs: true, quotingType: '"' });

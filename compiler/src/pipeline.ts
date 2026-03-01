@@ -18,6 +18,7 @@ import { generateLoader, loaderFileName } from './generators/react/loader.gen.js
 import { generateRoutes, generateComponentBarrel } from './generators/react/routes.gen.js';
 import { collectNodes } from './ast/visitor.js';
 import type { PageNode, WidgetNode } from './ast/nodes.js';
+import { toKebab } from './utils/naming.js';
 
 // ─── Pipeline Output ─────────────────────────────────────────────────
 
@@ -124,5 +125,4 @@ const discoverFiles = (dir: string, suffix: string): string[] => {
   }
 };
 
-const toKebab = (name: string): string =>
-  name.replace(/([A-Z])/g, (_, c, i) => (i > 0 ? '-' : '') + c.toLowerCase());
+

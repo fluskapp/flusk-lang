@@ -89,7 +89,7 @@ entities:
       - findPendingByOrg: { where: "org_id = ? AND accepted = false AND expires_at > datetime('now')" }
 
 routes:
-  - name: register-org
+  - name: register-org-handler
     method: POST
     path: /api/auth/register
     auth: none
@@ -106,13 +106,8 @@ routes:
       - name: name
         type: string
         required: true
-    actions:
-      - validate: register-input
-      - create: organization
-      - create: org-member
-      - emit: org-created
 
-  - name: login
+  - name: verify-credentials
     method: POST
     path: /api/auth/login
     auth: none
@@ -123,8 +118,6 @@ routes:
       - name: password
         type: string
         required: true
-    actions:
-      - call: verify-credentials
 
   - name: invite-member
     method: POST
@@ -141,7 +134,7 @@ routes:
       - create: invite
       - emit: member-invited
 
-  - name: accept-invite
+  - name: process-invite
     method: POST
     path: /api/auth/accept-invite
     auth: none
@@ -155,8 +148,6 @@ routes:
       - name: password
         type: string
         required: true
-    actions:
-      - call: process-invite
 
   - name: get-org
     method: GET
@@ -181,13 +172,10 @@ routes:
     actions:
       - update: org-member
 
-  - name: rotate-api-key
+  - name: generate-api-key
     method: POST
     path: /api/org/rotate-key
     auth: session
-    actions:
-      - call: generate-api-key
-      - update: organization
 
 functions:
   - name: verify-credentials
