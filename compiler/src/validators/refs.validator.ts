@@ -5,6 +5,10 @@ import type { CommandDef } from '../parsers/command.parser.js';
 import type { ServiceDef } from '../parsers/service.parser.js';
 import type { MiddlewareDef } from '../parsers/middleware.parser.js';
 import type { PluginDef } from '../parsers/plugin.parser.js';
+import type { EventDef } from '../parsers/event.parser.js';
+import type { WorkerDef } from '../parsers/worker.parser.js';
+import type { StreamDef } from '../parsers/stream.parser.js';
+import type { ProviderDef } from '../parsers/provider.parser.js';
 
 export class RefValidationError extends Error {
   constructor(public readonly issues: string[]) {
@@ -28,6 +32,10 @@ interface AllDefs {
   middlewares?: MiddlewareDef[];
   plugins?: PluginDef[];
   hooks?: Array<{ name: string; entity: string; lifecycle: Array<{ call?: string }> }>;
+  events?: EventDef[];
+  workers?: WorkerDef[];
+  streams?: StreamDef[];
+  providers?: ProviderDef[];
 }
 
 // Platformatic DB built-in entity operations
@@ -177,6 +185,29 @@ export const validateRefs = (defs: AllDefs): void => {
       if (lc.call && !isValidCall(lc.call, functionNames, entityNames, clientEndpoints, crudFunctions)) {
         issues.push(`Hook "${hook.name}" lifecycle calls unknown function "${lc.call}"`);
       }
+    }
+  }
+
+  // Event subscribe.handler → must exist as function
+  for (const event of defs.events ?? []) {
+    if (event.subscribe?.handler && !isValidCall(event.subscribe.handler, functionNames, entityNames, clientEndpoints, crudFunctions)) {
+      issues.push(`Event "${event.name}" subscribe handler references unknown function "${event.subscribe.handler}"`);
+    }
+  }
+
+  // Worker step calls → must reference valid functions
+  for (const worker of defs.workers ?? []) {
+    for (const step of worker.steps ?? []) {
+      if (step.call && !isValidCall(step.call, functionNames, entityNames, clientEndpoints, crudFunctions)) {
+        issues.push(`Worker "${worker.name}" step "${step.id}" calls unknown function "${step.call}"`);
+      }
+    }
+  }
+
+  // Stream source.entity → must exist as entity
+  for (const stream of defs.streams ?? []) {
+    if (stream.source?.entity && !entityNames.has(stream.source.entity)) {
+      issues.push(`Stream "${stream.name}" source references unknown entity "${stream.source.entity}"`);
     }
   }
 

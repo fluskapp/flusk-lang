@@ -24,6 +24,8 @@ import { generateEntityType } from './types.gen.js';
 import { generateEventBus, generateEventHandlers, generateWorker } from './event.gen.js';
 import { generateAllTests } from './test.gen.js';
 import { generateLogicFunction } from './logic.gen.js';
+import { generateCommandPlugin } from './command.gen.js';
+import { generateMiddlewarePlugin } from './middleware.gen.js';
 import { parseLogicBlock } from '../../parsers/logic.parser.js';
 
 export interface GeneratedFile {
@@ -73,7 +75,7 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
 
   // ── 3. API app (all custom logic) ──
   const hasCustomLogic = features.some(
-    (f) => f.routes.length > 0 || f.functions.length > 0 || f.events.length > 0 || f.workers.length > 0
+    (f) => f.routes.length > 0 || f.functions.length > 0 || f.events.length > 0 || f.workers.length > 0 || f.commands.length > 0 || f.middleware.length > 0
   );
   if (hasCustomLogic) {
     files.push(generateApiServiceConfig(features));
@@ -149,6 +151,22 @@ export const generateWattProject = (features: FeatureNode[]): GeneratedFile[] =>
         files.push({
           path: `apps/api/clients/${toKebab(client.name)}.ts`,
           content: generateClient(client),
+        });
+      }
+
+      // Commands
+      if (feature.commands.length > 0) {
+        files.push({
+          path: `apps/api/plugins/${name}-commands.ts`,
+          content: generateCommandPlugin(feature.commands),
+        });
+      }
+
+      // Middleware
+      if (feature.middleware.length > 0) {
+        files.push({
+          path: `apps/api/plugins/${name}-middleware.ts`,
+          content: generateMiddlewarePlugin(feature.middleware),
         });
       }
     }
