@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { join } from 'node:path';
 import { parseAll, lintGeneratedCode } from '../src/index.js';
-import { generateEntitySchema, generateEntityType, generateEntityRepository } from '../src/generators/node/entity.gen.js';
+import { generateEntitySchema, generateEntityType } from '../src/generators/node/entity.gen.js';
+import { generateRepositoryImpl } from '../src/generators/node/repository.gen.js';
 import { generateFunction } from '../src/generators/node/function.gen.js';
 import { generateCommand } from '../src/generators/node/command.gen.js';
 import { generateRoute } from '../src/generators/node/route.gen.js';
@@ -20,7 +21,7 @@ const generateAll = (schemaDir: string): GeneratedFile[] => {
   for (const e of s.entities) {
     files.push({ name: `${e.name}.schema.ts`, code: generateEntitySchema(e) });
     files.push({ name: `${e.name}.types.ts`, code: generateEntityType(e) });
-    files.push({ name: `${e.name}.repository.ts`, code: generateEntityRepository(e) });
+    files.push({ name: `${e.name}.repository.ts`, code: generateRepositoryImpl(e) });
   }
   for (const f of s.functions) files.push({ name: `${f.name}.function.ts`, code: generateFunction(f) });
   for (const c of s.commands) files.push({ name: `${c.name}.command.ts`, code: generateCommand(c) });

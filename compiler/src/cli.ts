@@ -10,6 +10,7 @@ import { validate } from './index.js';
 import { buildNode } from './commands/build-node.js';
 import { buildPython } from './commands/build-python.js';
 import { buildReactViews } from './commands/build-views.js';
+import { buildDocs } from './commands/build-docs.js';
 import { explodeFeatures, diffFeatures, buildFeatures } from './commands/features.js';
 import { watchSchemas } from './commands/watch.js';
 import { generateOpenApi } from './commands/openapi.js';
@@ -62,6 +63,7 @@ if (command === 'diff') {
     if (target === 'all' || target === 'node') buildNode(schemaDir, generatedDir, skipRefs, writeFile);
     if (target === 'all' || target === 'python') buildPython(schemaDir, generatedDir, skipRefs, writeFile);
     if (target === 'all' || target === 'views') buildReactViews(schemaDir, generatedDir);
+    if (target === 'docs') buildDocs(schemaDir, generatedDir, writeFile);
     blog.info('build complete');
   } catch (err) { blog.error({ err }, 'build failed'); process.exit(1); }
 } else if (command === 'watch') {

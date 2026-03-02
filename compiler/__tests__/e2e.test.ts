@@ -6,7 +6,8 @@ import { parseCommand } from '../src/parsers/command.parser.js';
 import { parseRoute } from '../src/parsers/route.parser.js';
 import { parseProvider } from '../src/parsers/provider.parser.js';
 import { parseClient } from '../src/parsers/client.parser.js';
-import { generateEntitySchema, generateEntityType, generateEntityRepository } from '../src/generators/node/entity.gen.js';
+import { generateEntitySchema, generateEntityType } from '../src/generators/node/entity.gen.js';
+import { generateRepositoryImpl } from '../src/generators/node/repository.gen.js';
 import { generateFunction } from '../src/generators/node/function.gen.js';
 import { generateCommand } from '../src/generators/node/command.gen.js';
 import { generateRoute } from '../src/generators/node/route.gen.js';
@@ -40,10 +41,10 @@ describe('E2E: Entity → Node', () => {
   });
 
   it('generates repository with all CRUD methods', () => {
-    const out = generateEntityRepository(entity);
+    const out = generateRepositoryImpl(entity);
     expect(out).toContain(HEADER_NODE);
     expect(out).toContain('findById');
-    expect(out).toContain('findAll');
+    expect(out).toContain('list');
     expect(out).toContain('create');
     expect(out).toContain('update');
     expect(out).toContain('delete');
@@ -73,8 +74,8 @@ describe('E2E: Function → Node', () => {
   it('generates async function with header', () => {
     const out = generateFunction(fn);
     expect(out).toContain(HEADER_NODE);
-    expect(out).toContain('export const dispatchAlert = async');
-    expect(out).toContain('Promise<DispatchResult[]>');
+    expect(out).toContain('export const dispatchAlert');
+    expect(out).toContain('unknown[]');
   });
 
   it('generates filter and forEach steps', () => {

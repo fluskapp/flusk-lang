@@ -10,7 +10,8 @@ import { parseClient } from '../src/parsers/client.parser.js';
 import { parseService } from '../src/parsers/service.parser.js';
 import { parseMiddleware } from '../src/parsers/middleware.parser.js';
 import { parsePlugin } from '../src/parsers/plugin.parser.js';
-import { generateEntitySchema, generateEntityType, generateEntityRepository } from '../src/generators/node/entity.gen.js';
+import { generateEntitySchema, generateEntityType } from '../src/generators/node/entity.gen.js';
+import { generateRepositoryImpl } from '../src/generators/node/repository.gen.js';
 import { generateFunction } from '../src/generators/node/function.gen.js';
 import { generateCommand } from '../src/generators/node/command.gen.js';
 import { generateRoute } from '../src/generators/node/route.gen.js';
@@ -38,7 +39,7 @@ describe('Lint-clean integration — all example YAMLs', () => {
     for (const [name, code] of [
       ['schema', generateEntitySchema(def)],
       ['types', generateEntityType(def)],
-      ['repo', generateEntityRepository(def)],
+      ['repo', generateRepositoryImpl(def)],
     ] as const) {
       const r = lintGeneratedCode(`alert-channel.${name}.ts`, code);
       assertNoAny(r);

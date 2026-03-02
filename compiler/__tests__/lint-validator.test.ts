@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { lintGeneratedCode } from '../src/validators/lint.validator.js';
-import { generateEntitySchema, generateEntityType, generateEntityRepository } from '../src/generators/node/entity.gen.js';
+import { generateEntitySchema, generateEntityType } from '../src/generators/node/entity.gen.js';
+import { generateRepositoryImpl } from '../src/generators/node/repository.gen.js';
 import { generateFunction } from '../src/generators/node/function.gen.js';
 import { generateMiddleware } from '../src/generators/node/middleware.gen.js';
 import { generatePlugin } from '../src/generators/node/plugin.gen.js';
@@ -87,7 +88,7 @@ describe('Lint Validator', () => {
   });
 
   it('entity repo has @generated header', () => {
-    const code = generateEntityRepository(entity);
+    const code = generateRepositoryImpl(entity);
     const result = lintGeneratedCode('user.repo.ts', code);
     expect(result.issues.filter((i) => i.rule === 'generated-header')).toHaveLength(0);
   });
