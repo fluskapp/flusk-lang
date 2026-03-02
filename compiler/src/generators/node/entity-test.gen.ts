@@ -32,7 +32,8 @@ export const generateEntityTest = (entity: EntityDef): string => {
   const pascal = toPascal(entity.name);
   const table = toTableName(entity.name);
   const lower = entity.name.toLowerCase();
-  const requiredFields = entity.fields.filter((f) => f.required !== false);
+  const autoColumns = new Set(['id', 'createdAt', 'updatedAt', 'created_at', 'updated_at']);
+  const requiredFields = entity.fields.filter((f) => f.required !== false && !autoColumns.has(f.name));
 
   const lines = [HEADER];
   lines.push(`import { describe, it, expect, beforeEach } from 'vitest';`);
@@ -49,11 +50,13 @@ export const generateEntityTest = (entity: EntityDef): string => {
   // Create table inline for test
   const cols = [
     'id TEXT PRIMARY KEY',
-    ...entity.fields.map((f) => {
-      const col = toSnake(f.name);
-      const sqlType = { string: 'TEXT', number: 'INTEGER', integer: 'INTEGER', float: 'REAL', boolean: 'INTEGER', enum: 'TEXT' }[f.type] ?? 'TEXT';
-      return `${col} ${sqlType}${f.required !== false ? ' NOT NULL' : ''}`;
-    }),
+    ...entity.fields
+      .filter((f) => !['id', 'createdAt', 'updatedAt', 'created_at', 'updated_at'].includes(f.name))
+      .map((f) => {
+        const col = toSnake(f.name);
+        const sqlType = { string: 'TEXT', number: 'INTEGER', integer: 'INTEGER', float: 'REAL', boolean: 'INTEGER', enum: 'TEXT' }[f.type] ?? 'TEXT';
+        return `${col} ${sqlType}${f.required !== false ? ' NOT NULL' : ''}`;
+      }),
     "created_at TEXT NOT NULL DEFAULT (datetime('now'))",
     "updated_at TEXT NOT NULL DEFAULT (datetime('now'))",
   ];

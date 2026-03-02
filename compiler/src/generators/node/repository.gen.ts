@@ -32,7 +32,8 @@ const isJsonType = (type: string): boolean =>
 export const generateRepositoryImpl = (entity: EntityDef): string => {
   const name = toPascal(entity.name);
   const table = toTableName(entity.name);
-  const fields = entity.fields;
+  const autoColumns = new Set(['id', 'createdAt', 'updatedAt', 'created_at', 'updated_at']);
+  const fields = entity.fields.filter((f) => !autoColumns.has(f.name));
   const allCols = ['id', ...fields.map((f) => toSnake(f.name)), 'created_at', 'updated_at'];
   const insertCols = fields.map((f) => toSnake(f.name));
   const jsonFields = fields.filter((f) => isJsonType(f.type));
