@@ -87,6 +87,8 @@ const checkUnusedVars = (code: string): LintIssue[] => {
     // Pipeline step results (await calls) are intentional intermediates
     if (/=\s*await\s+/.test(lines[i])) continue;
     const name = match[1];
+    // Skip _ prefixed variables (intentionally unused)
+    if (name.startsWith('_')) continue;
     const before = lines.slice(0, i).join('\n');
     const after = lines.slice(i + 1).join('\n');
     const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

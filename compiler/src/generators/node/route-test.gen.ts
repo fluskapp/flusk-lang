@@ -13,18 +13,24 @@ export const generateRouteTest = (route: RouteDef): string => {
   const lines = [HEADER];
   lines.push(`import { describe, it, expect, beforeAll, afterAll } from 'vitest';`);
   lines.push(`import Fastify from 'fastify';`);
+  lines.push(`import Database from 'better-sqlite3';`);
   lines.push(`import { ${toCamel(route.name)}Routes } from '../../src/routes/${route.name}.routes.js';`);
   lines.push('');
   lines.push(`describe('${route.name} routes', () => {`);
   lines.push(`  const app = Fastify();`);
+  lines.push(`  let db: Database.Database;`);
   lines.push('');
   lines.push(`  beforeAll(async () => {`);
+  lines.push(`    db = new Database(':memory:');`);
+  lines.push(`    db.pragma('journal_mode = WAL');`);
+  lines.push(`    app.decorate('db', db);`);
   lines.push(`    await app.register(${toCamel(route.name)}Routes);`);
   lines.push(`    await app.ready();`);
   lines.push(`  });`);
   lines.push('');
   lines.push(`  afterAll(async () => {`);
   lines.push(`    await app.close();`);
+  lines.push(`    db.close();`);
   lines.push(`  });`);
   lines.push('');
 

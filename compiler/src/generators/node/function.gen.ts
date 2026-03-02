@@ -107,7 +107,7 @@ const generateStepCode = (step: FunctionStep, indent: string): string => {
     return lines.join('\n');
   }
 
-  if (step.call && !step.action) {
+  if (step.call && (!step.action || step.action === 'call')) {
     const args = step.with
       ? Object.entries(step.with).map(([, v]) => resolveValue(v)).join(', ')
       : '';
@@ -350,7 +350,36 @@ const generateStepFunction = (fn: FunctionDef): string => {
   }
 
   lines.push(`};\n`);
-  return lines.join('\n');
+  const code = lines.join('\n');
+  return prefixUnusedVars(code);
+};
+
+/**
+ * Prefix unused const/let variables with _ to avoid lint errors.
+ */
+const prefixUnusedVars = (code: string): string => {
+  const bodyMatch = code.match(/=> \{([\s\S]*)\};/);
+  if (!bodyMatch) return code;
+  const body = bodyMatch[1]!;
+
+  // Collect all declared variables
+  const decls = [...body.matchAll(/(?:const|let) (\w+)\s*[:=]/g)].map((m) => m[1]!);
+
+  let result = code;
+  for (const varName of decls) {
+    if (varName.startsWith('_')) continue;
+    // Count usages in the body (excluding the declaration line itself)
+    const usagePattern = new RegExp(`\\b${varName}\\b`, 'g');
+    const usages = [...body.matchAll(usagePattern)];
+    // One usage is the declaration itself; if only 1, it's unused
+    if (usages.length <= 1) {
+      result = result.replace(
+        new RegExp(`((?:const|let) )${varName}(\\s*[:=])`),
+        `$1_${varName}$2`,
+      );
+    }
+  }
+  return result;
 };
 
 const mapInputType = (type: string): string => {
