@@ -42,10 +42,15 @@ export const generateRootPackageJson = (name: string): string => {
     },
     dependencies: {
       wattpm: '^3.0.0',
+      'better-sqlite3': '^11.0.0',
+      nanoid: '^5.0.0',
+      pino: '^9.0.0',
+      fastify: '^5.0.0',
     },
     devDependencies: {
       vitest: '^3.0.0',
       tsx: '^4.0.0',
+      '@types/better-sqlite3': '^7.6.0',
     },
     engines: { node: '>=22.0.0' },
   }, null, 2) + '\n';
