@@ -239,7 +239,7 @@ const generateCrudFunction = (
 ): string => {
   const lines = [HEADER];
   const repoClass = `${crud.entityPascal}Repository`;
-  const repoFile = crud.entityKebab.toLowerCase();
+  const repoFile = crud.entityPascal.toLowerCase();
   lines.push(`import type Database from 'better-sqlite3';`);
   lines.push(`import { ${repoClass} } from '../repositories/${repoFile}.repository.js';\n`);
 
@@ -321,12 +321,10 @@ const generateStepFunction = (fn: FunctionDef): string => {
     lines.push(`import type Database from 'better-sqlite3';`);
   }
   for (const entity of calledEntities) {
-    const kebab = entity.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-    lines.push(`import { ${entity}Repository } from '../repositories/${kebab}.repository.js';`);
+    lines.push(`import { ${entity}Repository } from '../repositories/${entity.toLowerCase()}.repository.js';`);
   }
   for (const fnCall of calledFunctions) {
-    const kebab = fnCall.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-    lines.push(`import { ${fnCall} } from './${kebab}.function.js';`);
+    lines.push(`import { ${fnCall} } from './${fnCall}.function.js';`);
   }
   if (hasDbInput || calledFunctions.size > 0 || calledEntities.size > 0) lines.push('');
 

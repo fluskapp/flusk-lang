@@ -53,6 +53,7 @@ export const generateRootPackageJson = (name: string): string => {
       '@types/better-sqlite3': '^7.6.0',
     },
     engines: { node: '>=22.0.0' },
+    pnpm: { onlyBuiltDependencies: ['better-sqlite3', 'esbuild', 'protobufjs'] },
   }, null, 2) + '\n';
 };
 
