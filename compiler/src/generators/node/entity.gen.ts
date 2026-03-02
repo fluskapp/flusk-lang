@@ -54,16 +54,5 @@ export const generateEntityType = (entity: EntityDef): string => {
   return lines.join('\n');
 };
 
-export const generateEntityRepository = (entity: EntityDef): string => {
-  const name = entity.name;
-  const lines = [HEADER];
-  lines.push(`import type { ${name} } from './${name.toLowerCase()}.types.js';\n`);
-  lines.push(`export interface ${name}Repository {`);
-  lines.push(`  findById(id: string): Promise<${name} | null>;`);
-  lines.push(`  findAll(): Promise<${name}[]>;`);
-  lines.push(`  create(data: Omit<${name}, 'id'>): Promise<${name}>;`);
-  lines.push(`  update(id: string, data: Partial<${name}>): Promise<${name}>;`);
-  lines.push(`  delete(id: string): Promise<void>;`);
-  lines.push(`}\n`);
-  return lines.join('\n');
-};
+// Repository interfaces are no longer generated here.
+// Use repository.gen.ts for concrete repository implementations in src/repositories/.

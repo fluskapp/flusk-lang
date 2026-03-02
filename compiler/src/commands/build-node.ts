@@ -5,7 +5,7 @@
 
 import { join } from 'node:path';
 import { parseAll, validate } from '../index.js';
-import { generateEntitySchema, generateEntityType, generateEntityRepository } from '../generators/node/entity.gen.js';
+import { generateEntitySchema, generateEntityType } from '../generators/node/entity.gen.js';
 import { generateFunction } from '../generators/node/function.gen.js';
 import { generateCommand } from '../generators/node/command.gen.js';
 import { generateRoute } from '../generators/node/route.gen.js';
@@ -45,7 +45,6 @@ export const buildNode = (
     const name = entity.name.toLowerCase();
     writeFile(join(srcDir, 'entities', `${name}.schema.ts`), generateEntitySchema(entity));
     writeFile(join(srcDir, 'entities', `${name}.types.ts`), generateEntityType(entity));
-    writeFile(join(srcDir, 'entities', `${name}.repository.ts`), generateEntityRepository(entity));
     writeFile(join(srcDir, 'repositories', `${name}.repository.ts`), generateRepositoryImpl(entity));
     allFiles.push(`entities/${name}.schema.ts`, `entities/${name}.types.ts`);
     allFiles.push(`repositories/${name}.repository.ts`);
