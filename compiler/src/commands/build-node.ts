@@ -1,5 +1,6 @@
 /**
  * Build Node.js target — generates TypeScript from YAML schemas
+ * Produces a complete runnable Platformatic Watt backend
  */
 
 import { join } from 'node:path';
@@ -18,6 +19,11 @@ import { generateEvent } from '../generators/node/event.gen.js';
 import { generateWorker } from '../generators/node/worker.gen.js';
 import { generateStream } from '../generators/node/stream.gen.js';
 import { generateHook } from '../generators/node/hook.gen.js';
+import { generateRepositoryImpl } from '../generators/node/repository.gen.js';
+import { generateAllCreateMigrations } from '../generators/node/create-migration.gen.js';
+import { generateAllWattFiles } from '../generators/node/watt.gen.js';
+import { generateEntityTest } from '../generators/node/entity-test.gen.js';
+import { generateRouteTest } from '../generators/node/route-test.gen.js';
 import type { WriteFileFn } from './types.js';
 import { createChildLogger } from '../logger.js';
 
@@ -30,90 +36,134 @@ export const buildNode = (
   writeFile: WriteFileFn,
 ): void => {
   const schema = skipRefs ? parseAll(schemaDir) : validate(schemaDir);
-  const nodeDir = join(generatedDir, 'node', 'src');
+  const nodeDir = join(generatedDir, 'node');
+  const srcDir = join(nodeDir, 'src');
   const allFiles: string[] = [];
 
+  // ── Entities ──────────────────────────────────
   for (const entity of schema.entities) {
-    const dir = join(nodeDir, 'entities');
     const name = entity.name.toLowerCase();
-    writeFile(join(dir, `${name}.schema.ts`), generateEntitySchema(entity));
-    writeFile(join(dir, `${name}.types.ts`), generateEntityType(entity));
-    writeFile(join(dir, `${name}.repository.ts`), generateEntityRepository(entity));
+    writeFile(join(srcDir, 'entities', `${name}.schema.ts`), generateEntitySchema(entity));
+    writeFile(join(srcDir, 'entities', `${name}.types.ts`), generateEntityType(entity));
+    writeFile(join(srcDir, 'entities', `${name}.repository.ts`), generateEntityRepository(entity));
+    writeFile(join(srcDir, 'repositories', `${name}.repository.ts`), generateRepositoryImpl(entity));
     allFiles.push(`entities/${name}.schema.ts`, `entities/${name}.types.ts`);
+    allFiles.push(`repositories/${name}.repository.ts`);
   }
 
+  // ── Functions ─────────────────────────────────
   for (const fn of schema.functions) {
     const f = `functions/${fn.name}.function.ts`;
-    writeFile(join(nodeDir, f), generateFunction(fn));
+    writeFile(join(srcDir, f), generateFunction(fn));
     allFiles.push(f);
   }
 
+  // ── Commands ──────────────────────────────────
   for (const cmd of schema.commands) {
     const f = `commands/${cmd.name}.command.ts`;
-    writeFile(join(nodeDir, f), generateCommand(cmd));
+    writeFile(join(srcDir, f), generateCommand(cmd));
     allFiles.push(f);
   }
 
+  // ── Routes ────────────────────────────────────
   for (const route of schema.routes) {
     const f = `routes/${route.name}.routes.ts`;
-    writeFile(join(nodeDir, f), generateRoute(route));
+    writeFile(join(srcDir, f), generateRoute(route));
     allFiles.push(f);
   }
 
+  // ── Providers ─────────────────────────────────
   for (const provider of schema.providers) {
     const f = `providers/${provider.name}.provider.ts`;
-    writeFile(join(nodeDir, f), generateProvider(provider));
+    writeFile(join(srcDir, f), generateProvider(provider));
     allFiles.push(f);
   }
 
+  // ── Clients ───────────────────────────────────
   for (const client of schema.clients) {
     const f = `clients/${client.name}.client.ts`;
-    writeFile(join(nodeDir, f), generateClient(client));
+    writeFile(join(srcDir, f), generateClient(client));
     allFiles.push(f);
   }
 
+  // ── Services ──────────────────────────────────
   for (const svc of schema.services) {
     const f = `services/${svc.name}.service.ts`;
-    writeFile(join(nodeDir, f), generateService(svc));
+    writeFile(join(srcDir, f), generateService(svc));
     allFiles.push(f);
   }
 
+  // ── Middlewares ────────────────────────────────
   for (const mw of schema.middlewares) {
     const f = `middlewares/${mw.name}.middleware.ts`;
-    writeFile(join(nodeDir, f), generateMiddleware(mw));
+    writeFile(join(srcDir, f), generateMiddleware(mw));
     allFiles.push(f);
   }
 
+  // ── Plugins ───────────────────────────────────
   for (const plugin of schema.plugins) {
     const f = `plugins/${plugin.name}.plugin.ts`;
-    writeFile(join(nodeDir, f), generatePlugin(plugin));
+    writeFile(join(srcDir, f), generatePlugin(plugin));
     allFiles.push(f);
   }
 
+  // ── Events ────────────────────────────────────
   for (const event of schema.events) {
     const f = `events/${event.name}.event.ts`;
-    writeFile(join(nodeDir, f), generateEvent(event));
+    writeFile(join(srcDir, f), generateEvent(event));
     allFiles.push(f);
   }
 
+  // ── Workers ───────────────────────────────────
   for (const worker of schema.workers) {
     const f = `workers/${worker.name}.worker.ts`;
-    writeFile(join(nodeDir, f), generateWorker(worker));
+    writeFile(join(srcDir, f), generateWorker(worker));
     allFiles.push(f);
   }
 
+  // ── Streams ───────────────────────────────────
   for (const stream of schema.streams) {
     const f = `streams/${stream.name}.stream.ts`;
-    writeFile(join(nodeDir, f), generateStream(stream));
+    writeFile(join(srcDir, f), generateStream(stream));
     allFiles.push(f);
   }
 
+  // ── Hooks ─────────────────────────────────────
   for (const hook of schema.hooks) {
     const f = `hooks/${hook.name}.hook.ts`;
-    writeFile(join(nodeDir, f), generateHook(hook));
+    writeFile(join(srcDir, f), generateHook(hook));
     allFiles.push(f);
   }
 
-  writeFile(join(nodeDir, 'index.ts'), generateBarrel(allFiles));
-  log.info({ files: allFiles.length }, 'Node.js generation complete');
+  // ── Barrel ────────────────────────────────────
+  writeFile(join(srcDir, 'index.ts'), generateBarrel(allFiles));
+
+  // ── SQLite Migrations ─────────────────────────
+  const migrations = generateAllCreateMigrations(schema.entities);
+  for (const m of migrations) {
+    writeFile(join(nodeDir, 'apps', 'api', 'migrations', m.filename), m.content);
+  }
+
+  // ── Watt App Infrastructure ───────────────────
+  const wattFiles = generateAllWattFiles(schema, 'observability');
+  for (const wf of wattFiles) {
+    writeFile(join(nodeDir, wf.path), wf.content);
+  }
+
+  // ── Tests ─────────────────────────────────────
+  for (const entity of schema.entities) {
+    const name = entity.name.toLowerCase();
+    writeFile(
+      join(nodeDir, '__tests__', 'entities', `${name}.test.ts`),
+      generateEntityTest(entity),
+    );
+  }
+  for (const route of schema.routes) {
+    writeFile(
+      join(nodeDir, '__tests__', 'routes', `${route.name}.test.ts`),
+      generateRouteTest(route),
+    );
+  }
+
+  log.info({ files: allFiles.length, migrations: migrations.length }, 'Node.js generation complete');
 };
