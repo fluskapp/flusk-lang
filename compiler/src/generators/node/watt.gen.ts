@@ -36,7 +36,9 @@ export const generateRootPackageJson = (name: string): string => {
     scripts: {
       start: 'wattpm start',
       dev: 'wattpm start --hot-reload',
-      test: 'vitest run',
+      test: 'vitest run __tests__/entities/',
+      'test:routes': 'vitest run __tests__/routes/',
+      'test:all': 'vitest run',
       'test:watch': 'vitest',
       migrate: 'node --import tsx apps/api/migrate.ts',
     },
