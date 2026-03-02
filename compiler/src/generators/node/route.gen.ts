@@ -21,8 +21,7 @@ export const generateRoute = (route: RouteDef): string => {
     fnNames.add(op.call);
   }
   for (const fnName of fnNames) {
-    const kebab = toKebab(fnName);
-    lines.push(`import { ${fnName} } from '../functions/${kebab}.function.js';`);
+    lines.push(`import { ${fnName} } from '../functions/${fnName}.function.js';`);
   }
 
   lines.push('');
