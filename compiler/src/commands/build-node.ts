@@ -4,6 +4,7 @@
  */
 
 import { join } from 'node:path';
+import { existsSync, readdirSync, unlinkSync } from 'node:fs';
 import { parseAll, validate } from '../index.js';
 import { generateEntitySchema, generateEntityType } from '../generators/node/entity.gen.js';
 import { generateFunction } from '../generators/node/function.gen.js';
@@ -138,9 +139,16 @@ export const buildNode = (
   writeFile(join(srcDir, 'index.ts'), generateBarrel(allFiles));
 
   // ── SQLite Migrations ─────────────────────────
+  const migrationsDir = join(nodeDir, 'apps', 'api', 'migrations');
+  // Clear old migrations to avoid duplicates on regeneration
+  if (existsSync(migrationsDir)) {
+    for (const f of readdirSync(migrationsDir)) {
+      if (f.endsWith('.sql')) unlinkSync(join(migrationsDir, f));
+    }
+  }
   const migrations = generateAllCreateMigrations(schema.entities);
   for (const m of migrations) {
-    writeFile(join(nodeDir, 'apps', 'api', 'migrations', m.filename), m.content);
+    writeFile(join(migrationsDir, m.filename), m.content);
   }
 
   // ── Watt App Infrastructure ───────────────────

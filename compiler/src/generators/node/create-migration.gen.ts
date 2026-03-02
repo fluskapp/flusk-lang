@@ -46,17 +46,21 @@ export const generateCreateTableMigration = (
   const table = toTableName(entity.name);
   const num = String(index).padStart(3, '0');
 
+  // Filter out auto-added columns from entity fields
+  const autoColumns = new Set(['id', 'createdAt', 'updatedAt', 'created_at', 'updated_at']);
   const cols = [
     'id TEXT PRIMARY KEY',
-    ...entity.fields.map((f) => {
-      const col = toSnake(f.name);
-      const parts = [col, sqlType(f.type)];
-      if (f.required !== false) parts.push('NOT NULL');
-      if (f.unique) parts.push('UNIQUE');
-      const def = defaultClause(f);
-      if (def) parts.push(def.trim());
-      return parts.join(' ');
-    }),
+    ...entity.fields
+      .filter((f) => !autoColumns.has(f.name))
+      .map((f) => {
+        const col = toSnake(f.name);
+        const parts = [col, sqlType(f.type)];
+        if (f.required !== false) parts.push('NOT NULL');
+        if (f.unique) parts.push('UNIQUE');
+        const def = defaultClause(f);
+        if (def) parts.push(def.trim());
+        return parts.join(' ');
+      }),
     "created_at TEXT NOT NULL DEFAULT (datetime('now'))",
     "updated_at TEXT NOT NULL DEFAULT (datetime('now'))",
   ];
