@@ -1,0 +1,23 @@
+name: MetricRow
+params:
+  - name: metrics
+    type: binding
+  - name: columns
+    type: number
+    default: 4
+template:
+  type: stat-cards
+  layout:
+    sm: stack
+    md: grid-4
+  widgets:
+    - type: stat-card
+      source: $metrics.total
+      label: Total
+    - type: stat-card
+      source: $metrics.active
+      label: Active
+    - type: stat-card
+      source: $metrics.growth
+      label: Growth
+      format: percent
