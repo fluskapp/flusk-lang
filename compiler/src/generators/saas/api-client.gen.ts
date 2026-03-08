@@ -241,26 +241,148 @@ export const ${keysVar} = {
   return code;
 }
 
+// ─── View-based hook generation ──────────────────────────────────────
+
+function isViewSchema(schema: FluskSchema): boolean {
+  const rawDir = schema._metadata?.directory ?? '';
+  const topDir = rawDir.split('/')[0] ?? rawDir;
+  if (topDir === 'views') return true;
+  const s = schema as unknown as Record<string, unknown>;
+  return !!s['route'] && !!s['sections'];
+}
+
+/** Extract all unique entity sources from a view's sections (recursively) */
+function extractSources(sections: unknown[]): Set<string> {
+  const sources = new Set<string>();
+  function walk(obj: unknown): void {
+    if (!obj || typeof obj !== 'object') return;
+    if (Array.isArray(obj)) { obj.forEach(walk); return; }
+    const rec = obj as Record<string, unknown>;
+    if (typeof rec['source'] === 'string') {
+      const src = rec['source'] as string;
+      // Extract entity name from "entity.field" pattern (e.g., "solutions.list" → "solutions")
+      const entity = src.split('.')[0]!;
+      if (entity && !entity.includes('API') && !entity.includes('Form') && entity !== 'filters') {
+        sources.add(entity);
+      }
+    }
+    for (const v of Object.values(rec)) walk(v);
+  }
+  walk(sections);
+  return sources;
+}
+
+/** Map entity source names to Platformatic API endpoints */
+function entityToEndpoint(entity: string): string {
+  // Platformatic uses plural snake_case: solutions, events, connectors, etc.
+  return `/api/${entity.replace(/([A-Z])/g, '_$1').toLowerCase()}`;
+}
+
+function generateViewHookFile(view: FluskSchema, entitySchemas: FluskSchema[]): string {
+  const viewName = view.name.replace(/[\s\-]+/g, '');
+  const hookName = `use${viewName}`;
+  const s = view as unknown as Record<string, unknown>;
+  const sections = (s['sections'] ?? []) as unknown[];
+  const sources = extractSources(sections);
+
+  // Find which entities have real API endpoints
+  const entityNames = new Set(entitySchemas.map(e => e.name.toLowerCase().replace(/[\s\-_]+/g, '')));
+  const knownEntities = ['solutions', 'events', 'connectors', 'agents', 'automations', 'deployables'];
+
+  // Determine which real API calls we need
+  const neededApis = new Set<string>();
+  const viewWords = view.name.toLowerCase().split(/[\s\-]+/);
+  const lastWord = viewWords[viewWords.length - 1] ?? '';
+  const firstWord = viewWords[0] ?? '';
+
+  // Direct entity sources
+  for (const src of sources) {
+    const normalized = src.toLowerCase().replace(/[\s\-_]+/g, '');
+    if (knownEntities.includes(src) || entityNames.has(normalized) || entityNames.has(normalized.replace(/s$/, ''))) {
+      neededApis.add(src);
+    }
+  }
+
+  // Derive from view name if no direct entities
+  if (neededApis.size === 0) {
+    if (knownEntities.includes(lastWord)) {
+      neededApis.add(lastWord);
+    } else if (firstWord === 'observe' || ['dashboard', 'analytics', 'compliance'].includes(lastWord)) {
+      neededApis.add('solutions');
+      neededApis.add('events');
+    }
+  }
+
+  // Build the data mapping — pages access data by source namespace (data.solutions, data.stats, etc.)
+  // We fetch from real APIs and map results to the namespaces the page expects
+  const apiCalls: string[] = [];
+  const apiNames: string[] = [];
+  for (const api of neededApis) {
+    apiCalls.push(`      apiClient.get<any[]>('${entityToEndpoint(api)}').catch(() => [])`);
+    apiNames.push(api);
+  }
+
+  // Map fetched data to all namespaces the view uses
+  const dataFields: string[] = [];
+  for (let i = 0; i < apiNames.length; i++) {
+    dataFields.push(`      ${apiNames[i]}: results[${i}]`);
+  }
+  // For abstract namespaces (stats, observe, analytics, compliance), provide empty objects
+  // so the page doesn't crash — these need real aggregation endpoints eventually
+  for (const src of sources) {
+    if (!neededApis.has(src) && src !== 'filters' && src !== 'event' && src !== 'connector') {
+      dataFields.push(`      ${src}: {}`);
+    }
+  }
+
+  if (apiCalls.length === 0) {
+    // Fallback: return empty data for views that don't map to entities (landing, login)
+    return `${HEADER}
+// View hook for ${view.name} — no entity endpoints detected
+export function ${hookName}(): { data: Record<string, any>; isLoading: boolean } {
+  return { data: {}, isLoading: false };
+}
+`;
+  }
+
+  return `${HEADER}
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '../lib/api-client';
+
+export function ${hookName}() {
+  return useQuery({
+    queryKey: ['${viewName}'],
+    queryFn: async () => {
+      const results = await Promise.all([
+${apiCalls.join(',\n')}
+      ]);
+      return {
+${dataFields.join(',\n')}
+      };
+    },
+  });
+}
+`;
+}
+
 export class APIClientGenerator {
   async generate(schemas: FluskSchema[], outputDir: string): Promise<GenerationResult> {
     const result: GenerationResult = { filesGenerated: 0, errors: [], warnings: [] };
-
-    const routes = schemas.filter(isRouteSchema);
-    if (routes.length === 0) {
-      result.warnings.push('APIClientGenerator: No route schemas found (add YAML files to a routes/ directory)');
-      return result;
-    }
 
     const libDir = join(outputDir, 'lib');
     const hooksDir = join(outputDir, 'hooks');
     await mkdir(libDir, { recursive: true });
     await mkdir(hooksDir, { recursive: true });
 
+    // Always write api-client
     await writeFileFs(join(libDir, 'api-client.ts'), apiClientTemplate(), 'utf-8');
     result.filesGenerated++;
 
     const barrelExports: string[] = [];
+    const writtenHooks = new Set<string>();
 
+    // 1. Generate hooks from route schemas (explicit CRUD operations)
+    const routes = schemas.filter(isRouteSchema);
     for (const route of routes) {
       try {
         const code = generateHookFile(route);
@@ -268,6 +390,7 @@ export class APIClientGenerator {
         await writeFileFs(join(hooksDir, fileName), code, 'utf-8');
         result.filesGenerated++;
         barrelExports.push(`export * from './use${toPascal(route.name)}';`);
+        writtenHooks.add(toPascal(route.name));
       } catch (err) {
         result.errors.push(
           `APIClientGenerator: Failed for route ${route.name}: ${err instanceof Error ? err.message : String(err)}`
@@ -275,6 +398,29 @@ export class APIClientGenerator {
       }
     }
 
+    // 2. Generate hooks from view schemas (fetch data for pages)
+    const views = schemas.filter(isViewSchema);
+    const entitySchemas = schemas.filter(s => s.type === 'entity');
+
+    for (const view of views) {
+      const viewName = view.name.replace(/[\s\-]+/g, '');
+      if (writtenHooks.has(viewName)) continue; // Don't overwrite route-based hooks
+
+      try {
+        const code = generateViewHookFile(view, entitySchemas);
+        const fileName = `use${viewName}.ts`;
+        await writeFileFs(join(hooksDir, fileName), code, 'utf-8');
+        result.filesGenerated++;
+        barrelExports.push(`export { use${viewName} } from './use${viewName}';`);
+        writtenHooks.add(viewName);
+      } catch (err) {
+        result.errors.push(
+          `APIClientGenerator: Failed for view ${view.name}: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+
+    // Write barrel
     await writeFileFs(
       join(hooksDir, 'index.ts'),
       `${HEADER}\n\n${barrelExports.join('\n')}\n`,

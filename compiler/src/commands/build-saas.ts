@@ -29,10 +29,10 @@ export async function buildSaas(schemaDir: string, outputDir: string): Promise<v
 
   const generators = [
     { name: 'types',       gen: new TypeGenerator() },
+    { name: 'pages',       gen: new VitePageGenerator() },
     { name: 'api-client',  gen: new APIClientGenerator() },
     { name: 'forms',       gen: new FormGenerator() },
     { name: 'router',      gen: new RouterGenerator() },
-    { name: 'pages',       gen: new VitePageGenerator() },
     { name: 'backend',     gen: new PlatformaticGenerator() },
   ];
 
