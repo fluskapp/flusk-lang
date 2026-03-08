@@ -15,6 +15,7 @@ import { explodeFeatures, diffFeatures, buildFeatures } from './commands/feature
 import { watchSchemas } from './commands/watch.js';
 import { generateOpenApi } from './commands/openapi.js';
 import { generateClient } from './commands/client-sdk.js';
+import { buildSaas } from './commands/build-saas.js';
 import type { WatchEvent } from './commands/watch-types.js';
 import { setLogLevel, createChildLogger } from './logger.js';
 
@@ -58,14 +59,20 @@ if (command === 'diff') {
   } catch (err) { vlog.error({ err }, 'validation failed'); process.exit(1); }
 } else if (command === 'build') {
   const blog = createChildLogger('build');
-  try {
-    if (target === 'all' || target === 'features') buildFeatures(schemaDir, generatedDir, writeFile);
-    if (target === 'all' || target === 'node') buildNode(schemaDir, generatedDir, skipRefs, writeFile);
-    if (target === 'all' || target === 'python') buildPython(schemaDir, generatedDir, skipRefs, writeFile);
-    if (target === 'all' || target === 'views') buildReactViews(schemaDir, generatedDir, process.argv.includes('--standalone'));
-    if (target === 'docs') buildDocs(schemaDir, generatedDir, writeFile);
-    blog.info('build complete');
-  } catch (err) { blog.error({ err }, 'build failed'); process.exit(1); }
+  if (target === 'saas') {
+    buildSaas(schemaDir, join(generatedDir, 'saas'))
+      .then(() => blog.info('build complete'))
+      .catch((err) => { blog.error({ err }, 'build failed'); process.exit(1); });
+  } else {
+    try {
+      if (target === 'all' || target === 'features') buildFeatures(schemaDir, generatedDir, writeFile);
+      if (target === 'all' || target === 'node') buildNode(schemaDir, generatedDir, skipRefs, writeFile);
+      if (target === 'all' || target === 'python') buildPython(schemaDir, generatedDir, skipRefs, writeFile);
+      if (target === 'all' || target === 'views') buildReactViews(schemaDir, generatedDir, process.argv.includes('--standalone'));
+      if (target === 'docs') buildDocs(schemaDir, generatedDir, writeFile);
+      blog.info('build complete');
+    } catch (err) { blog.error({ err }, 'build failed'); process.exit(1); }
+  }
 } else if (command === 'watch') {
   const wlog = createChildLogger('watch');
   const formatEvent = (event: WatchEvent): void => {
