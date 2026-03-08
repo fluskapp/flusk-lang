@@ -73,7 +73,8 @@ const emitWidget = (
 
   // Data binding → value prop
   if (node.source) {
-    props.push(`data={${dataVar}.${node.source.path}}`);
+    const safePath = node.source.path.split('.').join('?.');
+    props.push(`data={${dataVar}?.${safePath}}`);
   }
 
   // All other props

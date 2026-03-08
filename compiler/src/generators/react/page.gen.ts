@@ -75,7 +75,7 @@ const emitRouteDefinition = (page: PageNode): string => {
   return lines.join('\n');
 };
 
-// ─── Main: generate page .tsx ────────────────────────────────────────
+// ─── Main: generate page .tsx (TanStack Router mode) ─────────────────
 
 export const generatePage = (page: PageNode): string => {
   const imports = new ImportTracker();
@@ -108,6 +108,47 @@ export const generatePage = (page: PageNode): string => {
     ? ` aria-label="${page.accessibility.ariaLabel}"`
     : '';
 
+  lines.push(`  return (`);
+  lines.push(`    <${mainTag} className="space-y-6 p-6"${ariaLabel}>`);
+  lines.push(jsxChildren);
+  lines.push(`    </${mainTag}>`);
+  lines.push(`  )`);
+  lines.push(`}`);
+  lines.push('');
+
+  return lines.join('\n');
+};
+
+// ─── Standalone mode: plain React component (no TanStack) ────────────
+
+export const generateStandalonePage = (page: PageNode): string => {
+  const imports = new ImportTracker();
+
+  // Build JSX body
+  const dataVar = 'data';
+  const jsxChildren = page.sections
+    .map((s) => emitChild(s, imports, dataVar, '      '))
+    .join('\n');
+
+  const mainTag = page.accessibility?.landmark ?? 'main';
+  const ariaLabel = page.accessibility?.ariaLabel
+    ? ` aria-label="${page.accessibility.ariaLabel}"`
+    : '';
+
+  // Assemble file
+  const lines = [HEADER];
+  lines.push(`import React from 'react';`);
+  const componentImports = imports.emit();
+  if (componentImports) lines.push(componentImports);
+  lines.push('');
+
+  // Data prop interface
+  lines.push(`export interface ${page.name}PageProps {`);
+  lines.push(`  data?: Record<string, unknown>;`);
+  lines.push(`}`);
+  lines.push('');
+
+  lines.push(`export default function ${page.name}Page({ data = {} }: ${page.name}PageProps) {`);
   lines.push(`  return (`);
   lines.push(`    <${mainTag} className="space-y-6 p-6"${ariaLabel}>`);
   lines.push(jsxChildren);

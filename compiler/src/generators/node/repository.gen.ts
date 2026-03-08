@@ -135,13 +135,23 @@ export const generateRepositoryImpl = (entity: EntityDef): string => {
   lines.push(`  }`);
   lines.push('');
 
+  // JSON field names for proper serialization in update
+  if (jsonFields.length > 0) {
+    lines.push(`  private static readonly JSON_FIELDS = new Set([${jsonFields.map((f) => `'${f.name}'`).join(', ')}]);`);
+    lines.push('');
+  }
+
   // update
   lines.push(`  update(id: string, data: ${name}Update): ${name}Row | null {`);
   lines.push(`    const sets: string[] = [];`);
   lines.push(`    const params: unknown[] = [];`);
   lines.push(`    for (const [key, value] of Object.entries(data)) {`);
   lines.push(`      sets.push(key.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase() + ' = ?');`);
-  lines.push(`      params.push(typeof value === 'object' ? JSON.stringify(value) : value);`);
+  if (jsonFields.length > 0) {
+    lines.push(`      params.push(${name}Repository.JSON_FIELDS.has(key) || typeof value === 'object' ? JSON.stringify(value) : value);`);
+  } else {
+    lines.push(`      params.push(typeof value === 'object' ? JSON.stringify(value) : value);`);
+  }
   lines.push(`    }`);
   lines.push(`    if (sets.length === 0) return this.findById(id);`);
   lines.push(`    sets.push('updated_at = ?');`);

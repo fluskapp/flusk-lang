@@ -13,9 +13,10 @@ import { createRegistry } from './parsers/widget.parser.js';
 import { loadPartials } from './parsers/partial.parser.js';
 import { resolveAll } from './resolvers/view.resolver.js';
 import { validateViews, type ViewDiagnostic } from './validators/view.validator.js';
-import { generatePage } from './generators/react/page.gen.js';
+import { generatePage, generateStandalonePage } from './generators/react/page.gen.js';
 import { generateLoader, loaderFileName } from './generators/react/loader.gen.js';
 import { generateRoutes, generateComponentBarrel } from './generators/react/routes.gen.js';
+import { generateComponents } from './generators/react/component.gen.js';
 import { collectNodes } from './ast/visitor.js';
 import type { PageNode, WidgetNode } from './ast/nodes.js';
 import { toKebab } from './utils/naming.js';
@@ -35,10 +36,15 @@ export interface PipelineResult {
 
 // ─── Run the full pipeline ───────────────────────────────────────────
 
+export interface BuildOptions {
+  standalone?: boolean;  // Generate plain React components (no TanStack)
+}
+
 export const buildViews = (
   viewsDir: string,
   widgetsDir?: string,
   partialsDir?: string,
+  options?: BuildOptions,
 ): PipelineResult => {
   // 1. Discover
   const viewFiles = discoverFiles(viewsDir, '.view.yaml');
@@ -79,9 +85,10 @@ export const buildViews = (
   for (const page of resolved) {
     // Page file
     const kebab = toKebab(page.name);
+    const pageGen = options?.standalone ? generateStandalonePage : generatePage;
     files.push({
       path: `pages/${kebab}.page.tsx`,
-      content: generatePage(page),
+      content: pageGen(page),
     });
 
     // Loader file
@@ -109,6 +116,11 @@ export const buildViews = (
     path: 'components/index.ts',
     content: generateComponentBarrel(allWidgetTypes),
   });
+
+  // Component implementations
+  const uniqueTypes = [...new Set(allWidgetTypes)];
+  const componentFiles = generateComponents(uniqueTypes, registry);
+  files.push(...componentFiles);
 
   return { files, diagnostics, pages: resolved };
 };

@@ -34,8 +34,8 @@ sections:
     expect(code).toContain('Route.useLoaderData()');
     expect(code).toContain('StatCard');
     expect(code).toContain('Chart');
-    expect(code).toContain('data.stats.users');
-    expect(code).toContain('data.data.byDay');
+    expect(code).toContain('data?.stats?.users');
+    expect(code).toContain('data?.data?.byDay');
   });
 
   it('generates page without loader', () => {

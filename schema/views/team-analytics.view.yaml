@@ -1,0 +1,60 @@
+name: TeamAnalytics
+type: dashboard
+description: Per-team and per-person AI usage analytics
+route: /$tenant/management/teams
+layout: full
+auth: true
+ssr: false
+loader:
+  source: TeamAnalytics
+  params: [tenant]
+sections:
+  - name: Team Overview
+    type: stat-cards
+    widgets:
+      - type: stat-card
+        source: teams.totalUsers
+        label: Active Users
+        format: number
+      - type: stat-card
+        source: teams.totalTeams
+        label: Teams
+        format: number
+      - type: stat-card
+        source: teams.avgQueriesPerUser
+        label: Avg Queries / User
+        format: number
+      - type: stat-card
+        source: teams.adoptionRate
+        label: AI Adoption Rate
+        format: percent
+
+  - name: Usage by Team Over Time
+    type: chart
+    source: teams.usageByTeamByDay
+    chart:
+      type: line
+      xAxis: date
+      yAxis: queries
+      color: blue
+
+  - name: Usage by Department
+    type: chart
+    source: teams.byDepartment
+    chart:
+      type: bar
+      xAxis: department
+      yAxis: queries
+      color: emerald
+
+  - name: Teams Breakdown
+    type: data-table
+    source: teams.list
+    columns: [team, members, totalQueries, totalCost, adoptionRate, topSolution]
+    actions: [view, manage]
+
+  - name: Top Users
+    type: data-table
+    source: teams.topUsers
+    columns: [user, team, queries, cost, lastActive]
+    actions: [view]

@@ -1,0 +1,70 @@
+name: BudgetManagement
+type: dashboard
+description: Set budgets, configure alerts, and enforce spending limits per team
+route: /$tenant/management/budgets
+layout: full
+auth: true
+ssr: false
+loader:
+  source: BudgetManagement
+  params: [tenant]
+sections:
+  - name: Budget Status
+    type: stat-cards
+    widgets:
+      - type: stat-card
+        source: budgets.totalAllocated
+        label: Total Budget Allocated
+        format: currency
+      - type: stat-card
+        source: budgets.totalSpent
+        label: Total Spent
+        format: currency
+      - type: stat-card
+        source: budgets.teamsOverBudget
+        label: Teams Over Budget
+        format: number
+      - type: stat-card
+        source: budgets.teamsNearLimit
+        label: Teams Near Limit (>80%)
+        format: number
+
+  - name: Budget Utilization by Team
+    type: chart
+    source: budgets.utilizationByTeam
+    chart:
+      type: bar
+      xAxis: team
+      yAxis: utilizationPercent
+      color: amber
+
+  - name: Set Team Budgets
+    type: form
+    source: budgets.teamBudgetForm
+    fields:
+      - name: team
+        type: select
+        label: Team
+        required: true
+      - name: monthlyLimit
+        type: number
+        label: Monthly Limit ($)
+        required: true
+      - name: alertThreshold
+        type: number
+        label: Alert Threshold (%)
+        required: true
+      - name: hardLimit
+        type: toggle
+        label: Enforce Hard Limit
+        required: false
+      - name: notifyEmails
+        type: text
+        label: Notify Emails (comma-separated)
+        required: false
+
+  - name: Team Budgets
+    type: data-table
+    source: budgets.teamBudgets
+    columns: [team, monthlyLimit, spent, remaining, utilizationPercent, alertThreshold, hardLimit]
+    actions: [edit, delete]

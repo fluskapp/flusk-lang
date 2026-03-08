@@ -62,7 +62,7 @@ if (command === 'diff') {
     if (target === 'all' || target === 'features') buildFeatures(schemaDir, generatedDir, writeFile);
     if (target === 'all' || target === 'node') buildNode(schemaDir, generatedDir, skipRefs, writeFile);
     if (target === 'all' || target === 'python') buildPython(schemaDir, generatedDir, skipRefs, writeFile);
-    if (target === 'all' || target === 'views') buildReactViews(schemaDir, generatedDir);
+    if (target === 'all' || target === 'views') buildReactViews(schemaDir, generatedDir, process.argv.includes('--standalone'));
     if (target === 'docs') buildDocs(schemaDir, generatedDir, writeFile);
     blog.info('build complete');
   } catch (err) { blog.error({ err }, 'build failed'); process.exit(1); }

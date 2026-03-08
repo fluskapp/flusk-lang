@@ -104,7 +104,8 @@ export const generateEntityTest = (entity: EntityDef): string => {
   lines.push(`    const created = repo.create(testData());`);
   if (requiredFields[0]) {
     const f = requiredFields[0];
-    const updateVal = f.type === 'string' ? `'updated'` : f.type === 'number' ? '99' : `'updated'`;
+    const isJson = ['json', 'object', 'array'].includes(f.type);
+    const updateVal = isJson ? `{ updated: true }` : f.type === 'number' || f.type === 'integer' ? '99' : f.type === 'float' ? '9.99' : f.type === 'boolean' ? 'false' : `'updated'`;
     lines.push(`    const updated = repo.update(created.id, { ${f.name}: ${updateVal} });`);
     lines.push(`    expect(updated).toBeDefined();`);
   }

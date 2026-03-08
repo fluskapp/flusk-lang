@@ -12,13 +12,14 @@ const log = createChildLogger('build-views');
 export const buildReactViews = (
   schemaDir: string,
   generatedDir: string,
+  standalone?: boolean,
 ): void => {
   const viewsDir = join(schemaDir, 'views');
   const widgetsDir = join(schemaDir, 'widgets');
   const partialsDir = join(schemaDir, 'partials');
   const outDir = join(generatedDir, 'views');
 
-  const result = buildViews(viewsDir, widgetsDir, partialsDir);
+  const result = buildViews(viewsDir, widgetsDir, partialsDir, { standalone });
 
   for (const d of result.diagnostics) {
     if (d.severity === 'error') log.error({ code: d.code, file: d.file, line: d.line }, d.message);

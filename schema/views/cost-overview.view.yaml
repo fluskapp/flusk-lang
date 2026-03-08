@@ -1,0 +1,62 @@
+name: CostOverview
+type: dashboard
+description: Total AI spend dashboard with per-model and per-team cost breakdown
+route: /$tenant/management/cost
+layout: full
+auth: true
+ssr: false
+loader:
+  source: CostOverview
+  params: [tenant]
+sections:
+  - name: Spend Summary
+    type: stat-cards
+    widgets:
+      - type: stat-card
+        source: cost.totalThisMonth
+        label: Total Spend This Month
+        format: currency
+      - type: stat-card
+        source: cost.totalLastMonth
+        label: Last Month
+        format: currency
+      - type: stat-card
+        source: cost.projectedMonth
+        label: Projected Month-End
+        format: currency
+      - type: stat-card
+        source: cost.budgetUtilization
+        label: Budget Utilization
+        format: percent
+
+  - name: Spend Over Time
+    type: chart
+    source: cost.dailySpend
+    chart:
+      type: area
+      xAxis: date
+      yAxis: amount
+      color: violet
+
+  - name: Cost by Model
+    type: chart
+    source: cost.byModel
+    chart:
+      type: donut
+      xAxis: model
+      yAxis: cost
+
+  - name: Cost by Team
+    type: chart
+    source: cost.byTeam
+    chart:
+      type: bar
+      xAxis: team
+      yAxis: cost
+      color: indigo
+
+  - name: Model Usage Breakdown
+    type: data-table
+    source: cost.modelBreakdown
+    columns: [model, requests, tokens, costPerToken, totalCost, percentOfTotal]
+    actions: [view]
