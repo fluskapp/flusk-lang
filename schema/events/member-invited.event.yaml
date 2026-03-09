@@ -1,10 +1,10 @@
-name: member-invited
+name: MemberInvited
+channel: kafka
 payload:
-  - name: invite_id
-    type: integer
-  - name: email
-    type: string
-  - name: org_name
-    type: string
-triggers:
-  - worker: send-invite-email
+  fields:
+    - name: invite_id
+      type: number
+    - name: email
+      type: string
+    - name: org_name
+      type: string

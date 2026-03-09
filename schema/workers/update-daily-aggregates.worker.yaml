@@ -1,5 +1,8 @@
-name: update-daily-aggregates
-concurrency: 5
+name: UpdateDailyAggregates
+type: bullmq
 steps:
-  - load: telemetry-event
-  - call: aggregate-daily-usage
+  - id: load-telemetry-event
+    action: load
+    source: telemetry-event
+  - id: aggregate-daily-usage
+    call: aggregateDailyUsage

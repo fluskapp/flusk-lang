@@ -1,8 +1,8 @@
-name: knowledge-uploaded
+name: KnowledgeUploaded
+channel: kafka
 payload:
-  - name: kb_id
-    type: integer
-  - name: solution_id
-    type: integer
-triggers:
-  - worker: process-knowledge-base
+  fields:
+    - name: kb_id
+      type: number
+    - name: solution_id
+      type: number

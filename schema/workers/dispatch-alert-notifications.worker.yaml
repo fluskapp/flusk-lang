@@ -1,6 +1,11 @@
-name: dispatch-alert-notifications
-concurrency: 5
+name: DispatchAlertNotifications
+type: bullmq
 steps:
-  - load: alert
-  - load: alert-rule
-  - call: send-alert-notification
+  - id: load-alert
+    action: load
+    source: alert
+  - id: load-alert-rule
+    action: load
+    source: alert-rule
+  - id: send-alert-notification
+    call: sendAlertNotification

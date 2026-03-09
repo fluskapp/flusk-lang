@@ -1,7 +1,12 @@
-name: detect-anomalies
-concurrency: 3
+name: DetectAnomalies
+type: bullmq
 steps:
-  - load: usage-daily
-  - call: check-usage-spike
-  - condition: spike-detected
-  - emit: alert-triggered
+  - id: load-usage-daily
+    action: load
+    source: usage-daily
+  - id: check-usage-spike
+    call: checkUsageSpike
+  - id: spike-detected
+    action: condition
+  - id: emit-alert-triggered
+    action: emit

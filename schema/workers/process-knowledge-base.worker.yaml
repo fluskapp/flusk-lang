@@ -1,9 +1,13 @@
-name: process-knowledge-base
-concurrency: 2
+name: ProcessKnowledgeBase
+type: bullmq
 retry:
-  max: 3
+  maxAttempts: 3
   backoff: exponential
 steps:
-  - load: knowledge-base
-  - call: chunk-and-embed-content
-  - update: knowledge-base
+  - id: load-knowledge-base
+    action: load
+    source: knowledge-base
+  - id: chunk-and-embed-content
+    call: chunkAndEmbedContent
+  - id: update-knowledge-base
+    action: update

@@ -1,10 +1,10 @@
-name: new-tool-detected
+name: NewToolDetected
+channel: kafka
 payload:
-  - name: org_id
-    type: integer
-  - name: tool_name
-    type: string
-  - name: provider
-    type: string
-triggers:
-  - function: auto-classify-tool
+  fields:
+    - name: org_id
+      type: number
+    - name: tool_name
+      type: string
+    - name: provider
+      type: string

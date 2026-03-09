@@ -1,8 +1,8 @@
-name: org-created
+name: OrgCreated
+channel: kafka
 payload:
-  - name: org_id
-    type: integer
-  - name: name
-    type: string
-triggers:
-  - function: setup-default-tools
+  fields:
+    - name: org_id
+      type: number
+    - name: name
+      type: string

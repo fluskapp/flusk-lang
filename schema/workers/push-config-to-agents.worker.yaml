@@ -1,6 +1,11 @@
-name: push-config-to-agents
-concurrency: 10
+name: PushConfigToAgents
+type: bullmq
 steps:
-  - load: agent-config
-  - load: agent-device
-  - call: push-to-agents
+  - id: load-agent-config
+    action: load
+    source: agent-config
+  - id: load-agent-device
+    action: load
+    source: agent-device
+  - id: push-to-agents
+    call: pushToAgents

@@ -1,6 +1,6 @@
-name: slack-message-received
+name: SlackMessageReceived
+channel: webhook
 payload:
-  - name: message_id
-    type: string
-triggers:
-  - worker: process-slack-queue
+  fields:
+    - name: message_id
+      type: string

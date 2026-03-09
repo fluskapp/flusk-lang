@@ -1,5 +1,8 @@
-name: process-slack-queue
-concurrency: 5
+name: ProcessSlackQueue
+type: bullmq
 steps:
-  - load: bot-message
-  - call: send-slack-message
+  - id: load-bot-message
+    action: load
+    source: bot-message
+  - id: send-slack-message
+    call: sendSlackMessage

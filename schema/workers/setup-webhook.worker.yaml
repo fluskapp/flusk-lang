@@ -1,5 +1,8 @@
-name: setup-webhook
-concurrency: 1
+name: SetupWebhook
+type: bullmq
 steps:
-  - load: bot
-  - call: register-webhook-url
+  - id: load-bot
+    action: load
+    source: bot
+  - id: register-webhook-url
+    call: registerWebhookUrl

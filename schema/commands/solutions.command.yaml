@@ -1,18 +1,10 @@
 name: solutions
-subcommands:
-  - name: list
-    description: List solutions
-  - name: create
-    description: Create a new solution
-  - name: publish
-    description: Publish a solution to a channel
-    args:
-      - name: id
-        type: integer
-      - name: channel
-        type: string
-  - name: test
-    description: Test a solution interactively
-    args:
-      - name: id
-        type: integer
+description: Manage solutions operations
+args:
+  - name: action
+    type: string
+    required: true
+action:
+  call: handleSolutionsCommand
+  with:
+    action: action

@@ -1,6 +1,11 @@
-name: notify-agents-new-solution
-concurrency: 10
+name: NotifyAgentsNewSolution
+type: bullmq
 steps:
-  - load: deployment
-  - load: agent-device
-  - call: push-to-agents
+  - id: load-deployment
+    action: load
+    source: deployment
+  - id: load-agent-device
+    action: load
+    source: agent-device
+  - id: push-to-agents
+    call: pushToAgents

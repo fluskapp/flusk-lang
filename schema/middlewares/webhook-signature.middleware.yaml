@@ -1,6 +1,15 @@
 name: webhook-signature
-type: webhook-verify
-config:
-  header: x-webhook-signature
-  secret: $WEBHOOK_SECRET
-  algorithm: hmac-sha256
+description: Verify webhook request signatures using HMAC-SHA256
+phase: request
+inputs:
+  - name: signature
+    from: header:x-webhook-signature
+  - name: secret
+    from: env:WEBHOOK_SECRET
+steps:
+  - id: verify
+    action: call
+    value: verifyHmacSha256(signature, body, secret)
+  - id: reject
+    action: return
+    value: { status: 401, body: "Invalid signature" }

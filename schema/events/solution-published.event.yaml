@@ -1,12 +1,12 @@
-name: solution-published
+name: SolutionPublished
+channel: kafka
 payload:
-  - name: solution_id
-    type: integer
-  - name: deployment_id
-    type: integer
-  - name: channel
-    type: string
-  - name: org_id
-    type: integer
-triggers:
-  - worker: notify-agents-new-solution
+  fields:
+    - name: solution_id
+      type: number
+    - name: deployment_id
+      type: number
+    - name: channel_name
+      type: string
+    - name: org_id
+      type: number

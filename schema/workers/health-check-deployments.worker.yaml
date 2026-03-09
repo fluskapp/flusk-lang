@@ -1,6 +1,10 @@
-name: health-check-deployments
-concurrency: 5
+name: HealthCheckDeployments
+type: bullmq
 steps:
-  - load: deployment
-  - call: check-deployment-health
-  - update: deployment
+  - id: load-deployment
+    action: load
+    source: deployment
+  - id: check-deployment-health
+    call: checkDeploymentHealth
+  - id: update-deployment
+    action: update

@@ -1,8 +1,8 @@
-name: config-updated
+name: ConfigUpdated
+channel: kafka
 payload:
-  - name: org_id
-    type: integer
-  - name: version
-    type: integer
-triggers:
-  - worker: push-config-to-agents
+  fields:
+    - name: org_id
+      type: number
+    - name: version
+      type: number

@@ -1,7 +1,8 @@
-name: solution-created
+name: SolutionCreated
+channel: kafka
 payload:
-  - name: solution_id
-    type: integer
-  - name: org_id
-    type: integer
-triggers: []
+  fields:
+    - name: solution_id
+      type: number
+    - name: org_id
+      type: number

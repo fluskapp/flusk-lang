@@ -1,5 +1,8 @@
-name: create-shadow-alert
-concurrency: 3
+name: CreateShadowAlert
+type: bullmq
 steps:
-  - load: ai-tool
-  - call: create-alert
+  - id: load-ai-tool
+    action: load
+    source: ai-tool
+  - id: create-alert
+    call: createAlert

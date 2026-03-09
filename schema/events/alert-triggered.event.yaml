@@ -1,12 +1,12 @@
-name: alert-triggered
+name: AlertTriggered
+channel: kafka
 payload:
-  - name: org_id
-    type: integer
-  - name: alert_id
-    type: integer
-  - name: type
-    type: string
-  - name: severity
-    type: string
-triggers:
-  - worker: dispatch-alert-notifications
+  fields:
+    - name: org_id
+      type: number
+    - name: alert_id
+      type: number
+    - name: type
+      type: string
+    - name: severity
+      type: string

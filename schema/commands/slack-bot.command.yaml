@@ -1,4 +1,10 @@
 name: slack-bot
-subcommands:
-  - name: status
-    description: Show bot status
+description: Manage slack-bot operations
+args:
+  - name: action
+    type: string
+    required: true
+action:
+  call: handleSlackBotCommand
+  with:
+    action: action

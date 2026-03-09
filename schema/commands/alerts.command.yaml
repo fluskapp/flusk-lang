@@ -1,12 +1,14 @@
 name: alerts
-subcommands:
-  - name: list
-    description: List open alerts
-    args:
-      - name: org
-        type: string
-  - name: resolve
-    description: Resolve an alert
-    args:
-      - name: id
-        type: integer
+description: List open alerts for an organization
+args:
+  - name: org
+    type: string
+    required: true
+  - name: status
+    type: string
+    required: false
+action:
+  call: listAlerts
+  with:
+    org: org
+    status: status

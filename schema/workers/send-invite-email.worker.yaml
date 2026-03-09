@@ -1,5 +1,8 @@
-name: send-invite-email
-concurrency: 3
+name: SendInviteEmail
+type: bullmq
 steps:
-  - load: invite
-  - call: send-email
+  - id: load-invite
+    action: load
+    source: invite
+  - id: send-email
+    call: sendEmail
