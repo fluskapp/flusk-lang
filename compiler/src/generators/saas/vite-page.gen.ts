@@ -66,6 +66,9 @@ const SECTION_ICONS: Record<string, string[]> = {
   'goal-tree': ['ChevronRight', 'ChevronDown', 'Target', 'CheckCircle'],
   'connector-grid': [], 'trigger-table': ['MoreHorizontal', 'Zap'],
   'crud-table': ['Plus', 'Pencil', 'Trash2', 'X'], 'form': [],
+  'content-card': [], 'timeline': ['Calendar'], 'grouped-list': [],
+  'tag-list': ['CheckCircle'], 'progress-list': ['CheckCircle', 'Circle', 'Target'],
+  'collapsible': ['ChevronDown', 'ChevronRight'], 'stat-grid': [],
 };
 
 function lucideIcon(name: string): string { return ICON_MAP[name] ?? toPascal(name); }
@@ -93,10 +96,10 @@ function collectIcons(sections: any[]): Set<string> {
   return icons;
 }
 
-interface PageState { viewMode: boolean; activeTags: boolean; activeStatus: boolean; selectedFolder: boolean; }
+interface PageState { viewMode: boolean; activeTags: boolean; activeStatus: boolean; selectedFolder: boolean; collapsible: string[]; }
 
 function analyzePageState(sections: any[]): PageState {
-  const state: PageState = { viewMode: false, activeTags: false, activeStatus: false, selectedFolder: false };
+  const state: PageState = { viewMode: false, activeTags: false, activeStatus: false, selectedFolder: false, collapsible: [] };
   for (const section of sections) {
     if (section.type === 'filter-bar') {
       for (const f of section.filters ?? []) {
@@ -106,6 +109,20 @@ function analyzePageState(sections: any[]): PageState {
       }
     }
     if (section.type === 'folder-grid') state.selectedFolder = true;
+    if (section.type === 'collapsible') {
+      const id = section.name?.replace(/\s+/g, '') ?? section.title?.replace(/\s+/g, '') ?? `collapse${state.collapsible.length}`;
+      state.collapsible.push(id);
+    }
+    if (section.type === 'tabs-layout') {
+      for (const tab of section.tabs ?? []) {
+        for (const sub of tab.sections ?? []) {
+          if (sub.type === 'collapsible') {
+            const id = sub.name?.replace(/\s+/g, '') ?? sub.title?.replace(/\s+/g, '') ?? `collapse${state.collapsible.length}`;
+            state.collapsible.push(id);
+          }
+        }
+      }
+    }
   }
   return state;
 }
@@ -517,6 +534,192 @@ function renderForm(section: any, indent: string): string {
   return out;
 }
 
+function renderContentCard(section: any, indent: string): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('badge');
+  const title = section.title ?? section.name ?? '';
+  const display = section.display ?? {};
+  const field = display.field ?? 'content';
+  const fallback = display.fallback ?? '';
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const contentExpr = display.type === 'text' ? `${src}?.${field}` : `${src}?.${field}`;
+  const footerStats: any[] = section.footer?.stats ?? [];
+  let out = `${indent}<Card>\n`;
+  if (title) out += `${indent}  <CardHeader>\n${indent}    <CardTitle className="text-sm">${title}</CardTitle>\n${indent}  </CardHeader>\n`;
+  out += `${indent}  <CardContent>\n`;
+  out += `${indent}    <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{${contentExpr} ?? ${JSON.stringify(fallback)}}</p>\n`;
+  if (footerStats.length > 0) {
+    out += `${indent}    <div className="mt-4 pt-3 border-t border-stone-100 flex flex-wrap gap-2">\n`;
+    for (const stat of footerStats) {
+      const statExpr = stat.source ? sourceExpr(stat.source) : `${src}?.${stat.field ?? 'value'}`;
+      out += `${indent}      <Badge variant="outline">${stat.label ? stat.label + ': ' : ''}{${statExpr} ?? '—'}</Badge>\n`;
+    }
+    out += `${indent}    </div>\n`;
+  }
+  out += `${indent}  </CardContent>\n${indent}</Card>\n`;
+  return out;
+}
+
+function renderTimeline(section: any, indent: string): string {
+  shadcnNeeds.add('badge');
+  const title = section.title ?? section.name ?? '';
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const display = section.display ?? {};
+  const dateField = display.date_field ?? 'date';
+  const contentField = display.content_field ?? 'content';
+  const moodField = display.mood_field ?? 'mood';
+  const stats: any[] = display.stats ?? [];
+  let out = '';
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  out += `${indent}<div className="space-y-4">\n`;
+  out += `${indent}  {((${src}) as any[] ?? []).map((entry: any, i: number) => (\n`;
+  out += `${indent}    <div key={i} className="flex gap-4">\n`;
+  out += `${indent}      <div className="flex flex-col items-center">\n`;
+  out += `${indent}        <div className="w-2 h-2 rounded-full bg-stone-400 mt-2 flex-shrink-0" />\n`;
+  out += `${indent}        <div className="w-px flex-1 bg-stone-200" />\n`;
+  out += `${indent}      </div>\n`;
+  out += `${indent}      <div className="pb-4 min-w-0 flex-1">\n`;
+  out += `${indent}        <div className="flex items-center gap-2 mb-1">\n`;
+  out += `${indent}          <span className="text-xs font-medium text-stone-500">{entry.${dateField}}</span>\n`;
+  out += `${indent}          {entry.${moodField} && <span className="text-sm">{entry.${moodField}}</span>}\n`;
+  out += `${indent}        </div>\n`;
+  out += `${indent}        <p className="text-sm text-stone-700 line-clamp-3">{entry.${contentField}}</p>\n`;
+  if (stats.length > 0) {
+    out += `${indent}        <div className="mt-2 flex flex-wrap gap-1.5">\n`;
+    for (const stat of stats) {
+      out += `${indent}          {entry.${stat.field ?? stat.key ?? 'value'} != null && <Badge variant="outline">${stat.label ? stat.label + ': ' : ''}{entry.${stat.field ?? stat.key ?? 'value'}}</Badge>}\n`;
+    }
+    out += `${indent}        </div>\n`;
+  }
+  out += `${indent}      </div>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}  ))}\n`;
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderGroupedList(section: any, indent: string): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('badge');
+  const title = section.title ?? section.name ?? '';
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const groupBy = section.group_by ?? 'category';
+  const groupLabels: Record<string, string> = section.group_labels ?? {};
+  const display = section.display ?? {};
+  const emptyState = section.empty_state ?? 'No items found';
+  const actions: any[] = section.actions ?? [];
+  const groupLabelsJson = JSON.stringify(groupLabels);
+  let out = '';
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  out += `${indent}{(() => {\n`;
+  out += `${indent}  const items = (${src}) as any[] ?? [];\n`;
+  out += `${indent}  if (items.length === 0) return <p className="text-sm text-stone-400 py-6 text-center">${emptyState}</p>;\n`;
+  out += `${indent}  const labels: Record<string, string> = ${groupLabelsJson};\n`;
+  out += `${indent}  const groups: Record<string, any[]> = {};\n`;
+  out += `${indent}  for (const item of items) { const key = item.${groupBy} ?? 'other'; if (!groups[key]) groups[key] = []; groups[key].push(item); }\n`;
+  out += `${indent}  return (<div className="space-y-4">{Object.entries(groups).map(([key, groupItems]) => (\n`;
+  out += `${indent}    <div key={key}>\n`;
+  out += `${indent}      <h4 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">{labels[key] ?? key}</h4>\n`;
+  out += `${indent}      <div className="space-y-2">\n`;
+  out += `${indent}        {groupItems.map((item: any, i: number) => (\n`;
+  out += `${indent}          <Card key={i}>\n`;
+  out += `${indent}            <CardContent className="flex items-center justify-between px-4 py-3">\n`;
+  out += `${indent}              <div className="min-w-0 flex-1">\n`;
+  out += `${indent}                <p className="text-sm font-medium text-stone-900 truncate">{item.${display.title_field ?? 'name'} ?? item.name}</p>\n`;
+  if (display.subtitle_field) out += `${indent}                {item.${display.subtitle_field} && <p className="text-xs text-stone-500 truncate">{item.${display.subtitle_field}}</p>}\n`;
+  out += `${indent}              </div>\n`;
+  if (display.status_field) out += `${indent}              {item.${display.status_field} && <Badge variant="outline">{item.${display.status_field}}</Badge>}\n`;
+  out += `${indent}            </CardContent>\n`;
+  out += `${indent}          </Card>\n`;
+  out += `${indent}        ))}\n`;
+  out += `${indent}      </div>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}  ))}</div>);\n`;
+  out += `${indent}})()}\n`;
+  return out;
+}
+
+function renderTagList(section: any, indent: string): string {
+  shadcnNeeds.add('badge');
+  const title = section.title ?? section.name ?? '';
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const field = section.field ?? 'tags';
+  const iconName = section.icon ? lucideIcon(section.icon) : null;
+  const iconJsx = iconName ? `<${iconName} className="w-3 h-3 mr-1" />` : '';
+  let out = '';
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  out += `${indent}<div className="flex flex-wrap gap-2">\n`;
+  out += `${indent}  {((${src}?.${field}) as string[] ?? []).map((tag: string, i: number) => (\n`;
+  out += `${indent}    <Badge key={i} variant="secondary">${iconJsx}{tag}</Badge>\n`;
+  out += `${indent}  ))}\n`;
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderProgressList(section: any, indent: string): string {
+  shadcnNeeds.add('badge');
+  const title = section.title ?? section.name ?? '';
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const field = section.field ?? 'name';
+  const condition = section.condition ?? 'completed';
+  let out = '';
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  out += `${indent}<div className="space-y-2">\n`;
+  out += `${indent}  {((${src}) as any[] ?? []).map((item: any, i: number) => (\n`;
+  out += `${indent}    <div key={i} className="flex items-center gap-3 py-1.5">\n`;
+  out += `${indent}      {item.${condition} ? <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" /> : <Circle className="w-4 h-4 text-stone-300 flex-shrink-0" />}\n`;
+  out += `${indent}      <span className={\`text-sm \${item.${condition} ? 'text-stone-500 line-through' : 'text-stone-700'}\`}>{item.${field}}</span>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}  ))}\n`;
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderCollapsible(section: any, indent: string): string {
+  shadcnNeeds.add('card');
+  const title = section.title ?? section.name ?? '';
+  const stateId = section.name?.replace(/\s+/g, '') ?? section.title?.replace(/\s+/g, '') ?? 'collapse0';
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const display = section.display ?? {};
+  const field = display.field ?? 'content';
+  let out = `${indent}<Card>\n`;
+  out += `${indent}  <button onClick={() => set${stateId}((v) => !v)} className="w-full flex items-center justify-between px-5 py-4 text-left">\n`;
+  out += `${indent}    <span className="text-sm font-semibold text-stone-900">${title}</span>\n`;
+  out += `${indent}    {${stateId} ? <ChevronDown className="w-4 h-4 text-stone-400" /> : <ChevronRight className="w-4 h-4 text-stone-400" />}\n`;
+  out += `${indent}  </button>\n`;
+  out += `${indent}  {${stateId} && (\n`;
+  out += `${indent}    <div className="px-5 pb-4">\n`;
+  out += `${indent}      <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{${src}?.${field} ?? ''}</p>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}  )}\n`;
+  out += `${indent}</Card>\n`;
+  return out;
+}
+
+function renderStatGrid(section: any, indent: string): string {
+  shadcnNeeds.add('card');
+  const title = section.title ?? section.name ?? '';
+  const cols = section.columns ?? 4;
+  const stats: any[] = section.stats ?? [];
+  let out = '';
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  out += `${indent}<div className="grid grid-cols-2 md:grid-cols-${cols} gap-4">\n`;
+  for (const stat of stats) {
+    const src = stat.source ? sourceExpr(stat.source) : 'undefined';
+    const valExpr = stat.field ? `${src}?.${stat.field}` : src;
+    const iconName = stat.icon ? lucideIcon(stat.icon) : null;
+    const iconJsx = iconName ? `<${iconName} className="w-4 h-4 text-stone-400" />` : '';
+    const format = stat.format ?? 'number';
+    out += `${indent}  <Card>\n${indent}    <CardContent className="p-5">\n`;
+    out += `${indent}      <div className="flex items-start justify-between">\n`;
+    out += `${indent}        <p className="text-sm font-medium text-stone-500 leading-tight">${stat.label ?? ''}</p>\n`;
+    if (iconJsx) out += `${indent}        ${iconJsx}\n`;
+    out += `${indent}      </div>\n`;
+    out += `${indent}      <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{${valExpr} ?? '—'}</p>\n`;
+    out += `${indent}    </CardContent>\n${indent}  </Card>\n`;
+  }
+  out += `${indent}</div>\n`;
+  return out;
+}
+
 function renderTabsLayout(section: any, indent: string, isAuth = false, ctx?: { isMarketing?: boolean }): string {
   shadcnNeeds.add('tabs');
   const tabs: any[] = section.tabs ?? [];
@@ -573,6 +776,13 @@ function renderSection(section: any, indent: string, isAuth = false, ctx?: { isM
     case 'crud-table':    return renderCrudTable(section, indent);
     case 'form':          return renderForm(section, indent);
     case 'tabs-layout':   return renderTabsLayout(section, indent, isAuth, ctx);
+    case 'content-card':  return renderContentCard(section, indent);
+    case 'timeline':      return renderTimeline(section, indent);
+    case 'grouped-list':  return renderGroupedList(section, indent);
+    case 'tag-list':      return renderTagList(section, indent);
+    case 'progress-list': return renderProgressList(section, indent);
+    case 'collapsible':   return renderCollapsible(section, indent);
+    case 'stat-grid':     return renderStatGrid(section, indent);
     case 'detail-panel':  return `${indent}{/* Detail Panel: ${section.name} */}\n`;
     default:              return `${indent}{/* Section: ${section.name ?? ''} (type: ${section.type}) */}\n`;
   }
@@ -1010,7 +1220,11 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
   if (pageState.activeTags) code += `  const [activeTags, setActiveTags] = React.useState<string[]>([]);\n`;
   if (pageState.activeStatus) code += `  const [activeStatus, setActiveStatus] = React.useState<string>('');\n`;
   if (pageState.selectedFolder) code += `  const [selectedFolder, setSelectedFolder] = React.useState<string | null>(null);\n`;
-  if (isAuth && !hasFolderGrid && !hasSpotlightSearch && !hasSolutionCards && !hasCrudTable && !hasAgentTree && !hasGoalTree && !hasWorkflowPipeline && !pageState.viewMode && !pageState.activeTags && !pageState.activeStatus) {
+  for (const id of pageState.collapsible) {
+    const collapsed = true;
+    code += `  const [${id}, set${id}] = React.useState(${!collapsed});\n`;
+  }
+  if (isAuth && !hasFolderGrid && !hasSpotlightSearch && !hasSolutionCards && !hasCrudTable && !hasAgentTree && !hasGoalTree && !hasWorkflowPipeline && !pageState.viewMode && !pageState.activeTags && !pageState.activeStatus && pageState.collapsible.length === 0) {
     code += `  void isLoading;\n`;
   }
   code += '\n  return (\n';
