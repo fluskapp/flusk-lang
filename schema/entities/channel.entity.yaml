@@ -1,0 +1,48 @@
+name: Channel
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: type
+    type: enum
+    values:
+      - whatsapp
+      - telegram
+      - slack
+      - discord
+      - web
+      - email
+  - name: status
+    type: enum
+    default: pending
+    values:
+      - pending
+      - connecting
+      - active
+      - disconnected
+      - error
+  - name: config
+    type: json
+    description: Channel-specific config (phone number, bot token, webhook URL, etc.)
+  - name: external_id
+    type: string
+    required: false
+    index: true
+    description: External platform identifier (channel ID, phone number, etc.)
+  - name: last_message_at
+    type: datetime
+    required: false
+  - name: message_count
+    type: integer
+    default: 0
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM channel WHERE assistant_id = ?
+  - name: findByExternalId
+    sql: SELECT * FROM channel WHERE external_id = ?
+  - name: findActive
+    sql: SELECT * FROM channel WHERE assistant_id = ? AND status = 'active'
+relations:
+  - entity: Assistant
+    type: belongs-to
+    foreignKey: assistant_id

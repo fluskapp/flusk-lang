@@ -1,0 +1,82 @@
+name: GuardEvents
+type: table
+description: System events, actions, costs — full audit trail
+route: /app/events
+auth: true
+ssr: false
+data_sources:
+  events:
+    entity: GuardEvent
+    query: findByAssistant
+    params: [assistantId]
+    order: created_at DESC
+    limit: 100
+sections:
+  - name: EventFilters
+    type: filter-bar
+    filters:
+      - field: event_type
+        type: multi-select
+        label: "Type"
+        options:
+          - value: message_in
+            label: "Messages In"
+          - value: message_out
+            label: "Messages Out"
+          - value: tool_call
+            label: "Tool Calls"
+          - value: action
+            label: "Actions"
+          - value: cost
+            label: "Cost"
+          - value: error
+            label: "Errors"
+          - value: guard_block
+            label: "Blocked"
+          - value: pii_detected
+            label: "PII Detected"
+          - value: anomaly
+            label: "Anomalies"
+      - field: severity
+        type: multi-select
+        label: "Severity"
+        options: [info, warning, error, critical]
+      - field: channel
+        type: multi-select
+        label: "Channel"
+        options: [whatsapp, telegram, discord, slack, web]
+
+  - name: EventStream
+    type: event-list
+    source: events
+    realtime: true
+    display:
+      - field: created_at
+        type: timestamp
+        format: "HH:mm:ss"
+      - field: severity
+        type: severity-badge
+      - field: event_type
+        type: label
+        format: uppercase
+      - field: channel
+        type: icon
+      - field: details
+        type: json-preview
+        max_length: 100
+      - field: cost_cents
+        type: currency
+        condition: "cost_cents > 0"
+      - field: tokens_used
+        type: number
+        condition: "tokens_used > 0"
+      - field: blocked
+        type: blocked-badge
+        condition: "blocked == true"
+    actions:
+      - label: "Export Logs"
+        action: export
+        format: csv
+      - label: "Set Alert Rules"
+        action: navigate
+        to: /app/settings/alerts

@@ -1,0 +1,136 @@
+name: UserSettings
+type: form
+description: Assistant and account settings
+route: /app/settings
+auth: true
+ssr: false
+sections:
+  - name: Machine
+    type: settings-group
+    title: "Machine"
+    fields:
+      - name: plan
+        type: display
+        label: "Plan"
+        source: assistant.machine_tier
+        format: tier-display
+      - name: container_status
+        type: status-indicator
+        label: "Status"
+        source: assistant.container_status
+      - name: region
+        type: display
+        label: "Region"
+        value: "Europe (Frankfurt)"
+    actions:
+      - label: "Upgrade"
+        action: navigate
+        to: /app/settings/upgrade
+      - label: "Restart"
+        action: api-call
+        endpoint: POST /api/assistant/restart
+        confirm: "Restart your assistant?"
+      - label: "Stop"
+        action: api-call
+        endpoint: POST /api/assistant/stop
+        confirm: "Stop your assistant? You can restart it anytime."
+        variant: destructive
+
+  - name: AIModel
+    type: settings-group
+    title: "AI Model"
+    fields:
+      - name: llm_mode
+        type: radio
+        label: "Billing"
+        options:
+          - value: byok
+            label: "Bring your own key"
+          - value: managed
+            label: "Pay through Flusk (+15%)"
+      - name: llm_provider
+        type: select
+        label: "Provider"
+        options: [anthropic, openai, google, azure_openai]
+      - name: llm_model
+        type: select
+        label: "Model"
+        options:
+          - claude-sonnet-4-20250514
+          - claude-haiku-3.5
+          - gpt-4o
+          - gpt-4o-mini
+          - gemini-2.0-flash
+      - name: llm_budget_cents
+        type: number
+        label: "Monthly spending limit ($)"
+        format: currency
+
+  - name: Personality
+    type: settings-group
+    title: "Personality"
+    fields:
+      - name: name
+        type: text
+        label: "Assistant Name"
+        placeholder: "Assistant"
+      - name: soul
+        type: textarea
+        label: "Personality (SOUL.md)"
+        rows: 8
+        description: "Define how your assistant behaves, its tone, personality, and focus areas"
+      - name: user_context
+        type: textarea
+        label: "About You (USER.md)"
+        rows: 6
+        description: "Tell your assistant about yourself — name, job, preferences"
+
+  - name: Security
+    type: settings-group
+    title: "Flusk Guard"
+    fields:
+      - name: pii_filtering
+        type: toggle
+        label: "PII Filtering"
+        description: "Automatically detect and mask sensitive personal data"
+        default: true
+      - name: cost_cap
+        type: number
+        label: "Monthly cost cap ($)"
+        default: 50
+      - name: sandbox_level
+        type: select
+        label: "Sandbox Level"
+        options:
+          - value: strict
+            label: "Strict — chat only, no code execution"
+          - value: standard
+            label: "Standard — sandboxed execution"
+          - value: full
+            label: "Full — unrestricted (advanced users)"
+
+  - name: Account
+    type: settings-group
+    title: "Account"
+    fields:
+      - name: email
+        type: display
+        label: "Email"
+        source: user.email
+      - name: flusk_key
+        type: display
+        label: "Flusk Key"
+        source: user.flusk_key
+        format: masked-key
+    actions:
+      - label: "Billing"
+        action: navigate
+        to: /app/billing
+      - label: "Export Data"
+        action: api-call
+        endpoint: POST /api/account/export
+      - label: "Delete Account"
+        action: api-call
+        endpoint: DELETE /api/account
+        confirm: "Are you sure? This will permanently delete your assistant and all data."
+        variant: destructive

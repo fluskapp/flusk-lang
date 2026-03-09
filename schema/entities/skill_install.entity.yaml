@@ -1,0 +1,31 @@
+name: SkillInstall
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: skill_id
+    type: string
+    description: Marketplace skill identifier
+  - name: skill_version
+    type: string
+    default: latest
+  - name: config
+    type: json
+    required: false
+    description: Skill-specific configuration overrides
+  - name: status
+    type: enum
+    default: active
+    values:
+      - active
+      - disabled
+      - error
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM skill_install WHERE assistant_id = ?
+  - name: findBySkill
+    sql: SELECT * FROM skill_install WHERE skill_id = ?
+relations:
+  - entity: Assistant
+    type: belongs-to
+    foreignKey: assistant_id

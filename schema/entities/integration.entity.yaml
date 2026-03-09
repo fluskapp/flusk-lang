@@ -1,0 +1,52 @@
+name: Integration
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: provider
+    type: enum
+    values:
+      - google
+      - microsoft
+      - notion
+      - github
+      - jira
+      - slack
+      - salesforce
+      - hubspot
+      - zapier
+  - name: scopes
+    type: json
+    description: List of OAuth scopes granted
+  - name: access_token_ref
+    type: string
+    description: Reference key to secret vault entry for access token
+  - name: refresh_token_ref
+    type: string
+    required: false
+    description: Reference key to secret vault entry for refresh token
+  - name: token_expires_at
+    type: datetime
+    required: false
+  - name: status
+    type: enum
+    default: active
+    values:
+      - active
+      - expired
+      - revoked
+      - error
+  - name: last_used_at
+    type: datetime
+    required: false
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM integration WHERE assistant_id = ?
+  - name: findByAssistantAndProvider
+    sql: SELECT * FROM integration WHERE assistant_id = ? AND provider = ?
+  - name: findExpiring
+    sql: SELECT * FROM integration WHERE status = 'active' AND token_expires_at < ?
+relations:
+  - entity: Assistant
+    type: belongs-to
+    foreignKey: assistant_id

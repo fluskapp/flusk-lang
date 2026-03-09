@@ -1,0 +1,103 @@
+name: Assistant
+fields:
+  - name: account_id
+    type: integer
+    index: true
+  - name: user_id
+    type: integer
+    required: false
+    index: true
+  - name: name
+    type: string
+  - name: slug
+    type: string
+    index: true
+  - name: soul
+    type: string
+    required: false
+    description: SOUL.md content — assistant personality and core values
+  - name: identity
+    type: json
+    required: false
+    description: IDENTITY.md structured data — name, role, traits
+  - name: user_context
+    type: string
+    required: false
+    description: USER.md content — context about the user this assistant serves
+  - name: memory
+    type: string
+    required: false
+    description: MEMORY.md content — persistent memory across sessions
+  - name: llm_provider
+    type: enum
+    values:
+      - anthropic
+      - openai
+      - google
+      - azure_openai
+      - custom
+  - name: llm_model
+    type: string
+    default: claude-sonnet-4-20250514
+  - name: temperature
+    type: float
+    default: 0.7
+  - name: machine_tier
+    type: enum
+    values:
+      - starter
+      - pro
+      - power
+      - local
+    description: VPS/container size tier
+  - name: container_id
+    type: string
+    required: false
+    description: VPS or container identifier
+  - name: container_status
+    type: enum
+    default: pending
+    values:
+      - pending
+      - provisioning
+      - running
+      - stopped
+      - error
+  - name: openclaw_version
+    type: string
+    default: latest
+  - name: tools_enabled
+    type: json
+    default: '[]'
+    description: List of enabled tool identifiers
+  - name: sandbox_level
+    type: enum
+    default: standard
+    values:
+      - strict
+      - standard
+      - full
+  - name: status
+    type: enum
+    default: provisioning
+    values:
+      - active
+      - paused
+      - provisioning
+      - error
+queries:
+  - name: findByAccount
+    sql: SELECT * FROM assistant WHERE account_id = ?
+  - name: findByUser
+    sql: SELECT * FROM assistant WHERE user_id = ?
+  - name: findBySlug
+    sql: SELECT * FROM assistant WHERE slug = ?
+  - name: findRunning
+    sql: SELECT * FROM assistant WHERE container_status = 'running' AND status = 'active'
+relations:
+  - entity: Account
+    type: belongs-to
+    foreignKey: account_id
+  - entity: User
+    type: belongs-to
+    foreignKey: user_id

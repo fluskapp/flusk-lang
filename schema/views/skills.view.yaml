@@ -1,0 +1,95 @@
+name: Skills
+type: table
+description: Installed skills and marketplace
+route: /app/skills
+auth: true
+ssr: false
+data_sources:
+  installed:
+    entity: SkillInstall
+    query: findByAssistant
+    params: [assistantId]
+sections:
+  - name: InstalledSkills
+    type: card-grid
+    columns: 3
+    title: "Installed Skills"
+    source: installed
+    display:
+      - field: skill_id
+        type: heading
+        format: skill-name
+      - field: skill_version
+        type: badge
+      - field: status
+        type: status-badge
+    actions:
+      - label: "Configure"
+        action: edit
+      - label: "Disable"
+        action: update
+        field: status
+        value: disabled
+      - label: "Remove"
+        action: delete
+        confirm: "Remove this skill?"
+
+  - name: Marketplace
+    type: card-grid
+    columns: 3
+    title: "Skill Marketplace"
+    static_data:
+      - id: content-writer
+        name: "Content Writer"
+        icon: "pen-tool"
+        description: "Write blog posts, social media, newsletters"
+        category: "Writing"
+      - id: meeting-notes
+        name: "Meeting Notes"
+        icon: "mic"
+        description: "Auto-summarize meetings from calendar"
+        category: "Productivity"
+      - id: data-analyst
+        name: "Data Analyst"
+        icon: "bar-chart"
+        description: "Analyze CSV, Excel, databases"
+        category: "Data"
+      - id: code-reviewer
+        name: "Code Reviewer"
+        icon: "git-pull-request"
+        description: "Review PRs and suggest improvements"
+        category: "Development"
+      - id: web-researcher
+        name: "Web Researcher"
+        icon: "search"
+        description: "Deep research on any topic"
+        category: "Research"
+      - id: travel-planner
+        name: "Travel Planner"
+        icon: "plane"
+        description: "Find flights, hotels, plan trips"
+        category: "Lifestyle"
+      - id: expense-tracker
+        name: "Expense Tracker"
+        icon: "receipt"
+        description: "Track spending, generate reports"
+        category: "Finance"
+      - id: language-tutor
+        name: "Language Tutor"
+        icon: "languages"
+        description: "Practice conversations in any language"
+        category: "Learning"
+    display:
+      - field: name
+        type: heading
+      - field: description
+        type: subtitle
+      - field: category
+        type: badge
+    actions:
+      - label: "Install"
+        action: install-skill
+    search:
+      enabled: true
+      fields: [name, description, category]
+    note: "You can also install skills via chat: \"Hey, install the meeting notes skill\""

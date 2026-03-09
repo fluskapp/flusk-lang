@@ -1,0 +1,56 @@
+name: GuardEvent
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: event_type
+    type: enum
+    values:
+      - message_in
+      - message_out
+      - tool_call
+      - action
+      - cost
+      - error
+      - warning
+      - guard_block
+      - pii_detected
+      - anomaly
+  - name: severity
+    type: enum
+    default: info
+    values:
+      - info
+      - warning
+      - error
+      - critical
+  - name: channel
+    type: string
+    required: false
+    description: Channel identifier where the event originated
+  - name: details
+    type: json
+    description: Event-specific payload data
+  - name: cost_cents
+    type: integer
+    required: false
+    description: Cost of this event in cents
+  - name: tokens_used
+    type: integer
+    required: false
+  - name: model_used
+    type: string
+    required: false
+  - name: blocked
+    type: boolean
+    default: false
+    description: Whether this event was blocked by a guard rule
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM guard_event WHERE assistant_id = ?
+  - name: findByType
+    sql: SELECT * FROM guard_event WHERE assistant_id = ? AND event_type = ?
+  - name: findByTimeRange
+    sql: SELECT * FROM guard_event WHERE assistant_id = ? AND created_at BETWEEN ? AND ?
+  - name: findBlocked
+    sql: SELECT * FROM guard_event WHERE assistant_id = ? AND blocked = true ORDER BY created_at DESC

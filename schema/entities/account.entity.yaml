@@ -1,0 +1,79 @@
+name: Account
+fields:
+  - name: type
+    type: enum
+    values:
+      - personal
+      - organization
+  - name: name
+    type: string
+  - name: slug
+    type: string
+    unique: true
+  - name: owner_email
+    type: string
+    index: true
+  - name: plan
+    type: enum
+    default: free
+    values:
+      - free
+      - pro_starter
+      - pro
+      - pro_power
+      - enterprise
+  - name: llm_mode
+    type: enum
+    default: managed
+    values:
+      - managed
+      - byok
+    description: managed = Flusk provides LLM, byok = bring your own key
+  - name: llm_budget_cents
+    type: integer
+    required: false
+    description: Monthly LLM spend cap in cents
+  - name: status
+    type: enum
+    default: trial
+    values:
+      - active
+      - suspended
+      - trial
+      - cancelled
+  - name: trial_ends_at
+    type: datetime
+    required: false
+  - name: stripe_customer_id
+    type: string
+    required: false
+  - name: stripe_subscription_id
+    type: string
+    required: false
+  - name: sso_provider
+    type: enum
+    required: false
+    values:
+      - google
+      - okta
+      - azure_ad
+    description: Organization accounts only
+  - name: sso_config
+    type: json
+    required: false
+    description: SSO provider-specific configuration
+  - name: max_assistants
+    type: integer
+    default: 1
+  - name: max_users
+    type: integer
+    default: 1
+queries:
+  - name: findBySlug
+    sql: SELECT * FROM account WHERE slug = ?
+  - name: findByOwnerEmail
+    sql: SELECT * FROM account WHERE owner_email = ?
+  - name: findByStripeCustomer
+    sql: SELECT * FROM account WHERE stripe_customer_id = ?
+  - name: findActive
+    sql: SELECT * FROM account WHERE status = 'active'

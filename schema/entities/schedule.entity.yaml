@@ -1,0 +1,54 @@
+name: Schedule
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: name
+    type: string
+  - name: cron_expression
+    type: string
+    required: false
+    description: Standard cron expression (e.g. '0 9 * * 1-5')
+  - name: interval_ms
+    type: integer
+    required: false
+    description: Repeat interval in milliseconds (alternative to cron_expression)
+  - name: prompt
+    type: string
+    description: Prompt to send to the assistant when the schedule fires
+  - name: timezone
+    type: string
+    default: UTC
+  - name: last_run_at
+    type: datetime
+    required: false
+  - name: next_run_at
+    type: datetime
+    required: false
+  - name: run_count
+    type: integer
+    default: 0
+  - name: status
+    type: enum
+    default: active
+    values:
+      - active
+      - paused
+      - error
+  - name: delivery
+    type: enum
+    default: silent
+    values:
+      - channel
+      - silent
+      - webhook
+    description: Where to deliver the assistant response
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM schedule WHERE assistant_id = ?
+  - name: findDue
+    sql: SELECT * FROM schedule WHERE status = 'active' AND next_run_at <= ?
+relations:
+  - entity: Assistant
+    type: belongs-to
+    foreignKey: assistant_id

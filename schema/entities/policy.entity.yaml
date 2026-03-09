@@ -1,0 +1,43 @@
+name: Policy
+fields:
+  - name: account_id
+    type: integer
+    index: true
+  - name: name
+    type: string
+  - name: target_role
+    type: enum
+    required: false
+    values:
+      - owner
+      - admin
+      - user
+      - viewer
+    description: Role this policy applies to; null means applies to all roles
+  - name: target_department
+    type: string
+    required: false
+    description: Department this policy targets (org accounts only)
+  - name: rules
+    type: json
+    description: "Policy rules: tools_allowed, tools_blocked, integrations_allowed, max_messages_per_day, code_execution, require_approval, content_filters, cost_limit_daily_cents, allowed_models, blocked_topics, data_classification"
+  - name: priority
+    type: integer
+    default: 0
+    description: Higher priority policies override lower ones
+  - name: status
+    type: enum
+    default: draft
+    values:
+      - active
+      - draft
+      - disabled
+queries:
+  - name: findByAccount
+    sql: SELECT * FROM policy WHERE account_id = ? ORDER BY priority DESC
+  - name: findForRole
+    sql: SELECT * FROM policy WHERE account_id = ? AND (target_role = ? OR target_role IS NULL) AND status = 'active' ORDER BY priority DESC
+relations:
+  - entity: Account
+    type: belongs-to
+    foreignKey: account_id

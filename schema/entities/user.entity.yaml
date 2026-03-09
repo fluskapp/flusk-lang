@@ -1,0 +1,63 @@
+name: User
+fields:
+  - name: account_id
+    type: integer
+    index: true
+  - name: email
+    type: string
+    index: true
+  - name: name
+    type: string
+  - name: avatar_url
+    type: string
+    required: false
+  - name: role
+    type: enum
+    default: user
+    values:
+      - owner
+      - admin
+      - user
+      - viewer
+  - name: department
+    type: string
+    required: false
+    description: Organization accounts only
+  - name: job_title
+    type: string
+    required: false
+  - name: sso_id
+    type: string
+    required: false
+    index: true
+  - name: status
+    type: enum
+    default: invited
+    values:
+      - active
+      - invited
+      - disabled
+      - suspended
+  - name: last_login_at
+    type: datetime
+    required: false
+  - name: onboarding_complete
+    type: boolean
+    default: false
+  - name: flusk_key
+    type: string
+    unique: true
+    description: API key for local OpenClaw installs to connect to Flusk
+queries:
+  - name: findByEmail
+    sql: SELECT * FROM user WHERE email = ?
+  - name: findByAccount
+    sql: SELECT * FROM user WHERE account_id = ?
+  - name: findBySsoId
+    sql: SELECT * FROM user WHERE sso_id = ?
+  - name: findByFluskKey
+    sql: SELECT * FROM user WHERE flusk_key = ?
+relations:
+  - entity: Account
+    type: belongs-to
+    foreignKey: account_id

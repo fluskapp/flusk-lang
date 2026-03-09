@@ -1,0 +1,108 @@
+name: UserDashboard
+type: dashboard
+description: Main user dashboard — overview of assistant status and activity
+route: /app/dashboard
+auth: true
+ssr: false
+data_sources:
+  assistant:
+    entity: Assistant
+    query: findByUser
+    params: [currentUserId]
+  channels:
+    entity: Channel
+    query: findByAssistant
+    params: [assistantId]
+  recentEvents:
+    entity: GuardEvent
+    query: findByAssistant
+    params: [assistantId]
+    limit: 10
+  usageDaily:
+    entity: UsageDaily
+    query: findByAssistant
+    params: [assistantId]
+    limit: 7
+sections:
+  - name: AssistantStatus
+    type: status-card
+    title: "Your Assistant"
+    fields:
+      - name: status
+        label: "Status"
+        type: status-indicator
+        source: assistant.container_status
+      - name: plan
+        label: "Machine"
+        source: assistant.machine_tier
+      - name: model
+        label: "Model"
+        source: assistant.llm_model
+      - name: uptime
+        label: "Uptime"
+        type: duration
+        source: assistant.created_at
+
+  - name: Channels
+    type: card-list
+    title: "Connected Channels"
+    source: channels
+    display:
+      - field: type
+        label: "Channel"
+        type: icon-label
+      - field: status
+        label: "Status"
+        type: status-badge
+      - field: message_count
+        label: "Messages"
+        type: number
+    actions:
+      - label: "+ Connect Channel"
+        action: navigate
+        to: /app/channels
+
+  - name: WeeklyStats
+    type: stat-grid
+    columns: 4
+    title: "This Week"
+    stats:
+      - label: "Messages"
+        source: usageDaily
+        aggregate: sum
+        field: message_count
+        icon: "message-square"
+      - label: "Actions"
+        source: usageDaily
+        aggregate: sum
+        field: action_count
+        icon: "zap"
+      - label: "AI Cost"
+        source: usageDaily
+        aggregate: sum
+        field: cost_cents
+        format: currency
+        icon: "dollar-sign"
+      - label: "Skills Used"
+        source: usageDaily
+        aggregate: max
+        field: skills_active
+        icon: "puzzle"
+
+  - name: RecentActivity
+    type: event-list
+    title: "Recent Activity"
+    source: recentEvents
+    display:
+      - field: created_at
+        type: timestamp
+      - field: severity
+        type: severity-badge
+      - field: event_type
+        type: label
+      - field: details
+        type: json-preview
+    actions:
+      - label: "View All Events"
+        action: navigate
+        to: /app/events
