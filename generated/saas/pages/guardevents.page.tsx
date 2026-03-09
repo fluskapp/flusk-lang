@@ -10,12 +10,9 @@ export function GuardEventsPage() {
   return (
     <div className="min-h-screen bg-stone-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl border border-stone-200 shadow-sm">
-          <div className="px-3 py-2 text-sm border border-stone-200 rounded-lg text-stone-500">{/* multi-select */}</div>
-          <div className="px-3 py-2 text-sm border border-stone-200 rounded-lg text-stone-500">{/* multi-select */}</div>
-          <div className="px-3 py-2 text-sm border border-stone-200 rounded-lg text-stone-500">{/* multi-select */}</div>
-        </div>
-        {/* Section: EventStream (type: event-list) */}
+        {/* Section: GuardStatus (type: status-card) */}
+        {/* Section: RecentBlocks (type: event-list) */}
+        {/* Section: AllEvents (type: collapsible) */}
       </div>
     </div>
   );

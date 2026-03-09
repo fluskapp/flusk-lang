@@ -1,6 +1,6 @@
 name: UserDashboard
 type: dashboard
-description: Main user dashboard — overview of assistant status and activity
+description: Main user dashboard — day summaries, assistant status, simple and clean
 route: /app/dashboard
 auth: true
 ssr: false
@@ -13,16 +13,18 @@ data_sources:
     entity: Channel
     query: findByAssistant
     params: [assistantId]
-  recentEvents:
-    entity: GuardEvent
+  todaySummary:
+    entity: DaySummary
+    query: findByDate
+    params: [assistantId, today]
+  recentSummaries:
+    entity: DaySummary
+    query: findRecent
+    params: [assistantId, 7]
+  guardPolicy:
+    entity: GuardPolicy
     query: findByAssistant
     params: [assistantId]
-    limit: 10
-  usageDaily:
-    entity: UsageDaily
-    query: findByAssistant
-    params: [assistantId]
-    limit: 7
 sections:
   - name: AssistantStatus
     type: status-card
@@ -35,13 +37,15 @@ sections:
       - name: plan
         label: "Machine"
         source: assistant.machine_tier
+        format: tier-label
       - name: model
         label: "Model"
         source: assistant.llm_model
-      - name: uptime
-        label: "Uptime"
-        type: duration
-        source: assistant.created_at
+      - name: guard
+        label: "Guard"
+        type: status-indicator
+        value: active
+        icon: shield
 
   - name: Channels
     type: card-list
@@ -61,48 +65,49 @@ sections:
       - label: "+ Connect Channel"
         action: navigate
         to: /app/channels
+    empty_state:
+      title: "No channels connected"
+      description: "Connect WhatsApp, Telegram, or Discord to start chatting"
+      action:
+        label: "Connect a Channel"
+        to: /app/channels
 
-  - name: WeeklyStats
-    type: stat-grid
-    columns: 4
-    title: "This Week"
-    stats:
-      - label: "Messages"
-        source: usageDaily
-        aggregate: sum
-        field: message_count
-        icon: "message-square"
-      - label: "Actions"
-        source: usageDaily
-        aggregate: sum
-        field: action_count
-        icon: "zap"
-      - label: "AI Cost"
-        source: usageDaily
-        aggregate: sum
-        field: cost_cents
-        format: currency
-        icon: "dollar-sign"
-      - label: "Skills Used"
-        source: usageDaily
-        aggregate: max
-        field: skills_active
-        icon: "puzzle"
-
-  - name: RecentActivity
-    type: event-list
-    title: "Recent Activity"
-    source: recentEvents
+  - name: TodaySummary
+    type: content-card
+    title: "Today"
+    source: todaySummary
     display:
-      - field: created_at
-        type: timestamp
-      - field: severity
-        type: severity-badge
-      - field: event_type
-        type: label
-      - field: details
-        type: json-preview
-    actions:
-      - label: "View All Events"
-        action: navigate
-        to: /app/events
+      field: summary_text
+      type: markdown
+      fallback: "Your assistant hasn't had any conversations today yet. Send a message to get started! 🦞"
+    footer:
+      stats:
+        - label: "Messages"
+          field: message_count
+        - label: "Actions"
+          field: action_count
+        - label: "Cost"
+          field: cost_cents
+          format: currency
+        - label: "Guard Blocks"
+          field: guard_blocks
+          condition: "guard_blocks > 0"
+          type: warning-badge
+
+  - name: RecentDays
+    type: timeline
+    title: "This Week"
+    source: recentSummaries
+    display:
+      date_field: date
+      content_field: summary_text
+      mood_field: mood
+      stats:
+        - field: message_count
+          label: "msgs"
+        - field: cost_cents
+          label: "cost"
+          format: currency
+    on_click:
+      action: navigate
+      to: /app/days/:date

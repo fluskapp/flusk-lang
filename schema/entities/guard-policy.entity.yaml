@@ -1,0 +1,56 @@
+name: GuardPolicy
+description: Secured Claw proxy rules — what the guard allows, blocks, and monitors
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: pii_detection
+    type: boolean
+    default: true
+    description: Scan outbound messages for PII and mask them
+  - name: cost_cap_cents
+    type: integer
+    default: 5000
+    description: Monthly cost cap in cents ($50 default)
+  - name: daily_cost_cap_cents
+    type: integer
+    required: false
+    description: Daily cost cap in cents (optional, more granular)
+  - name: rate_limit_per_minute
+    type: integer
+    default: 30
+  - name: blocked_domains
+    type: json
+    default: '[]'
+    description: Domains the assistant cannot access
+  - name: allowed_tools
+    type: json
+    default: '["exec","read","write","edit","web_search"]'
+    description: Tools the assistant is allowed to use
+  - name: blocked_tools
+    type: json
+    default: '["browser"]'
+    description: Tools explicitly denied
+  - name: require_approval_tools
+    type: json
+    default: '["send_email","send_message","post_social"]'
+    description: Tools that need user confirmation before executing
+  - name: intent_matching
+    type: boolean
+    default: true
+    description: Check if tool calls match the user's original intent
+  - name: sandbox_level
+    type: enum
+    default: standard
+    values:
+      - strict
+      - standard
+      - full
+    description: strict=no network, standard=limited network, full=unrestricted
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM guard_policy WHERE assistant_id = ?
+relations:
+  - entity: Assistant
+    type: belongs-to
+    foreignKey: assistant_id

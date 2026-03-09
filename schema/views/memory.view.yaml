@@ -1,0 +1,93 @@
+name: Memory
+type: table
+description: What your assistant remembers — clean, curated, editable
+route: /app/memory
+auth: true
+ssr: false
+data_sources:
+  memories:
+    entity: MemoryEntry
+    query: findByAssistant
+    params: [assistantId]
+  assistantMemory:
+    entity: Assistant
+    query: findByUser
+    params: [currentUserId]
+    fields: [memory]
+sections:
+  - name: MemoryOverview
+    type: content-card
+    title: "Your Assistant's Memory"
+    description: "These are the things your assistant has decided to remember. You can edit, remove, or add entries. The assistant curates this list weekly — keeping what matters, forgetting what doesn't."
+
+  - name: MemoryCategories
+    type: grouped-list
+    source: memories
+    group_by: category
+    group_labels:
+      decision: "📋 Decisions"
+      preference: "⚙️ Your Preferences"
+      goal: "🎯 Goals"
+      person: "👥 People"
+      date: "📅 Important Dates"
+      boundary: "🚫 Boundaries"
+      insight: "💡 Insights"
+    display:
+      - field: content
+        type: text
+      - field: context
+        type: text-muted
+        condition: "context != null"
+      - field: importance
+        type: importance-badge
+      - field: source_date
+        type: date
+        format: "MMM D"
+    actions:
+      - label: "Edit"
+        action: inline-edit
+        fields: [content, importance]
+      - label: "Forget"
+        action: archive
+        confirm: "Remove this from your assistant's memory?"
+    empty_state:
+      title: "No memories yet"
+      description: "As you talk to your assistant, it will learn what matters and remember it here."
+
+  - name: AddMemory
+    type: form
+    title: "Tell Your Assistant Something"
+    description: "Anything you add here will be remembered in future conversations."
+    fields:
+      - name: content
+        label: "What should I remember?"
+        type: textarea
+        placeholder: "e.g., I prefer morning meetings, My wife's birthday is June 15th"
+      - name: category
+        label: "Category"
+        type: select
+        options:
+          - value: preference
+            label: "Preference"
+          - value: person
+            label: "Person"
+          - value: date
+            label: "Important Date"
+          - value: goal
+            label: "Goal"
+          - value: boundary
+            label: "Boundary / Off-limits"
+          - value: insight
+            label: "Insight"
+    submit:
+      label: "Remember This"
+      entity: MemoryEntry
+
+  - name: RawMemory
+    type: collapsible
+    title: "Raw MEMORY.md"
+    collapsed: true
+    source: assistantMemory
+    display:
+      field: memory
+      type: markdown-editor

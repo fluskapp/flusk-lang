@@ -12,8 +12,8 @@ export function UserDashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Section: AssistantStatus (type: status-card) */}
         {/* Section: Channels (type: card-list) */}
-        {/* Section: WeeklyStats (type: stat-grid) */}
-        {/* Section: RecentActivity (type: event-list) */}
+        {/* Section: TodaySummary (type: content-card) */}
+        {/* Section: RecentDays (type: timeline) */}
       </div>
     </div>
   );

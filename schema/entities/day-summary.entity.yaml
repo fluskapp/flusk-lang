@@ -1,0 +1,75 @@
+name: DaySummary
+description: Human-readable daily summary of assistant activity — the primary view for users
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: date
+    type: date
+    index: true
+  - name: summary_text
+    type: string
+    description: Human-readable narrative of the day (markdown, with emoji, written like a diary entry)
+  - name: key_decisions
+    type: json
+    required: false
+    description: Array of important decisions made today
+  - name: goals_progress
+    type: json
+    required: false
+    description: Array of goals and their status updates
+  - name: people_mentioned
+    type: json
+    required: false
+    description: Array of people mentioned in conversations
+  - name: personality_notes
+    type: json
+    required: false
+    description: Things learned about the user's preferences
+  - name: things_to_remember
+    type: json
+    required: false
+    description: Items flagged for long-term memory
+  - name: message_count
+    type: integer
+    default: 0
+  - name: action_count
+    type: integer
+    default: 0
+  - name: cost_cents
+    type: integer
+    default: 0
+  - name: guard_blocks
+    type: integer
+    default: 0
+  - name: pii_detections
+    type: integer
+    default: 0
+  - name: channels_used
+    type: json
+    default: '[]'
+    description: Array of channel names used today
+  - name: mood
+    type: enum
+    required: false
+    values:
+      - productive
+      - creative
+      - busy
+      - quiet
+      - stressed
+      - exploratory
+    description: Overall vibe of the day (determined by summary generator)
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM day_summary WHERE assistant_id = ? ORDER BY date DESC
+  - name: findByDate
+    sql: SELECT * FROM day_summary WHERE assistant_id = ? AND date = ?
+  - name: findByDateRange
+    sql: SELECT * FROM day_summary WHERE assistant_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC
+  - name: findRecent
+    sql: SELECT * FROM day_summary WHERE assistant_id = ? ORDER BY date DESC LIMIT ?
+relations:
+  - entity: Assistant
+    type: belongs-to
+    foreignKey: assistant_id

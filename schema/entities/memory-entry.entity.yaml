@@ -1,0 +1,61 @@
+name: MemoryEntry
+description: Curated long-term memory entries — only the important stuff survives
+fields:
+  - name: assistant_id
+    type: integer
+    index: true
+  - name: category
+    type: enum
+    values:
+      - decision
+      - preference
+      - goal
+      - person
+      - date
+      - boundary
+      - insight
+    description: What kind of memory this is
+  - name: content
+    type: string
+    description: The actual memory in human-readable form
+  - name: context
+    type: string
+    required: false
+    description: Why this matters or when it came up
+  - name: source_date
+    type: date
+    description: When this was first learned
+  - name: last_referenced
+    type: datetime
+    required: false
+    description: Last time this memory was relevant in a conversation
+  - name: importance
+    type: enum
+    default: normal
+    values:
+      - critical
+      - high
+      - normal
+      - low
+    description: How important this is to keep
+  - name: status
+    type: enum
+    default: active
+    values:
+      - active
+      - archived
+      - expired
+    description: Active memories are in MEMORY.md, archived are kept but not loaded
+queries:
+  - name: findByAssistant
+    sql: SELECT * FROM memory_entry WHERE assistant_id = ? AND status = 'active' ORDER BY importance DESC, source_date DESC
+  - name: findByCategory
+    sql: SELECT * FROM memory_entry WHERE assistant_id = ? AND category = ? AND status = 'active'
+  - name: findCritical
+    sql: SELECT * FROM memory_entry WHERE assistant_id = ? AND importance = 'critical' AND status = 'active'
+  - name: findStale
+    sql: SELECT * FROM memory_entry WHERE assistant_id = ? AND status = 'active' AND last_referenced < ? ORDER BY last_referenced ASC
+relations:
+  - entity: Assistant
+    type: belongs-to
+    foreignKey: assistant_id

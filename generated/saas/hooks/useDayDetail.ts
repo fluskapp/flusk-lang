@@ -2,18 +2,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
-export function useGuardEvents() {
+export function useDayDetail() {
   return useQuery({
-    queryKey: ['GuardEvents'],
+    queryKey: ['DayDetail'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any[]>('/api/guard_policy').catch(() => []),
       apiClient.get<any[]>('/api/events').catch(() => [])
       ]);
       return {
-      guardPolicy: results[0],
-      events: results[1],
-      blockedEvents: {}
+      events: results[0],
+      summary: {}
       };
     },
   });

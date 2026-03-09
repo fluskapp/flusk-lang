@@ -8,14 +8,13 @@ export function useUserDashboard() {
     queryFn: async () => {
       const results = await Promise.all([
       apiClient.get<any[]>('/api/assistant').catch(() => []),
-      apiClient.get<any[]>('/api/channels').catch(() => []),
-      apiClient.get<any[]>('/api/usage_daily').catch(() => [])
+      apiClient.get<any[]>('/api/channels').catch(() => [])
       ]);
       return {
       assistant: results[0],
       channels: results[1],
-      usageDaily: results[2],
-      recentEvents: {}
+      todaySummary: {},
+      recentSummaries: {}
       };
     },
   });

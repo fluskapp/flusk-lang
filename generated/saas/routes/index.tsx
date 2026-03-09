@@ -12,7 +12,9 @@ import { ChatUIPage } from '../pages/chatui.page';
 import { ConversationViewPage } from '../pages/conversation-view.page';
 import { ConversationsPage } from '../pages/conversations.page';
 import { CostOverviewPage } from '../pages/costoverview.page';
+import { DayDetailPage } from '../pages/daydetail.page';
 import { GuardEventsPage } from '../pages/guardevents.page';
+import { MemoryPage } from '../pages/memory.page';
 import { OnboardingPage } from '../pages/onboarding.page';
 import { SkillsPage } from '../pages/skills.page';
 import { SlackSettingsPage } from '../pages/slack-settings.page';
@@ -33,7 +35,9 @@ export const router = createBrowserRouter([
   { path: '/dashboard', element: <BotDashboardPage /> },
   { path: '/bots/:id/conversations/:conversationId', element: <ConversationViewPage /> },
   { path: '/app/conversations', element: <ConversationsPage /> },
-  { path: '/app/events', element: <GuardEventsPage /> },
+  { path: '/app/days/:date', element: <DayDetailPage /> },
+  { path: '/app/guard', element: <GuardEventsPage /> },
+  { path: '/app/memory', element: <MemoryPage /> },
   { path: '/onboarding', element: <OnboardingPage /> },
   { path: '/app/skills', element: <SkillsPage /> },
   { path: '/settings/slack', element: <SlackSettingsPage /> },
