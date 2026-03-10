@@ -1,36 +1,71 @@
 name: Bot
+description: A managed AI bot instance. Runtime-agnostic — today OpenClaw, tomorrow anything.
 fields:
   - name: name
     type: string
     required: true
-  - name: phone_number
-    type: string
-    unique: true
-  - name: system_prompt
-    type: string
-  - name: model
+    description: User-chosen name for the bot
+  - name: owner_id
+    type: integer
+    index: true
+    description: User who owns this bot
+  - name: runtime
     type: enum
-    default: gpt-4o
+    default: openclaw
     values:
-      - gpt-4o
-      - claude-sonnet
-      - gemini-pro
-  - name: temperature
-    type: float
-    default: 0.7
-  - name: max_tokens
-    type: number
-    default: 1024
+      - openclaw
+      - langchain
+      - crewai
+      - generic
+    description: Which AI runtime this bot uses
+  - name: runtime_url
+    type: string
+    required: false
+    description: URL of the runtime (e.g. localhost:18789)
+  - name: runtime_status
+    type: enum
+    default: unknown
+    values:
+      - running
+      - stopped
+      - provisioning
+      - error
+      - unknown
+  - name: tier
+    type: enum
+    default: free
+    values:
+      - free
+      - starter
+      - pro
+      - power
+  - name: model
+    type: string
+    required: false
+    description: Current LLM model
+  - name: soul
+    type: text
+    required: false
+    description: Path or content of SOUL.md
+  - name: identity
+    type: text
+    required: false
+    description: Path or content of IDENTITY.md
+  - name: user_context
+    type: text
+    required: false
+    description: Path or content of USER.md
+  - name: workspace_path
+    type: string
+    required: false
+    description: Local filesystem path to the bot workspace
   - name: active
     type: boolean
     default: true
-  - name: owner_id
-    type: string
-    index: true
 queries:
   - name: findByOwner
     sql: SELECT * FROM bot WHERE owner_id = ?
-  - name: findByPhone
-    sql: SELECT * FROM bot WHERE phone_number = ?
   - name: findActive
-    sql: SELECT * FROM bot WHERE active = 1
+    sql: SELECT * FROM bot WHERE owner_id = ? AND active = true
+  - name: findByRuntime
+    sql: SELECT * FROM bot WHERE runtime = ?

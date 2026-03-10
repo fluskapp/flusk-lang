@@ -6,5 +6,5 @@ export const dispatchAlertNotificationsHandler = async (job: { data: Record<stri
   const { data } = job;
     // TODO: implement step "load-alert"
     // TODO: implement step "load-alert-rule"
-    const send-alert-notification = await send-alert-notification();
+    const send-alert-notification = await sendAlertNotification();
 };

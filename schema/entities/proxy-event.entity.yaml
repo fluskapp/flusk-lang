@@ -1,0 +1,73 @@
+name: ProxyEvent
+description: Every request/response/action that passes through the Flusk proxy
+fields:
+  - name: bot_id
+    type: integer
+    index: true
+    description: The bot this event belongs to
+  - name: direction
+    type: enum
+    values:
+      - inbound
+      - outbound
+      - tool_call
+      - internal
+  - name: event_type
+    type: enum
+    values:
+      - message
+      - tool_call
+      - api_call
+      - pii_detected
+      - pii_masked
+      - policy_block
+      - rate_limit
+      - cost_alert
+      - error
+  - name: channel
+    type: string
+    required: false
+    description: whatsapp, telegram, web, api
+  - name: content_preview
+    type: string
+    required: false
+    description: Human-readable summary of what happened (cynical tone)
+  - name: details
+    type: json
+    required: false
+    description: Full event payload
+  - name: cost_usd
+    type: float
+    default: 0
+  - name: tokens
+    type: integer
+    default: 0
+  - name: model
+    type: string
+    required: false
+  - name: blocked
+    type: boolean
+    default: false
+  - name: pii_found
+    type: boolean
+    default: false
+  - name: pii_types
+    type: json
+    required: false
+    description: Array of PII types found (e.g. ["email", "israeli_id"])
+  - name: latency_ms
+    type: integer
+    required: false
+  - name: session_id
+    type: string
+    required: false
+    index: true
+queries:
+  - name: findByBot
+    sql: SELECT * FROM proxy_event WHERE bot_id = ? ORDER BY created_at DESC LIMIT ?
+  - name: findBlocked
+    sql: SELECT * FROM proxy_event WHERE bot_id = ? AND blocked = true ORDER BY created_at DESC
+  - name: findPII
+    sql: SELECT * FROM proxy_event WHERE bot_id = ? AND pii_found = true ORDER BY created_at DESC
+  - name: dailyCost
+    sql: SELECT date(created_at) as day, SUM(cost_usd) as total_cost, SUM(tokens) as total_tokens FROM proxy_event WHERE bot_id = ? GROUP BY day ORDER BY day DESC

@@ -1,37 +1,81 @@
-name: bot-dashboard
-type: page
-route: /dashboard
-title: WhatsApp Bots
-loader: list-bots
+name: BotDashboard
+description: Main bot dashboard — real data from proxy
+layout: single-column
 sections:
-  - layout:
-      md: grid-4
-    widgets:
-      - type: stat-card
-        source: data.totalBots
-        label: Total Bots
-        icon: 🤖
-      - type: stat-card
-        source: data.activeBots
-        label: Active
-        icon: ✅
-      - type: stat-card
-        source: data.totalMessages
-        label: Messages Today
-        format: number
-      - type: stat-card
-        source: data.totalCost
-        label: Cost Today
+  - name: status
+    type: status-bar
+    data:
+      - field: runtime_status
+        source: bot
+        display: dot-label
+      - field: model
+        source: bot
+      - field: channels_count
+        source: proxy_session
+        aggregate: count_distinct(channel)
+      - field: guard_active
+        static: true
+
+  - name: usage
+    type: stats-grid
+    title: This week
+    columns: 3
+    data:
+      - label: cost
+        source: proxy_event
+        aggregate: sum(cost_usd)
+        filter: created_at >= now() - 7d
         format: currency
-  - h2: Your Bots
-  - source: data.bots
-    columns:
-      - name
-      - phone_number
-      - model
-      - active
-      - created_at
-    actions:
-      - edit
-      - stats
-      - toggle
+      - label: tokens
+        source: proxy_event
+        aggregate: sum(tokens)
+        filter: created_at >= now() - 7d
+        format: number
+      - label: sessions
+        source: proxy_session
+        aggregate: count
+        filter: status = active
+        format: number
+
+  - name: channels
+    type: list
+    title: Channels
+    source: runtime_adapter.getChannels()
+    fields:
+      - name: name
+      - name: detail
+      - name: connected
+        display: dot-label
+
+  - name: sessions
+    type: list
+    title: Active sessions
+    source: proxy_session
+    filter: status = active
+    limit: 5
+    sort: last_activity desc
+    fields:
+      - name: display_name
+      - name: total_tokens
+        format: number
+
+  - name: solutions
+    type: list
+    title: Solutions
+    source: runtime_adapter.getSolutions()
+    filter: enabled = true
+    fields:
+      - name: name
+        transform: capitalize
+      - name: enabled
+        display: badge
+
+  - name: links
+    type: quick-links
+    items:
+      - label: "{memory_count} memories →"
+        path: /app/bot/memory
+      - label: "Guard →"
+        path: /app/bot/guard
+      - label: "{skills_count} skills →"
+        path: /app/bot/skills

@@ -3,13 +3,17 @@
 export interface Bot {
   id: string;
   name: string;
-  phone_number: string;
-  system_prompt: string;
-  model: 'gpt-4o' | 'claude-sonnet' | 'gemini-pro';
-  temperature: unknown;
-  max_tokens: number;
+  owner_id: unknown;
+  runtime: 'openclaw' | 'langchain' | 'crewai' | 'generic';
+  runtime_url?: string;
+  runtime_status: 'running' | 'stopped' | 'provisioning' | 'error' | 'unknown';
+  tier: 'free' | 'starter' | 'pro' | 'power';
+  model?: string;
+  soul?: unknown;
+  identity?: unknown;
+  user_context?: unknown;
+  workspace_path?: string;
   active: boolean;
-  owner_id: string;
   createdAt: string;
   updatedAt: string;
 }

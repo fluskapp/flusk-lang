@@ -1,0 +1,49 @@
+name: ProxyConfig
+description: Per-bot proxy configuration (policies, limits, features)
+fields:
+  - name: bot_id
+    type: integer
+    unique: true
+  - name: pii_detection
+    type: boolean
+    default: true
+  - name: pii_masking
+    type: boolean
+    default: true
+    description: Whether to mask PII in outbound messages
+  - name: cost_cap_daily_usd
+    type: float
+    required: false
+    description: Daily cost cap in USD (null = unlimited)
+  - name: cost_cap_monthly_usd
+    type: float
+    required: false
+  - name: rate_limit_per_minute
+    type: integer
+    default: 60
+  - name: rate_limit_per_day
+    type: integer
+    required: false
+  - name: allowed_tools
+    type: json
+    required: false
+    description: List of allowed tool names (null = all allowed)
+  - name: blocked_tools
+    type: json
+    required: false
+    description: List of blocked tool names
+  - name: allowed_domains
+    type: json
+    required: false
+    description: Allowed outbound domains
+  - name: require_approval
+    type: boolean
+    default: false
+    description: Enterprise - require human approval for risky actions
+  - name: intent_validation
+    type: boolean
+    default: false
+    description: Validate assistant actions match user intent
+queries:
+  - name: findByBot
+    sql: SELECT * FROM proxy_config WHERE bot_id = ?

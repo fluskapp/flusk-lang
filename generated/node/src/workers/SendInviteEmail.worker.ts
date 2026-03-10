@@ -5,5 +5,5 @@ export const sendInviteEmailQueue = 'sendInviteEmail';
 export const sendInviteEmailHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-invite"
-    const send-email = await send-email();
+    const send-email = await sendEmail();
 };

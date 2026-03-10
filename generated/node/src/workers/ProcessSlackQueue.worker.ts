@@ -5,5 +5,5 @@ export const processSlackQueueQueue = 'processSlackQueue';
 export const processSlackQueueHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-bot-message"
-    const send-slack-message = await send-slack-message();
+    const send-slack-message = await sendSlackMessage();
 };

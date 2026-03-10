@@ -5,5 +5,5 @@ export const updateDailyAggregatesQueue = 'updateDailyAggregates';
 export const updateDailyAggregatesHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-telemetry-event"
-    const aggregate-daily-usage = await aggregate-daily-usage();
+    const aggregate-daily-usage = await aggregateDailyUsage();
 };

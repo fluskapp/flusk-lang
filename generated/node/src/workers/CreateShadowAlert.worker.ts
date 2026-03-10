@@ -5,5 +5,5 @@ export const createShadowAlertQueue = 'createShadowAlert';
 export const createShadowAlertHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-ai-tool"
-    const create-alert = await create-alert();
+    const create-alert = await createAlert();
 };

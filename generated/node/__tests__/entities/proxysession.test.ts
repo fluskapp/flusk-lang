@@ -2,25 +2,27 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { BotRepository } from '../../src/repositories/bot.repository.js';
+import { ProxySessionRepository } from '../../src/repositories/proxysession.repository.js';
 
-describe('BotRepository', () => {
+describe('ProxySessionRepository', () => {
   let db: Database.Database;
-  let repo: BotRepository;
+  let repo: ProxySessionRepository;
 
   beforeEach(() => {
     db = new Database(':memory:');
-    db.exec(`CREATE TABLE bots (id TEXT PRIMARY KEY, name TEXT NOT NULL, owner_id INTEGER NOT NULL, runtime TEXT NOT NULL, runtime_url TEXT, runtime_status TEXT NOT NULL, tier TEXT NOT NULL, model TEXT, soul TEXT, identity TEXT, user_context TEXT, workspace_path TEXT, active INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
-    repo = new BotRepository(db);
+    db.exec(`CREATE TABLE proxy_sessions (id TEXT PRIMARY KEY, bot_id INTEGER NOT NULL, session_key TEXT NOT NULL, channel TEXT NOT NULL, chat_type TEXT NOT NULL, display_name TEXT, model TEXT, total_tokens INTEGER NOT NULL, total_cost_usd REAL NOT NULL, message_count INTEGER NOT NULL, last_activity TEXT, status TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
+    repo = new ProxySessionRepository(db);
   });
 
   const testData = () => ({
-    name: 'test-name',
-    owner_id: 42,
-    runtime: 'openclaw',
-    runtime_status: 'running',
-    tier: 'free',
-    active: true,
+    bot_id: 42,
+    session_key: 'test-session_key',
+    channel: 'test-channel',
+    chat_type: 'direct',
+    total_tokens: 42,
+    total_cost_usd: 3.14,
+    message_count: 42,
+    status: 'active',
   });
 
   it('creates a record', () => {
@@ -45,7 +47,7 @@ describe('BotRepository', () => {
 
   it('updates a record', () => {
     const created = repo.create(testData());
-    const updated = repo.update(created.id, { name: 'updated' });
+    const updated = repo.update(created.id, { bot_id: 99 });
     expect(updated).toBeDefined();
   });
 

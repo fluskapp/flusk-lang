@@ -5,5 +5,5 @@ export const setupWebhookQueue = 'setupWebhook';
 export const setupWebhookHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-bot"
-    const register-webhook-url = await register-webhook-url();
+    const register-webhook-url = await registerWebhookUrl();
 };

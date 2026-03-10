@@ -5,7 +5,7 @@ export const detectAnomaliesQueue = 'detectAnomalies';
 export const detectAnomaliesHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-usage-daily"
-    const check-usage-spike = await check-usage-spike();
+    const check-usage-spike = await checkUsageSpike();
     // TODO: implement step "spike-detected"
     // TODO: implement step "emit-alert-triggered"
 };

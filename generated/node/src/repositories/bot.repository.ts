@@ -9,13 +9,17 @@ const log = createChildLogger('bots-repo');
 export interface BotRow {
   id: string;
   name: string;
-  phone_number: string;
-  system_prompt: string;
-  model: 'gpt-4o' | 'claude-sonnet' | 'gemini-pro';
-  temperature: number;
-  max_tokens: number;
+  owner_id: unknown;
+  runtime: 'openclaw' | 'langchain' | 'crewai' | 'generic';
+  runtime_url?: string;
+  runtime_status: 'running' | 'stopped' | 'provisioning' | 'error' | 'unknown';
+  tier: 'free' | 'starter' | 'pro' | 'power';
+  model?: string;
+  soul?: unknown;
+  identity?: unknown;
+  user_context?: unknown;
+  workspace_path?: string;
   active: boolean;
-  owner_id: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,13 +30,17 @@ export type BotUpdate = Partial<BotCreate>;
 const toRow = (raw: Record<string, unknown>): BotRow => ({
   id: raw.id as string,
   name: raw.name as string,
-  phone_number: raw.phone_number as string,
-  system_prompt: raw.system_prompt as string,
-  model: raw.model as 'gpt-4o' | 'claude-sonnet' | 'gemini-pro',
-  temperature: raw.temperature as number,
-  max_tokens: raw.max_tokens as number,
+  owner_id: raw.owner_id as unknown,
+  runtime: raw.runtime as 'openclaw' | 'langchain' | 'crewai' | 'generic',
+  runtime_url: raw.runtime_url as string,
+  runtime_status: raw.runtime_status as 'running' | 'stopped' | 'provisioning' | 'error' | 'unknown',
+  tier: raw.tier as 'free' | 'starter' | 'pro' | 'power',
+  model: raw.model as string,
+  soul: raw.soul as unknown,
+  identity: raw.identity as unknown,
+  user_context: raw.user_context as unknown,
+  workspace_path: raw.workspace_path as string,
   active: Boolean(raw.active),
-  owner_id: raw.owner_id as string,
   createdAt: raw.created_at as string,
   updatedAt: raw.updated_at as string,
 });
@@ -44,17 +52,21 @@ export class BotRepository {
     const id = nanoid();
     const now = new Date().toISOString();
     this.db.prepare(
-      'INSERT INTO bots (id, name, phone_number, system_prompt, model, temperature, max_tokens, active, owner_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO bots (id, name, owner_id, runtime, runtime_url, runtime_status, tier, model, soul, identity, user_context, workspace_path, active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ).run(
       id,
       data.name,
-      data.phone_number,
-      data.system_prompt,
-      data.model,
-      data.temperature,
-      data.max_tokens,
-      data.active ? 1 : 0,
       data.owner_id,
+      data.runtime,
+      data.runtime_url,
+      data.runtime_status,
+      data.tier,
+      data.model,
+      data.soul,
+      data.identity,
+      data.user_context,
+      data.workspace_path,
+      data.active ? 1 : 0,
       now, now,
     );
     log.debug({ id }, 'Bot created');
@@ -62,12 +74,12 @@ export class BotRepository {
   }
 
   findById(id: string): BotRow | null {
-    const raw = this.db.prepare('SELECT id, name, phone_number, system_prompt, model, temperature, max_tokens, active, owner_id, created_at, updated_at FROM bots WHERE id = ?').get(id) as Record<string, unknown> | undefined;
+    const raw = this.db.prepare('SELECT id, name, owner_id, runtime, runtime_url, runtime_status, tier, model, soul, identity, user_context, workspace_path, active, created_at, updated_at FROM bots WHERE id = ?').get(id) as Record<string, unknown> | undefined;
     return raw ? toRow(raw) : null;
   }
 
   list(filters?: Partial<Record<string, unknown>>): BotRow[] {
-    let sql = 'SELECT id, name, phone_number, system_prompt, model, temperature, max_tokens, active, owner_id, created_at, updated_at FROM bots';
+    let sql = 'SELECT id, name, owner_id, runtime, runtime_url, runtime_status, tier, model, soul, identity, user_context, workspace_path, active, created_at, updated_at FROM bots';
     const params: unknown[] = [];
     if (filters && Object.keys(filters).length > 0) {
       const clauses = Object.entries(filters).map(([k, v]) => {

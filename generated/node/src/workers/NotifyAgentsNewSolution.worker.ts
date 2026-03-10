@@ -6,5 +6,5 @@ export const notifyAgentsNewSolutionHandler = async (job: { data: Record<string,
   const { data } = job;
     // TODO: implement step "load-deployment"
     // TODO: implement step "load-agent-device"
-    const push-to-agents = await push-to-agents();
+    const push-to-agents = await pushToAgents();
 };

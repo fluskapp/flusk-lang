@@ -5,8 +5,8 @@ export const processIncomingMessageQueue = 'processIncomingMessage';
 export const processIncomingMessageHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-message"
-    const generate-ai-reply = await generate-ai-reply();
-    const send-whatsapp-message = await send-whatsapp-message();
+    const generate-ai-reply = await generateAiReply();
+    const send-whatsapp-message = await sendWhatsappMessage();
     // TODO: implement step "update-conversation"
   // Retry config: maxAttempts=3, backoff=exponential
 };

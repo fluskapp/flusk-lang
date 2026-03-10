@@ -2,25 +2,26 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { BotRepository } from '../../src/repositories/bot.repository.js';
+import { ProxyEventRepository } from '../../src/repositories/proxyevent.repository.js';
 
-describe('BotRepository', () => {
+describe('ProxyEventRepository', () => {
   let db: Database.Database;
-  let repo: BotRepository;
+  let repo: ProxyEventRepository;
 
   beforeEach(() => {
     db = new Database(':memory:');
-    db.exec(`CREATE TABLE bots (id TEXT PRIMARY KEY, name TEXT NOT NULL, owner_id INTEGER NOT NULL, runtime TEXT NOT NULL, runtime_url TEXT, runtime_status TEXT NOT NULL, tier TEXT NOT NULL, model TEXT, soul TEXT, identity TEXT, user_context TEXT, workspace_path TEXT, active INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
-    repo = new BotRepository(db);
+    db.exec(`CREATE TABLE proxy_events (id TEXT PRIMARY KEY, bot_id INTEGER NOT NULL, direction TEXT NOT NULL, event_type TEXT NOT NULL, channel TEXT, content_preview TEXT, details TEXT, cost_usd REAL NOT NULL, tokens INTEGER NOT NULL, model TEXT, blocked INTEGER NOT NULL, pii_found INTEGER NOT NULL, pii_types TEXT, latency_ms INTEGER, session_id TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
+    repo = new ProxyEventRepository(db);
   });
 
   const testData = () => ({
-    name: 'test-name',
-    owner_id: 42,
-    runtime: 'openclaw',
-    runtime_status: 'running',
-    tier: 'free',
-    active: true,
+    bot_id: 42,
+    direction: 'inbound',
+    event_type: 'message',
+    cost_usd: 3.14,
+    tokens: 42,
+    blocked: true,
+    pii_found: true,
   });
 
   it('creates a record', () => {
@@ -45,7 +46,7 @@ describe('BotRepository', () => {
 
   it('updates a record', () => {
     const created = repo.create(testData());
-    const updated = repo.update(created.id, { name: 'updated' });
+    const updated = repo.update(created.id, { bot_id: 99 });
     expect(updated).toBeDefined();
   });
 

@@ -6,5 +6,5 @@ export const pushConfigToAgentsHandler = async (job: { data: Record<string, unkn
   const { data } = job;
     // TODO: implement step "load-agent-config"
     // TODO: implement step "load-agent-device"
-    const push-to-agents = await push-to-agents();
+    const push-to-agents = await pushToAgents();
 };

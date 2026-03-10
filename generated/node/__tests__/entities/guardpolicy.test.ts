@@ -2,25 +2,29 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { BotRepository } from '../../src/repositories/bot.repository.js';
+import { GuardPolicyRepository } from '../../src/repositories/guardpolicy.repository.js';
 
-describe('BotRepository', () => {
+describe('GuardPolicyRepository', () => {
   let db: Database.Database;
-  let repo: BotRepository;
+  let repo: GuardPolicyRepository;
 
   beforeEach(() => {
     db = new Database(':memory:');
-    db.exec(`CREATE TABLE bots (id TEXT PRIMARY KEY, name TEXT NOT NULL, owner_id INTEGER NOT NULL, runtime TEXT NOT NULL, runtime_url TEXT, runtime_status TEXT NOT NULL, tier TEXT NOT NULL, model TEXT, soul TEXT, identity TEXT, user_context TEXT, workspace_path TEXT, active INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
-    repo = new BotRepository(db);
+    db.exec(`CREATE TABLE guard_policys (id TEXT PRIMARY KEY, assistant_id INTEGER NOT NULL, pii_detection INTEGER NOT NULL, cost_cap_cents INTEGER NOT NULL, daily_cost_cap_cents INTEGER, rate_limit_per_minute INTEGER NOT NULL, blocked_domains TEXT NOT NULL, allowed_tools TEXT NOT NULL, blocked_tools TEXT NOT NULL, require_approval_tools TEXT NOT NULL, intent_matching INTEGER NOT NULL, sandbox_level TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
+    repo = new GuardPolicyRepository(db);
   });
 
   const testData = () => ({
-    name: 'test-name',
-    owner_id: 42,
-    runtime: 'openclaw',
-    runtime_status: 'running',
-    tier: 'free',
-    active: true,
+    assistant_id: 42,
+    pii_detection: true,
+    cost_cap_cents: 42,
+    rate_limit_per_minute: 42,
+    blocked_domains: { key: 'value' },
+    allowed_tools: { key: 'value' },
+    blocked_tools: { key: 'value' },
+    require_approval_tools: { key: 'value' },
+    intent_matching: true,
+    sandbox_level: 'strict',
   });
 
   it('creates a record', () => {
@@ -45,7 +49,7 @@ describe('BotRepository', () => {
 
   it('updates a record', () => {
     const created = repo.create(testData());
-    const updated = repo.update(created.id, { name: 'updated' });
+    const updated = repo.update(created.id, { assistant_id: 99 });
     expect(updated).toBeDefined();
   });
 

@@ -5,6 +5,6 @@ export const healthCheckDeploymentsQueue = 'healthCheckDeployments';
 export const healthCheckDeploymentsHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-deployment"
-    const check-deployment-health = await check-deployment-health();
+    const check-deployment-health = await checkDeploymentHealth();
     // TODO: implement step "update-deployment"
 };

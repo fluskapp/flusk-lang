@@ -5,7 +5,7 @@ export const processKnowledgeBaseQueue = 'processKnowledgeBase';
 export const processKnowledgeBaseHandler = async (job: { data: Record<string, unknown> }): Promise<void> => {
   const { data } = job;
     // TODO: implement step "load-knowledge-base"
-    const chunk-and-embed-content = await chunk-and-embed-content();
+    const chunk-and-embed-content = await chunkAndEmbedContent();
     // TODO: implement step "update-knowledge-base"
   // Retry config: maxAttempts=3, backoff=exponential
 };

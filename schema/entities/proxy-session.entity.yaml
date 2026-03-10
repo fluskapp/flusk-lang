@@ -1,0 +1,50 @@
+name: ProxySession
+description: Active conversation sessions tracked by the proxy
+fields:
+  - name: bot_id
+    type: integer
+    index: true
+  - name: session_key
+    type: string
+    unique: true
+    description: Unique session identifier from the runtime
+  - name: channel
+    type: string
+    description: whatsapp, telegram, web, api
+  - name: chat_type
+    type: enum
+    values:
+      - direct
+      - group
+    default: direct
+  - name: display_name
+    type: string
+    required: false
+    description: Human-readable session label (e.g. "WhatsApp DM")
+  - name: model
+    type: string
+    required: false
+  - name: total_tokens
+    type: integer
+    default: 0
+  - name: total_cost_usd
+    type: float
+    default: 0
+  - name: message_count
+    type: integer
+    default: 0
+  - name: last_activity
+    type: datetime
+    required: false
+  - name: status
+    type: enum
+    values:
+      - active
+      - idle
+      - closed
+    default: active
+queries:
+  - name: findByBot
+    sql: SELECT * FROM proxy_session WHERE bot_id = ? ORDER BY last_activity DESC
+  - name: findActive
+    sql: SELECT * FROM proxy_session WHERE bot_id = ? AND status = 'active' ORDER BY last_activity DESC

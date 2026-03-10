@@ -2,25 +2,28 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { BotRepository } from '../../src/repositories/bot.repository.js';
+import { DaySummaryRepository } from '../../src/repositories/daysummary.repository.js';
 
-describe('BotRepository', () => {
+describe('DaySummaryRepository', () => {
   let db: Database.Database;
-  let repo: BotRepository;
+  let repo: DaySummaryRepository;
 
   beforeEach(() => {
     db = new Database(':memory:');
-    db.exec(`CREATE TABLE bots (id TEXT PRIMARY KEY, name TEXT NOT NULL, owner_id INTEGER NOT NULL, runtime TEXT NOT NULL, runtime_url TEXT, runtime_status TEXT NOT NULL, tier TEXT NOT NULL, model TEXT, soul TEXT, identity TEXT, user_context TEXT, workspace_path TEXT, active INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
-    repo = new BotRepository(db);
+    db.exec(`CREATE TABLE day_summarys (id TEXT PRIMARY KEY, assistant_id INTEGER NOT NULL, date TEXT NOT NULL, summary_text TEXT NOT NULL, key_decisions TEXT, goals_progress TEXT, people_mentioned TEXT, personality_notes TEXT, things_to_remember TEXT, message_count INTEGER NOT NULL, action_count INTEGER NOT NULL, cost_cents INTEGER NOT NULL, guard_blocks INTEGER NOT NULL, pii_detections INTEGER NOT NULL, channels_used TEXT NOT NULL, mood TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`);
+    repo = new DaySummaryRepository(db);
   });
 
   const testData = () => ({
-    name: 'test-name',
-    owner_id: 42,
-    runtime: 'openclaw',
-    runtime_status: 'running',
-    tier: 'free',
-    active: true,
+    assistant_id: 42,
+    date: '2026-01-01T00:00:00.000Z',
+    summary_text: 'test-summary_text',
+    message_count: 42,
+    action_count: 42,
+    cost_cents: 42,
+    guard_blocks: 42,
+    pii_detections: 42,
+    channels_used: { key: 'value' },
   });
 
   it('creates a record', () => {
@@ -45,7 +48,7 @@ describe('BotRepository', () => {
 
   it('updates a record', () => {
     const created = repo.create(testData());
-    const updated = repo.update(created.id, { name: 'updated' });
+    const updated = repo.update(created.id, { assistant_id: 99 });
     expect(updated).toBeDefined();
   });
 
