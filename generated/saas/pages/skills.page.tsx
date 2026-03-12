@@ -3,51 +3,62 @@ import React from 'react';
 import { useSkills } from '../hooks/useSkills';
 import { Badge } from '../../components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 
 export function SkillsPage() {
   const { data = {} as any, isLoading } = useSkills();
-  const navigate = (to: string) => { window.location.href = to; };
   void isLoading;
+  const navigate = (to: string) => { window.location.href = to; };
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div>
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">Installed Skills</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {((data?.installed) as any[] ?? []).map((item: any, i: number) => (
-              <Card key={i} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between">
-                    <h4 className="font-medium text-stone-900 text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
-                    {item.status && (
-                      <Badge variant={(() => { const s = (item.status ?? '').toLowerCase(); if (s === 'active' || s === 'connected') return 'default'; if (s === 'paused' || s === 'warning' || s === 'info') return 'secondary'; if (s === 'error' || s === 'critical') return 'destructive'; return 'outline'; })()}>{item.status}</Badge>
-                    )}
-                  </div>
-                  {item.description && <p className="mt-1.5 text-xs text-stone-500 line-clamp-2">{item.description}</p>}
-                </CardContent>
-              </Card>
-            ))}
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Tabs defaultValue="installed" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="installed">Installed</TabsTrigger>
+          <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+        </TabsList>
+        <TabsContent value="installed" className="space-y-6">
+          <div>
+            <h3 className="text-sm font-semibold text-stone-700 mb-3">Installed Skills</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {((data?.installed) as any[] ?? []).map((item: any, i: number) => (
+                <Card key={i} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-medium text-stone-900 text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
+                      {item.status && (
+                        <Badge variant={(() => { const s = (item.status ?? '').toLowerCase(); if (s === 'active' || s === 'connected') return 'default'; if (s === 'paused' || s === 'warning' || s === 'info') return 'secondary'; if (s === 'error' || s === 'critical') return 'destructive'; return 'outline'; })()}>{item.status}</Badge>
+                      )}
+                    </div>
+                    {item.description && <p className="mt-1.5 text-xs text-stone-500 line-clamp-2">{item.description}</p>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">Skill Marketplace</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {((undefined) as any[] ?? []).map((item: any, i: number) => (
-              <Card key={i} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between">
-                    <h4 className="font-medium text-stone-900 text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
-                    {item.status && (
-                      <Badge variant={(() => { const s = (item.status ?? '').toLowerCase(); if (s === 'active' || s === 'connected') return 'default'; if (s === 'paused' || s === 'warning' || s === 'info') return 'secondary'; if (s === 'error' || s === 'critical') return 'destructive'; return 'outline'; })()}>{item.status}</Badge>
-                    )}
-                  </div>
-                  {item.description && <p className="mt-1.5 text-xs text-stone-500 line-clamp-2">{item.description}</p>}
-                </CardContent>
-              </Card>
-            ))}
+        </TabsContent>
+        <TabsContent value="marketplace" className="space-y-6">
+          <div>
+            <h3 className="text-sm font-semibold text-stone-700 mb-3">Available Skills</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {((undefined) as any[] ?? []).map((item: any, i: number) => (
+                <Card key={i} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-medium text-stone-900 text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
+                      {item.status && (
+                        <Badge variant={(() => { const s = (item.status ?? '').toLowerCase(); if (s === 'active' || s === 'connected') return 'default'; if (s === 'paused' || s === 'warning' || s === 'info') return 'secondary'; if (s === 'error' || s === 'critical') return 'destructive'; return 'outline'; })()}>{item.status}</Badge>
+                      )}
+                    </div>
+                    {item.description && <p className="mt-1.5 text-xs text-stone-500 line-clamp-2">{item.description}</p>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
+        </TabsContent>
+      </Tabs>
       </div>
     </div>
   );

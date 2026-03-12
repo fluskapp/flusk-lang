@@ -92,6 +92,10 @@ function collectIcons(sections: any[]): Set<string> {
         if (tab.sections) { const sub = collectIcons(tab.sections); for (const i of sub) icons.add(i); }
       }
     }
+    // Collect icons from stat-grid stats
+    for (const stat of section.stats ?? []) {
+      if (stat.icon) icons.add(lucideIcon(stat.icon));
+    }
   }
   return icons;
 }
@@ -699,11 +703,13 @@ function renderStatGrid(section: any, indent: string): string {
   const title = section.title ?? section.name ?? '';
   const cols = section.columns ?? 4;
   const stats: any[] = section.stats ?? [];
+  // section-level source is the default for all stats
+  const sectionSrc = section.source ? sourceExpr(section.source) : null;
   let out = '';
   if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
   out += `${indent}<div className="grid grid-cols-2 md:grid-cols-${cols} gap-4">\n`;
   for (const stat of stats) {
-    const src = stat.source ? sourceExpr(stat.source) : 'undefined';
+    const src = stat.source ? sourceExpr(stat.source) : (sectionSrc ?? 'undefined');
     const valExpr = stat.field ? `${src}?.${stat.field}` : src;
     const iconName = stat.icon ? lucideIcon(stat.icon) : null;
     const iconJsx = iconName ? `<${iconName} className="w-4 h-4 text-stone-400" />` : '';
@@ -716,6 +722,324 @@ function renderStatGrid(section: any, indent: string): string {
     out += `${indent}      <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{${valExpr} ?? '—'}</p>\n`;
     out += `${indent}    </CardContent>\n${indent}  </Card>\n`;
   }
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderEventFeed(section: any, indent: string): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('badge');
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const title = section.title ?? section.name ?? '';
+  const footerAction = section.footer?.action;
+  let out = `${indent}<div className="space-y-3">\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700">${title}</h3>\n`;
+  out += `${indent}  <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">\n`;
+  out += `${indent}    {((${src}) as any[] ?? []).slice(0, 20).map((event: any, i: number) => (\n`;
+  out += `${indent}      <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors">\n`;
+  out += `${indent}        <span className="text-xs text-stone-400 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>\n`;
+  out += `${indent}        <span className="text-xs font-medium text-stone-600 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>\n`;
+  out += `${indent}        <span className="text-xs text-stone-500 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>\n`;
+  out += `${indent}        {event.blocked && <Badge variant="destructive" className="text-xs flex-shrink-0">blocked</Badge>}\n`;
+  out += `${indent}      </div>\n`;
+  out += `${indent}    ))}\n`;
+  out += `${indent}    {!(${src})?.length && (\n`;
+  out += `${indent}      <div className="px-4 py-8 text-center text-sm text-stone-400">${section.empty_state?.description ?? 'No events yet'}</div>\n`;
+  out += `${indent}    )}\n`;
+  out += `${indent}  </div>\n`;
+  if (footerAction) {
+    shadcnNeeds.add('button');
+    const href = footerAction.to ?? '#';
+    out += `${indent}  <div className="text-right"><Button variant="ghost" size="sm" onClick={() => navigate('${href}')}>${footerAction.label ?? 'View all'}</Button></div>\n`;
+  }
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderCardList(section: any, indent: string, isAuth = false): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('badge');
+  const title = section.title ?? section.name ?? '';
+  const src = section.source ? sourceExpr(section.source) + (section.field ? `?.${section.field}` : '') : 'undefined';
+  const actions: any[] = section.actions ?? [];
+  const emptyAction = section.empty_state?.action;
+  let out = `${indent}<div className="space-y-3">\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700">${title}</h3>\n`;
+  out += `${indent}  <div className="space-y-2">\n`;
+  out += `${indent}    {((${src}) as any[] ?? []).map((item: any, i: number) => (\n`;
+  out += `${indent}      <Card key={i}>\n`;
+  out += `${indent}        <CardContent className="flex items-center justify-between px-4 py-3">\n`;
+  out += `${indent}          <div className="flex items-center gap-3">\n`;
+  out += `${indent}            <span className="text-sm font-medium text-stone-800">{item.type ?? item.name ?? item.title ?? ''}</span>\n`;
+  out += `${indent}            {item.status && <Badge variant="outline">{item.status}</Badge>}\n`;
+  out += `${indent}          </div>\n`;
+  out += `${indent}          <span className="text-xs text-stone-400">{item.message_count != null ? \`\${item.message_count} msgs\` : ''}</span>\n`;
+  out += `${indent}        </CardContent>\n`;
+  out += `${indent}      </Card>\n`;
+  out += `${indent}    ))}\n`;
+  out += `${indent}    {!(${src})?.length && (\n`;
+  out += `${indent}      <Card><CardContent className="px-4 py-6 text-center text-sm text-stone-400">\n`;
+  out += `${indent}        <p className="font-medium text-stone-600">${section.empty_state?.title ?? 'Nothing here'}</p>\n`;
+  out += `${indent}        <p className="mt-1">${section.empty_state?.description ?? ''}</p>\n`;
+  if (emptyAction) { shadcnNeeds.add('button'); out += `${indent}        <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('${emptyAction.to ?? '#}'}')}>${emptyAction.label ?? 'Get started'}</Button>\n`; }
+  out += `${indent}      </CardContent></Card>\n`;
+  out += `${indent}    )}\n`;
+  out += `${indent}  </div>\n`;
+  if (actions.length) {
+    shadcnNeeds.add('button');
+    for (const a of actions) {
+      const href = a.to ?? a.action ?? '#';
+      out += `${indent}  <Button variant="ghost" size="sm" onClick={() => navigate('${href}')}>${a.label}</Button>\n`;
+    }
+  }
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderFileList(section: any, indent: string): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('badge'); shadcnNeeds.add('button');
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const title = section.title ?? section.name ?? '';
+  const desc = section.description ?? '';
+  const actions: any[] = section.actions ?? [];
+  let out = `${indent}<div className="space-y-3">\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700">${title}</h3>\n`;
+  if (desc) out += `${indent}  <p className="text-xs text-stone-500">${desc}</p>\n`;
+  out += `${indent}  <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">\n`;
+  out += `${indent}    {((${src}) as any[] ?? []).map((file: any, i: number) => (\n`;
+  out += `${indent}      <div key={i} className="flex items-center gap-3 px-4 py-3 hover:bg-stone-50 group">\n`;
+  out += `${indent}        <span className="text-lg flex-shrink-0">{file.type === 'md' || file.type === 'txt' ? '📄' : file.type === 'json' || file.type === 'yaml' ? '📋' : file.type === 'py' || file.type === 'js' || file.type === 'ts' ? '💻' : '📁'}</span>\n`;
+  out += `${indent}        <div className="flex-1 min-w-0">\n`;
+  out += `${indent}          <p className="text-sm font-medium text-stone-800 truncate">{file.name ?? ''}</p>\n`;
+  out += `${indent}          <p className="text-xs text-stone-400">{file.size ? \`\${Math.round(file.size / 1024)} KB\` : ''} {file.modified_at ? \`· \${new Date(file.modified_at).toLocaleDateString('en', { month: 'short', day: 'numeric' })}\` : ''}</p>\n`;
+  out += `${indent}        </div>\n`;
+  if (actions.length) {
+    out += `${indent}        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">\n`;
+    for (const a of actions.slice(0, 3)) {
+      const isDelete = a.variant === 'destructive';
+      out += `${indent}          <Button variant="${isDelete ? 'destructive' : 'ghost'}" size="sm" className="h-7 px-2 text-xs">${a.label}</Button>\n`;
+    }
+    out += `${indent}        </div>\n`;
+  }
+  out += `${indent}      </div>\n`;
+  out += `${indent}    ))}\n`;
+  out += `${indent}    {!(${src})?.length && (\n`;
+  out += `${indent}      <div className="px-4 py-8 text-center text-sm text-stone-400">${section.empty_state?.description ?? 'No files yet'}</div>\n`;
+  out += `${indent}    )}\n`;
+  out += `${indent}  </div>\n`;
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderStatusCard(section: any, indent: string): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('badge');
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const title = section.title ?? section.name ?? '';
+  const desc = section.description ?? '';
+  const fields: any[] = section.fields ?? [];
+  const actions: any[] = section.actions ?? [];
+  let out = `${indent}<Card>\n`;
+  out += `${indent}  <CardHeader>\n`;
+  out += `${indent}    <CardTitle className="text-sm">${title}</CardTitle>\n`;
+  if (desc) out += `${indent}    <CardDescription>${desc}</CardDescription>\n`;
+  out += `${indent}  </CardHeader>\n`;
+  out += `${indent}  <CardContent className="divide-y divide-stone-50">\n`;
+  for (const f of fields) {
+    const valExpr = f.value != null ? JSON.stringify(f.value) : f.source ? sourceExpr(f.source) : `${src}?.${f.name}`;
+    const type = f.type ?? 'display';
+    out += `${indent}    <div className="flex items-center justify-between py-3">\n`;
+    out += `${indent}      <span className="text-sm text-stone-500">${f.label ?? f.name ?? ''}</span>\n`;
+    if (type === 'toggle-display') {
+      out += `${indent}      <Badge variant={{${valExpr} ? 'default' : 'secondary'}}>{${valExpr} ? 'Enabled' : 'Disabled'}</Badge>\n`;
+    } else if (type === 'currency') {
+      out += `${indent}      <span className="text-sm font-medium">{${valExpr} != null ? \`$\${(${valExpr} / 100).toFixed(2)}\` : '—'}</span>\n`;
+    } else if (type === 'status-indicator') {
+      out += `${indent}      <Badge variant="outline" className="capitalize">{${valExpr} ?? '—'}</Badge>\n`;
+    } else {
+      out += `${indent}      <span className="text-sm font-medium text-stone-800">{${valExpr} ?? '—'}</span>\n`;
+    }
+    out += `${indent}    </div>\n`;
+  }
+  out += `${indent}  </CardContent>\n`;
+  if (actions.length) {
+    shadcnNeeds.add('button'); shadcnNeeds.add('separator');
+    out += `${indent}  <CardFooter className="flex gap-2 pt-0">\n`;
+    for (const a of actions) {
+      const isDestruct = a.variant === 'destructive';
+      const href = a.to ?? a.endpoint?.split(' ')[1] ?? '#';
+      out += `${indent}    <Button variant="${isDestruct ? 'destructive' : 'outline'}" size="sm">${a.label}</Button>\n`;
+    }
+    out += `${indent}  </CardFooter>\n`;
+  }
+  out += `${indent}</Card>\n`;
+  return out;
+}
+
+function renderTabbedPage(schema: any, indent: string, isAuth: boolean): string {
+  shadcnNeeds.add('tabs');
+  const tabs: any[] = schema.tabs ?? [];
+  if (tabs.length === 0) return `${indent}{/* No tabs defined */}\n`;
+  const defaultTab = tabs[0]?.id ?? 'tab-0';
+  let out = `${indent}<Tabs defaultValue="${defaultTab}" className="w-full">\n`;
+  out += `${indent}  <TabsList className="mb-6">\n`;
+  for (const tab of tabs) {
+    const id = tab.id ?? tab.label?.toLowerCase().replace(/\s+/g, '-') ?? 'tab';
+    out += `${indent}    <TabsTrigger value="${id}">${tab.label ?? id}</TabsTrigger>\n`;
+  }
+  out += `${indent}  </TabsList>\n`;
+  for (const tab of tabs) {
+    const id = tab.id ?? tab.label?.toLowerCase().replace(/\s+/g, '-') ?? 'tab';
+    const subSections: any[] = tab.sections ?? [];
+    out += `${indent}  <TabsContent value="${id}" className="space-y-6">\n`;
+    for (const sub of subSections) out += renderSection(sub, indent + '    ', isAuth, {});
+    out += `${indent}  </TabsContent>\n`;
+  }
+  out += `${indent}</Tabs>\n`;
+  return out;
+}
+
+function renderFileBrowserPage(schema: any, indent: string, isAuth: boolean): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('button'); shadcnNeeds.add('input');
+  const layout = schema.layout ?? {};
+  const sidebarSections: any[] = layout.sidebar?.sections ?? [];
+  const controls = schema.controls?.toolbar ?? [];
+  const hasSearch = controls.some((c: any) => c.type === 'search');
+  const hasNewFile = controls.some((c: any) => c.type === 'button');
+  let out = `${indent}<div className="flex h-full min-h-[600px] gap-0 rounded-xl border border-stone-200 overflow-hidden bg-white">\n`;
+  // Sidebar
+  out += `${indent}  {/* Finder Sidebar */}\n`;
+  out += `${indent}  <div className="w-52 flex-shrink-0 border-r border-stone-200 bg-stone-50 flex flex-col">\n`;
+  out += `${indent}    <div className="px-3 py-3 border-b border-stone-200">\n`;
+  out += `${indent}      <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Workspace</p>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}    <nav className="flex-1 p-2 space-y-0.5">\n`;
+  for (const s of sidebarSections) {
+    const srcVar = s.source ? `data?.${s.source}` : '[]';
+    out += `${indent}      <button onClick={() => setSelectedSection('${s.id ?? s.label}')} className={\`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left \${selectedSection === '${s.id ?? s.label}' ? 'bg-black text-white' : 'text-stone-600 hover:bg-stone-100'}\`}>\n`;
+    out += `${indent}        <span className="w-4 h-4 flex-shrink-0">📁</span>\n`;
+    out += `${indent}        <span className="flex-1 truncate">${s.label ?? s.id ?? ''}</span>\n`;
+    out += `${indent}        <span className={\`text-xs \${selectedSection === '${s.id ?? s.label}' ? 'text-white/60' : 'text-stone-400'}\`}>{((${srcVar}) as any[] ?? []).length}</span>\n`;
+    out += `${indent}      </button>\n`;
+  }
+  out += `${indent}    </nav>\n`;
+  out += `${indent}  </div>\n`;
+  // Main area
+  out += `${indent}  {/* Main Content */}\n`;
+  out += `${indent}  <div className="flex-1 flex flex-col min-w-0">\n`;
+  // Toolbar
+  out += `${indent}    <div className="flex items-center gap-2 px-4 py-2 border-b border-stone-200 bg-white">\n`;
+  if (hasSearch) {
+    out += `${indent}      <div className="flex items-center gap-2 flex-1 px-3 py-1.5 border border-stone-200 rounded-lg">\n`;
+    out += `${indent}        <Search className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />\n`;
+    out += `${indent}        <input type="search" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 text-sm focus:outline-none placeholder-stone-400" />\n`;
+    out += `${indent}      </div>\n`;
+  }
+  if (hasNewFile) {
+    out += `${indent}      <Button size="sm" variant="outline" className="text-xs">+ New File</Button>\n`;
+  }
+  out += `${indent}    </div>\n`;
+  // File grid
+  out += `${indent}    <div className="flex-1 p-4 overflow-auto">\n`;
+  out += `${indent}      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">\n`;
+  out += `${indent}        {(currentFiles.filter((f: any) => !searchQuery || f.name?.toLowerCase().includes(searchQuery.toLowerCase()))).map((file: any, i: number) => (\n`;
+  out += `${indent}          <button key={i} onClick={() => setSelectedFile(file)} onDoubleClick={() => setPreviewFile(file)} className={\`flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-stone-100 transition-colors text-center \${selectedFile === file ? 'bg-stone-100 ring-1 ring-stone-300' : ''}\`}>\n`;
+  out += `${indent}            <span className="text-3xl">{file.type === 'md' || file.type === 'txt' ? '📄' : file.type === 'json' || file.type === 'yaml' ? '📋' : file.type === 'py' || file.type === 'js' || file.type === 'ts' ? '💻' : file.type === 'png' || file.type === 'jpg' ? '🖼️' : '📁'}</span>\n`;
+  out += `${indent}            <span className="text-xs text-stone-700 truncate w-full text-center leading-tight">{file.name ?? ''}</span>\n`;
+  out += `${indent}          </button>\n`;
+  out += `${indent}        ))}\n`;
+  out += `${indent}        {currentFiles.length === 0 && (\n`;
+  out += `${indent}          <div className="col-span-full py-16 text-center text-stone-400">\n`;
+  out += `${indent}            <p className="text-sm font-medium">No files here</p>\n`;
+  out += `${indent}            <p className="text-xs mt-1">Your bot will store files here as it works</p>\n`;
+  out += `${indent}          </div>\n`;
+  out += `${indent}        )}\n`;
+  out += `${indent}      </div>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}  </div>\n`;
+  // Preview panel
+  out += `${indent}  {/* Preview Panel */}\n`;
+  out += `${indent}  {previewFile && (\n`;
+  out += `${indent}    <div className="w-80 flex-shrink-0 border-l border-stone-200 bg-white flex flex-col">\n`;
+  out += `${indent}      <div className="flex items-center justify-between px-4 py-2 border-b border-stone-200">\n`;
+  out += `${indent}        <span className="text-sm font-medium text-stone-800 truncate">{previewFile.name}</span>\n`;
+  out += `${indent}        <button onClick={() => setPreviewFile(null)} className="text-stone-400 hover:text-stone-600 text-lg leading-none">×</button>\n`;
+  out += `${indent}      </div>\n`;
+  out += `${indent}      <div className="flex-1 p-4 overflow-auto">\n`;
+  out += `${indent}        <pre className="text-xs text-stone-700 whitespace-pre-wrap font-mono leading-relaxed">{previewFile.content ?? 'Loading...'}</pre>\n`;
+  out += `${indent}      </div>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}  )}\n`;
+  out += `${indent}</div>\n`;
+  return out;
+}
+
+function renderChatOnboardingPage(schema: any, indent: string): string {
+  shadcnNeeds.add('card'); shadcnNeeds.add('button'); shadcnNeeds.add('input'); shadcnNeeds.add('label');
+  const steps: any[] = schema.steps ?? [];
+  const redirectOnComplete = schema.redirect_on_complete ?? '/app/dashboard';
+  const personality = schema.personality ?? {};
+  const greeting = personality.greeting ?? "Welcome! Let's get you set up.";
+  let out = `${indent}<div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">\n`;
+  out += `${indent}  <div className="w-full max-w-lg">\n`;
+  out += `${indent}    {/* Header */}\n`;
+  out += `${indent}    <div className="text-center mb-10">\n`;
+  out += `${indent}      <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center mx-auto mb-5 shadow-lg">\n`;
+  out += `${indent}        <span className="text-white font-bold text-lg">F</span>\n`;
+  out += `${indent}      </div>\n`;
+  out += `${indent}      <p className="text-stone-600 text-sm leading-relaxed">${greeting}</p>\n`;
+  out += `${indent}    </div>\n`;
+  out += `${indent}    {/* Step Progress */}\n`;
+  out += `${indent}    <div className="flex items-center gap-2 mb-8">\n`;
+  for (let i = 0; i < steps.length; i++) {
+    out += `${indent}      <div className={\`flex-1 h-1 rounded-full transition-colors \${step > ${i} ? 'bg-black' : step === ${i} ? 'bg-black' : 'bg-stone-200'}\`} />\n`;
+  }
+  out += `${indent}    </div>\n`;
+  out += `${indent}    {/* Steps */}\n`;
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    out += `${indent}    {currentStep === ${i} && (\n`;
+    out += `${indent}      <Card className="shadow-sm">\n`;
+    out += `${indent}        <CardContent className="p-6">\n`;
+    out += `${indent}          <h2 className="text-lg font-semibold text-stone-900 mb-1">${step.title ?? step.name ?? ''}</h2>\n`;
+    if (step.description) out += `${indent}          <p className="text-sm text-stone-500 mb-5">${step.description}</p>\n`;
+    if (step.options?.length) {
+      out += `${indent}          <div className="grid grid-cols-2 gap-3 mb-5">\n`;
+      for (const opt of step.options) {
+        out += `${indent}            <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_${i}: '${opt.id}' }))} className={\`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left \${onboardingData.step_${i} === '${opt.id}' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}\`}>\n`;
+        out += `${indent}              <span className="text-sm font-medium">${opt.label}</span>\n`;
+        if (opt.description) out += `${indent}              <span className={\`text-xs \${onboardingData.step_${i} === '${opt.id}' ? 'text-white/70' : 'text-stone-400'}\`}>${opt.description}</span>\n`;
+        out += `${indent}            </button>\n`;
+      }
+      out += `${indent}          </div>\n`;
+    } else if (step.collects?.length) {
+      for (const field of step.collects) {
+        out += `${indent}          <div className="space-y-2 mb-4">\n`;
+        out += `${indent}            <Label htmlFor="${field}">${field.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}</Label>\n`;
+        out += `${indent}            <Input id="${field}" name="${field}" placeholder="${field.replace(/_/g, ' ')}" value={onboardingData['${field}'] ?? ''} onChange={(e) => setOnboardingData((d: any) => ({ ...d, '${field}': e.target.value }))} />\n`;
+        out += `${indent}          </div>\n`;
+      }
+    } else if (step.channels?.length) {
+      out += `${indent}          <div className="space-y-2 mb-5">\n`;
+      for (const ch of step.channels) {
+        out += `${indent}            <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200">\n`;
+        out += `${indent}              <span className="text-sm font-medium text-stone-800">${ch.label}</span>\n`;
+        out += `${indent}              <Button size="sm" variant="${ch.default ? 'default' : 'outline'}">${ch.default ? 'Default' : 'Connect'}</Button>\n`;
+        out += `${indent}            </div>\n`;
+      }
+      out += `${indent}          </div>\n`;
+    } else if (step.download_url) {
+      out += `${indent}          <div className="text-center py-4 mb-5">\n`;
+      out += `${indent}            <Button size="lg" className="bg-black text-white hover:bg-stone-800" onClick={() => window.open('${step.download_url}', '_blank')}>Download FLUSK</Button>\n`;
+      out += `${indent}            <p className="mt-3 text-xs text-stone-400">macOS · Free download</p>\n`;
+      out += `${indent}          </div>\n`;
+    }
+    out += `${indent}          <div className="flex justify-between pt-2">\n`;
+    out += `${indent}            {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}\n`;
+    out += `${indent}            <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < ${steps.length - 1}) { setCurrentStep((s: number) => s + 1); } else { navigate('${redirectOnComplete}'); } }}>{currentStep < ${steps.length - 1} ? 'Continue →' : 'Get Started'}</Button>\n`;
+    out += `${indent}          </div>\n`;
+    out += `${indent}        </CardContent>\n`;
+    out += `${indent}      </Card>\n`;
+    out += `${indent}    )}\n`;
+  }
+  out += `${indent}  </div>\n`;
   out += `${indent}</div>\n`;
   return out;
 }
@@ -756,7 +1080,12 @@ function renderSection(section: any, indent: string, isAuth = false, ctx?: { isM
     case 'data-table':    return renderDataTable(section, indent);
     case 'card-grid':     return renderCardGrid(section, indent);
     case 'filter-bar':    return renderFilterBar(section, indent);
-    case 'settings-section': return renderSettingsSection(section, indent);
+    case 'settings-section':
+    case 'settings-group': return renderSettingsSection(section, indent);
+    case 'event-feed':    return renderEventFeed(section, indent);
+    case 'card-list':     return renderCardList(section, indent, isAuth);
+    case 'file-list':     return renderFileList(section, indent);
+    case 'status-card':   return renderStatusCard(section, indent);
     case 'hero':          return renderHero(section, indent);
     case 'navbar':        return renderNavbar(section, indent);
     case 'footer':        return renderFooter(section, indent);
@@ -1142,18 +1471,97 @@ declare module 'recharts' {
 
 // ─── Page generator ──────────────────────────────────────────────────────────
 
-const PAGE_TYPES = new Set(['dashboard', 'marketing', 'form', 'view', 'table', 'settings', 'list', 'builder', 'detail']);
+const PAGE_TYPES = new Set(['dashboard', 'marketing', 'form', 'view', 'table', 'settings', 'list', 'builder', 'detail', 'tabbed', 'file-browser', 'chat-onboarding', 'page', 'chat']);
 
 function getHookName(schema: FluskSchema): string { return 'use' + toPascal(schema.name); }
 
 function generatePageCode(schema: FluskSchema, primary: string): string {
   shadcnNeeds = new Set<string>();
   const sections: any[] = (schema as any).sections ?? [];
+  const schemaAny = schema as any;
   const componentName = toPascal(schema.name) + 'Page';
   const isMarketing = schema.type === 'marketing';
-  const isAuth = (schema as any).auth === true;
+  const isAuth = schemaAny.auth === true;
   const hookName = getHookName(schema);
 
+  // ── Special page types: tabbed, file-browser, chat-onboarding ──
+  if (schema.type === 'tabbed') {
+    const tabs: any[] = schemaAny.tabs ?? [];
+    // Collect all sections from all tabs for analysis
+    const allSections: any[] = tabs.flatMap((t: any) => t.sections ?? []);
+    const icons = collectIcons(allSections);
+    shadcnNeeds.add('tabs');
+    const tabsJsx = renderTabbedPage(schemaAny, '      ', isAuth);
+    const shadcnImportLines = buildShadcnImports();
+    let code = `${HEADER}\nimport React from 'react';\n`;
+    if (isAuth) code += `import { ${hookName} } from '../hooks/${hookName}';\n`;
+    if (icons.size > 0) code += `import { ${[...icons].sort().join(', ')} } from 'lucide-react';\n`;
+    if (shadcnImportLines) code += shadcnImportLines + '\n';
+    code += `\nexport function ${componentName}() {\n`;
+    if (isAuth) code += `  const { data = {} as any, isLoading } = ${hookName}();\n  void isLoading;\n`;
+    code += `  const navigate = (to: string) => { window.location.href = to; };\n`;
+    code += `\n  return (\n    <div className="min-h-screen bg-white">\n      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">\n`;
+    code += tabsJsx;
+    code += `      </div>\n    </div>\n  );\n}\n\nexport default ${componentName};\n`;
+    return code;
+  }
+
+  if (schema.type === 'file-browser') {
+    const dataSources = schemaAny.data_sources ?? {};
+    const sidebarSections: any[] = schemaAny.layout?.sidebar?.sections ?? [];
+    const firstSrc = sidebarSections[0]?.id ?? 'workspace';
+    shadcnNeeds.add('card'); shadcnNeeds.add('button'); shadcnNeeds.add('input');
+    let code = `${HEADER}\nimport React from 'react';\n`;
+    if (isAuth) code += `import { ${hookName} } from '../hooks/${hookName}';\n`;
+    code += `import { Search } from 'lucide-react';\n`;
+    const shadcnImportLines = buildShadcnImports();
+    if (shadcnImportLines) code += shadcnImportLines + '\n';
+    code += `\nexport function ${componentName}() {\n`;
+    if (isAuth) code += `  const { data = {} as any, isLoading } = ${hookName}();\n  void isLoading;\n`;
+    code += `  const navigate = (to: string) => { window.location.href = to; };\n`;
+    code += `  const [selectedSection, setSelectedSection] = React.useState<string>('${firstSrc}');\n`;
+    code += `  const [selectedFile, setSelectedFile] = React.useState<any>(null);\n`;
+    code += `  const [previewFile, setPreviewFile] = React.useState<any>(null);\n`;
+    code += `  const [searchQuery, setSearchQuery] = React.useState<string>('');\n`;
+    // Map section IDs to data keys
+    const srcMap: Record<string, string> = {};
+    for (const s of sidebarSections) {
+      if (s.source && dataSources[s.source]) srcMap[s.id ?? s.label] = s.source;
+    }
+    code += `  const currentFiles = React.useMemo(() => {\n`;
+    code += `    const srcMap: Record<string, any[]> = {\n`;
+    for (const [k, v] of Object.entries(srcMap)) {
+      code += `      '${k}': (data?.${v}) as any[] ?? [],\n`;
+    }
+    code += `    };\n`;
+    code += `    return srcMap[selectedSection] ?? [];\n`;
+    code += `  }, [selectedSection, data]);\n`;
+    code += `\n  return (\n    <div className="min-h-screen bg-white">\n      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">\n`;
+    code += renderFileBrowserPage(schemaAny, '        ', isAuth);
+    code += `      </div>\n    </div>\n  );\n}\n\nexport default ${componentName};\n`;
+    return code;
+  }
+
+  if (schema.type === 'chat-onboarding') {
+    const steps: any[] = schemaAny.steps ?? [];
+    shadcnNeeds.add('card'); shadcnNeeds.add('button'); shadcnNeeds.add('input'); shadcnNeeds.add('label');
+    let code = `${HEADER}\nimport React from 'react';\n`;
+    if (isAuth) code += `import { ${hookName} } from '../hooks/${hookName}';\n`;
+    const shadcnImportLines = buildShadcnImports();
+    if (shadcnImportLines) code += shadcnImportLines + '\n';
+    code += `\nexport function ${componentName}() {\n`;
+    if (isAuth) code += `  const { data = {} as any, isLoading } = ${hookName}();\n  void isLoading;\n`;
+    code += `  const navigate = (to: string) => { window.location.href = to; };\n`;
+    code += `  const [currentStep, setCurrentStep] = React.useState(0);\n`;
+    code += `  const [onboardingData, setOnboardingData] = React.useState<Record<string, any>>({});\n`;
+    code += `  const step = currentStep;\n  void step;\n`;
+    code += `\n  return (\n`;
+    code += renderChatOnboardingPage(schemaAny, '    ');
+    code += `  );\n}\n\nexport default ${componentName};\n`;
+    return code;
+  }
+
+  // ── Standard page types ──
   const needsStatCard = sections.some((s) => s.type === 'stat-cards' || s.widgets?.some((w: any) => w.type === 'stat-card'));
   const needsChart = sections.some((s) => s.type === 'chart' || s.type === 'grid' || s.widgets?.some((w: any) => w.type === 'chart'));
   const needsDataTable = sections.some((s) => s.type === 'data-table');
@@ -1257,7 +1665,12 @@ export class VitePageGenerator {
       await writeFileFs(join(outputDir, 'types', 'recharts.d.ts'), rechartsStubTemplate());
       result.filesGenerated += 1;
 
-      const views = schemas.filter((s) => PAGE_TYPES.has(s.type) && (s as any).sections?.length > 0);
+      const views = schemas.filter((s) => PAGE_TYPES.has(s.type) && (
+        (s as any).sections?.length > 0 ||
+        (s as any).tabs?.length > 0 ||
+        s.type === 'file-browser' ||
+        s.type === 'chat-onboarding'
+      ));
       for (const view of views) {
         try {
           const code = generatePageCode(view, primary);
