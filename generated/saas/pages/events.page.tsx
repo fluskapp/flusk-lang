@@ -21,132 +21,132 @@ export function EventsPage() {
         </TabsList>
         <TabsContent value="activity" className="space-y-6">
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-stone-700">Activity</h3>
-            <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">
+            <h3 className="text-sm font-semibold text-black/70">Activity</h3>
+            <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">
               {((data?.events) as any[] ?? []).slice(0, 20).map((event: any, i: number) => (
-                <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors">
-                  <span className="text-xs text-stone-400 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
-                  <span className="text-xs font-medium text-stone-600 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>
-                  <span className="text-xs text-stone-500 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>
+                <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.02] transition-colors">
+                  <span className="text-xs text-black/30 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                  <span className="text-xs font-medium text-black/60 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>
+                  <span className="text-xs text-black/50 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>
                   {event.blocked && <Badge variant="destructive" className="text-xs flex-shrink-0">blocked</Badge>}
                 </div>
               ))}
               {!(data?.events)?.length && (
-                <div className="px-4 py-8 text-center text-sm text-stone-400">Events will appear here as your bot runs</div>
+                <div className="px-4 py-8 text-center text-sm text-black/30">Events will appear here as your bot runs</div>
               )}
             </div>
           </div>
         </TabsContent>
         <TabsContent value="guard" className="space-y-6">
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">Guard Overview</h3>
+          <h3 className="text-sm font-semibold text-black/70 mb-3">Guard Overview</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">PII Detected</p>
-                  <EyeOff className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">PII Detected</p>
+                  <EyeOff className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_total ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_total ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Blocked Events</p>
-                  <ShieldOff className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Blocked Events</p>
+                  <ShieldOff className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.blocked_total ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.blocked_total ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Phone Numbers</p>
-                  <Phone className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Phone Numbers</p>
+                  <Phone className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_phone ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_phone ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Email Addresses</p>
-                  <Mail className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Email Addresses</p>
+                  <Mail className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_email ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_email ?? '—'}</p>
               </CardContent>
             </Card>
           </div>
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">PII Breakdown</h3>
+          <h3 className="text-sm font-semibold text-black/70 mb-3">PII Breakdown</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Names</p>
-                  <User className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Names</p>
+                  <User className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_name ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_name ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Addresses</p>
-                  <MapPin className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Addresses</p>
+                  <MapPin className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_address ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_address ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Credit Cards</p>
-                  <CreditCard className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Credit Cards</p>
+                  <CreditCard className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_credit_card ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_credit_card ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">SSNs</p>
-                  <Lock className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">SSNs</p>
+                  <Lock className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_ssn ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_ssn ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Passwords</p>
-                  <Key className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Passwords</p>
+                  <Key className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_password ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_password ?? '—'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-stone-500 leading-tight">Other PII</p>
-                  <AlertCircle className="w-4 h-4 text-stone-400" />
+                  <p className="text-sm font-medium text-black/50 leading-tight">Other PII</p>
+                  <AlertCircle className="w-4 h-4 text-black/30" />
                 </div>
-                <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.guardStats?.pii_other ?? '—'}</p>
+                <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.guardStats?.pii_other ?? '—'}</p>
               </CardContent>
             </Card>
           </div>
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-stone-700">Blocked & Flagged</h3>
-            <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">
+            <h3 className="text-sm font-semibold text-black/70">Blocked & Flagged</h3>
+            <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">
               {((data?.guardEvents) as any[] ?? []).slice(0, 20).map((event: any, i: number) => (
-                <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors">
-                  <span className="text-xs text-stone-400 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
-                  <span className="text-xs font-medium text-stone-600 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>
-                  <span className="text-xs text-stone-500 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>
+                <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.02] transition-colors">
+                  <span className="text-xs text-black/30 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                  <span className="text-xs font-medium text-black/60 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>
+                  <span className="text-xs text-black/50 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>
                   {event.blocked && <Badge variant="destructive" className="text-xs flex-shrink-0">blocked</Badge>}
                 </div>
               ))}
               {!(data?.guardEvents)?.length && (
-                <div className="px-4 py-8 text-center text-sm text-stone-400">Your bot has been behaving. Good bot.</div>
+                <div className="px-4 py-8 text-center text-sm text-black/30">Your bot has been behaving. Good bot.</div>
               )}
             </div>
           </div>

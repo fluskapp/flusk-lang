@@ -26,49 +26,49 @@ export function PichefkesPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex h-full min-h-[600px] gap-0 rounded-xl border border-stone-200 overflow-hidden bg-white">
+        <div className="flex h-full min-h-[600px] gap-0 rounded-xl border border-black/10 overflow-hidden bg-white">
           {/* Finder Sidebar */}
-          <div className="w-52 flex-shrink-0 border-r border-stone-200 bg-stone-50 flex flex-col">
-            <div className="px-3 py-3 border-b border-stone-200">
-              <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Workspace</p>
+          <div className="w-52 flex-shrink-0 border-r border-black/10 bg-white flex flex-col">
+            <div className="px-3 py-3 border-b border-black/10">
+              <p className="text-xs font-semibold text-black/50 uppercase tracking-wider">Workspace</p>
             </div>
             <nav className="flex-1 p-2 space-y-0.5">
-              <button onClick={() => setSelectedSection('pichefkes')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${selectedSection === 'pichefkes' ? 'bg-black text-white' : 'text-stone-600 hover:bg-stone-100'}`}>
+              <button onClick={() => setSelectedSection('pichefkes')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${selectedSection === 'pichefkes' ? 'bg-black text-white' : 'text-black/60 hover:bg-black/[0.04]'}`}>
                 <span className="w-4 h-4 flex-shrink-0">📁</span>
                 <span className="flex-1 truncate">Pichefkes</span>
-                <span className={`text-xs ${selectedSection === 'pichefkes' ? 'text-white/60' : 'text-stone-400'}`}>{((data?.workspace) as any[] ?? []).length}</span>
+                <span className={`text-xs ${selectedSection === 'pichefkes' ? 'text-white/60' : 'text-black/30'}`}>{((data?.workspace) as any[] ?? []).length}</span>
               </button>
-              <button onClick={() => setSelectedSection('signals')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${selectedSection === 'signals' ? 'bg-black text-white' : 'text-stone-600 hover:bg-stone-100'}`}>
+              <button onClick={() => setSelectedSection('signals')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${selectedSection === 'signals' ? 'bg-black text-white' : 'text-black/60 hover:bg-black/[0.04]'}`}>
                 <span className="w-4 h-4 flex-shrink-0">📁</span>
                 <span className="flex-1 truncate">Signals</span>
-                <span className={`text-xs ${selectedSection === 'signals' ? 'text-white/60' : 'text-stone-400'}`}>{((data?.signals) as any[] ?? []).length}</span>
+                <span className={`text-xs ${selectedSection === 'signals' ? 'text-white/60' : 'text-black/30'}`}>{((data?.signals) as any[] ?? []).length}</span>
               </button>
-              <button onClick={() => setSelectedSection('noise')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${selectedSection === 'noise' ? 'bg-black text-white' : 'text-stone-600 hover:bg-stone-100'}`}>
+              <button onClick={() => setSelectedSection('noise')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${selectedSection === 'noise' ? 'bg-black text-white' : 'text-black/60 hover:bg-black/[0.04]'}`}>
                 <span className="w-4 h-4 flex-shrink-0">📁</span>
                 <span className="flex-1 truncate">Noise</span>
-                <span className={`text-xs ${selectedSection === 'noise' ? 'text-white/60' : 'text-stone-400'}`}>{((data?.noise) as any[] ?? []).length}</span>
+                <span className={`text-xs ${selectedSection === 'noise' ? 'text-white/60' : 'text-black/30'}`}>{((data?.noise) as any[] ?? []).length}</span>
               </button>
             </nav>
           </div>
           {/* Main Content */}
           <div className="flex-1 flex flex-col min-w-0">
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-stone-200 bg-white">
-              <div className="flex items-center gap-2 flex-1 px-3 py-1.5 border border-stone-200 rounded-lg">
-                <Search className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
-                <input type="search" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 text-sm focus:outline-none placeholder-stone-400" />
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-black/10 bg-white">
+              <div className="flex items-center gap-2 flex-1 px-3 py-1.5 border border-black/10 rounded-lg">
+                <Search className="w-3.5 h-3.5 text-black/30 flex-shrink-0" />
+                <input type="search" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 text-sm focus:outline-none placeholder-black/30" />
               </div>
               <Button size="sm" variant="outline" className="text-xs">+ New File</Button>
             </div>
             <div className="flex-1 p-4 overflow-auto">
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
                 {(currentFiles.filter((f: any) => !searchQuery || f.name?.toLowerCase().includes(searchQuery.toLowerCase()))).map((file: any, i: number) => (
-                  <button key={i} onClick={() => setSelectedFile(file)} onDoubleClick={() => setPreviewFile(file)} className={`flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-stone-100 transition-colors text-center ${selectedFile === file ? 'bg-stone-100 ring-1 ring-stone-300' : ''}`}>
+                  <button key={i} onClick={() => setSelectedFile(file)} onDoubleClick={() => setPreviewFile(file)} className={`flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-black/[0.04] transition-colors text-center ${selectedFile === file ? 'bg-black/[0.02] ring-1 ring-black/20' : ''}`}>
                     <span className="text-3xl">{file.type === 'md' || file.type === 'txt' ? '📄' : file.type === 'json' || file.type === 'yaml' ? '📋' : file.type === 'py' || file.type === 'js' || file.type === 'ts' ? '💻' : file.type === 'png' || file.type === 'jpg' ? '🖼️' : '📁'}</span>
-                    <span className="text-xs text-stone-700 truncate w-full text-center leading-tight">{file.name ?? ''}</span>
+                    <span className="text-xs text-black/70 truncate w-full text-center leading-tight">{file.name ?? ''}</span>
                   </button>
                 ))}
                 {currentFiles.length === 0 && (
-                  <div className="col-span-full py-16 text-center text-stone-400">
+                  <div className="col-span-full py-16 text-center text-black/30">
                     <p className="text-sm font-medium">No files here</p>
                     <p className="text-xs mt-1">Your bot will store files here as it works</p>
                   </div>
@@ -78,13 +78,13 @@ export function PichefkesPage() {
           </div>
           {/* Preview Panel */}
           {previewFile && (
-            <div className="w-80 flex-shrink-0 border-l border-stone-200 bg-white flex flex-col">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-stone-200">
-                <span className="text-sm font-medium text-stone-800 truncate">{previewFile.name}</span>
-                <button onClick={() => setPreviewFile(null)} className="text-stone-400 hover:text-stone-600 text-lg leading-none">×</button>
+            <div className="w-80 flex-shrink-0 border-l border-black/10 bg-white flex flex-col">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-black/10">
+                <span className="text-sm font-medium text-black/80 truncate">{previewFile.name}</span>
+                <button onClick={() => setPreviewFile(null)} className="text-black/30 hover:text-black/60 text-lg leading-none">×</button>
               </div>
               <div className="flex-1 p-4 overflow-auto">
-                <pre className="text-xs text-stone-700 whitespace-pre-wrap font-mono leading-relaxed">{previewFile.content ?? 'Loading...'}</pre>
+                <pre className="text-xs text-black/70 whitespace-pre-wrap font-mono leading-relaxed">{previewFile.content ?? 'Loading...'}</pre>
               </div>
             </div>
           )}

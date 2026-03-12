@@ -19,19 +19,19 @@ export function ConnectorsPage() {
           <TabsTrigger value="tools">Tools</TabsTrigger>
         </TabsList>
         <TabsContent value="channels" className="space-y-6">
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">Messaging Channels</h3>
+          <h3 className="text-sm font-semibold text-black/70 mb-3">Messaging Channels</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {((data?.channels) as any[] ?? []).map((item: any, i: number) => (
               <Card key={i} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.status === 'active' || item.status === 'connected' ? 'bg-emerald-400' : 'bg-stone-300'}`} />
-                      <span className="text-sm font-semibold text-stone-900">{item.name}</span>
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.status === 'active' || item.status === 'connected' ? 'bg-emerald-400' : 'bg-black/20'}`} />
+                      <span className="text-sm font-semibold text-black">{item.name}</span>
                     </div>
                     <Badge variant="outline">{item.type ?? 'integration'}</Badge>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-stone-400">
+                  <div className="flex items-center justify-between text-xs text-black/30">
                     <span>{item.requests != null ? `${item.requests} req/day` : 'No data'}</span>
                     <span>{item.latency != null ? `${item.latency}ms` : ''}</span>
                   </div>
@@ -41,19 +41,19 @@ export function ConnectorsPage() {
           </div>
         </TabsContent>
         <TabsContent value="tools" className="space-y-6">
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">External Tools</h3>
+          <h3 className="text-sm font-semibold text-black/70 mb-3">External Tools</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {((data?.tools) as any[] ?? []).map((item: any, i: number) => (
               <Card key={i} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.status === 'active' || item.status === 'connected' ? 'bg-emerald-400' : 'bg-stone-300'}`} />
-                      <span className="text-sm font-semibold text-stone-900">{item.name}</span>
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.status === 'active' || item.status === 'connected' ? 'bg-emerald-400' : 'bg-black/20'}`} />
+                      <span className="text-sm font-semibold text-black">{item.name}</span>
                     </div>
                     <Badge variant="outline">{item.type ?? 'integration'}</Badge>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-stone-400">
+                  <div className="flex items-center justify-between text-xs text-black/30">
                     <span>{item.requests != null ? `${item.requests} req/day` : 'No data'}</span>
                     <span>{item.latency != null ? `${item.latency}ms` : ''}</span>
                   </div>

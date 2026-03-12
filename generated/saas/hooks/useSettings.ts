@@ -7,12 +7,12 @@ export function useSettings() {
     queryKey: ['Settings'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any[]>('/api/bot').catch(() => []),
-      apiClient.get<any[]>('/api/user').catch(() => [])
+      apiClient.get<any>('/api/gateway/status').catch(() => null),
+      apiClient.get<any>('/api/account/me').catch(() => null)
       ]);
       return {
-      bot: results[0],
-      user: results[1]
+        bot: results[0],
+        user: results[1]
       };
     },
   });

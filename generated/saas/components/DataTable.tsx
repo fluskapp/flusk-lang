@@ -9,25 +9,25 @@ const PLACEHOLDER_ROWS = [{ name: 'Alice Chen', email: 'alice@example.com', role
 
 function StatusBadge({ value }: { value: string }) {
   const v = String(value).toLowerCase();
-  const cls = v === 'active' || v === 'connected' || v === 'admin' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : v === 'paused' || v === 'pending' || v === 'manager' ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-stone-100 text-stone-600 ring-stone-200';
+  const cls = v === 'active' || v === 'connected' || v === 'admin' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : v === 'paused' || v === 'pending' || v === 'manager' ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-black/[0.02] text-black/60 ring-black/10';
   return <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ring-1 ring-inset ${cls}`}>{value}</span>;
 }
 
 function CellValue({ value, col }: { value: any; col: Column }) {
-  if (value == null) return <span className="text-stone-300">—</span>;
+  if (value == null) return <span className="text-black/20">—</span>;
   const isStatus = col.widget === 'status-badge' || col.widget === 'role-badge' || col.key === 'status' || col.key === 'role';
   if (isStatus) return <StatusBadge value={String(value)} />;
-  return <span className="text-stone-700">{String(value)}</span>;
+  return <span className="text-black/70">{String(value)}</span>;
 }
 
 export function DataTable({ title, columns, data, actions, pagination }: DataTableProps) {
   const rows = data && data.length > 0 ? data : PLACEHOLDER_ROWS;
   const visibleCols = columns.filter((c) => c.label);
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-      {(title || (actions && actions.length > 0)) && (<div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">{title && <h3 className="text-sm font-semibold text-stone-800">{title}</h3>}<div className="flex gap-2">{actions?.map((action, i) => (<button key={i} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: '#18181b' }}>{action.label}</button>))}</div></div>)}
-      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="bg-stone-50 border-b border-stone-100">{visibleCols.map((col) => <th key={col.key} className="px-4 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide whitespace-nowrap">{col.label}</th>)}<th className="px-4 py-3 w-8" /></tr></thead><tbody className="divide-y divide-stone-50">{rows.map((row: any, i: number) => (<tr key={i} className="hover:bg-stone-50/80 transition-colors group">{visibleCols.map((col) => (<td key={col.key} className="px-4 py-3"><CellValue value={row[col.key]} col={col} /></td>))}<td className="px-4 py-3 text-right"><button className="text-stone-300 hover:text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal className="w-4 h-4" /></button></td></tr>))}</tbody></table></div>
-      {pagination && (<div className="px-5 py-3 border-t border-stone-100 flex items-center justify-between"><span className="text-xs text-stone-400">Showing {rows.length} results</span><div className="flex gap-1"><button className="px-2.5 py-1 text-xs text-stone-600 border border-stone-200 rounded-md hover:bg-stone-50">Prev</button><button className="px-2.5 py-1 text-xs text-stone-600 border border-stone-200 rounded-md hover:bg-stone-50">Next</button></div></div>)}
+    <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden">
+      {(title || (actions && actions.length > 0)) && (<div className="px-5 py-4 border-b border-black/[0.06] flex items-center justify-between">{title && <h3 className="text-sm font-semibold text-black/80">{title}</h3>}<div className="flex gap-2">{actions?.map((action, i) => (<button key={i} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: '#18181b' }}>{action.label}</button>))}</div></div>)}
+      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="bg-white border-b border-black/[0.06]">{visibleCols.map((col) => <th key={col.key} className="px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap">{col.label}</th>)}<th className="px-4 py-3 w-8" /></tr></thead><tbody className="divide-y divide-black/[0.04]">{rows.map((row: any, i: number) => (<tr key={i} className="hover:bg-black/[0.02]/80 transition-colors group">{visibleCols.map((col) => (<td key={col.key} className="px-4 py-3"><CellValue value={row[col.key]} col={col} /></td>))}<td className="px-4 py-3 text-right"><button className="text-black/20 hover:text-black/60 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal className="w-4 h-4" /></button></td></tr>))}</tbody></table></div>
+      {pagination && (<div className="px-5 py-3 border-t border-black/[0.06] flex items-center justify-between"><span className="text-xs text-black/30">Showing {rows.length} results</span><div className="flex gap-1"><button className="px-2.5 py-1 text-xs text-black/60 border border-black/10 rounded-md hover:bg-black/[0.02]">Prev</button><button className="px-2.5 py-1 text-xs text-black/60 border border-black/10 rounded-md hover:bg-black/[0.02]">Next</button></div></div>)}
     </div>
   );
 }

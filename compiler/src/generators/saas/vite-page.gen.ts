@@ -169,14 +169,14 @@ function renderStatCards(section: any, indent: string, ctx?: { isMarketing?: boo
   const widgets: any[] = section.widgets ?? [];
   const cols = section.columns ?? 4;
   const isDark = section.dark === true;
-  const wrapCls = isDark ? 'grid grid-cols-2 md:grid-cols-' + cols + ' gap-4 bg-stone-900 rounded-2xl p-6' : 'grid grid-cols-2 md:grid-cols-' + cols + ' gap-4';
+  const wrapCls = isDark ? 'grid grid-cols-2 md:grid-cols-' + cols + ' gap-4 bg-black rounded-2xl p-6' : 'grid grid-cols-2 md:grid-cols-' + cols + ' gap-4';
   let out = `${indent}<div className="${wrapCls}">\n`;
   for (const w of widgets) {
     const val = w.value != null ? `{${JSON.stringify(w.value)}}` : ctx?.isMarketing ? `{"—"}` : `{${w.source ? sourceExpr(w.source) : 'undefined'}}`;
     const trendAttr = w.trend ? ` trend={{ direction: '${w.trend.direction}', value: ${w.trend.value ?? 'undefined'}, label: '${w.trend.label ?? ''}' }}` : '';
     const colorAttr = w.color ? ` color="${w.color}"` : '';
     const darkAttr = isDark ? ' dark={true}' : '';
-    out += `${indent}  <Card${isDark ? ' className="bg-stone-800 border-stone-700"' : ''}>\n`;
+    out += `${indent}  <Card${isDark ? ' className="bg-black/80 border-black/70"' : ''}>\n`;
     out += `${indent}    <CardContent className="p-5">\n`;
     out += `${indent}      <StatCard\n${indent}        label="${w.label ?? ''}"\n${indent}        value=${val}\n${indent}        format="${w.format ?? 'number'}"${colorAttr}${darkAttr}${trendAttr}\n${indent}      />\n`;
     out += `${indent}    </CardContent>\n${indent}  </Card>\n`;
@@ -206,10 +206,10 @@ function renderGrid(section: any, indent: string): string {
     } else if (w.type === 'feature-card') {
       shadcnNeeds.add('card');
       const iconName = w.icon ? lucideIcon(w.icon) : null;
-      const iconJsx = iconName ? `${indent}      <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center mb-4">\n${indent}        <${iconName} className="w-5 h-5 text-stone-700" />\n${indent}      </div>\n` : '';
-      out += `${indent}  <Card className="hover:shadow-md transition-shadow">\n${indent}    <CardContent className="p-6">\n${iconJsx}${indent}      <h3 className="font-semibold text-stone-900 mb-2">${w.title ?? ''}</h3>\n${indent}      <p className="text-sm text-stone-500 leading-relaxed">${w.body ?? ''}</p>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
+      const iconJsx = iconName ? `${indent}      <div className="w-10 h-10 rounded-xl bg-black/[0.02] flex items-center justify-center mb-4">\n${indent}        <${iconName} className="w-5 h-5 text-black/70" />\n${indent}      </div>\n` : '';
+      out += `${indent}  <Card className="hover:shadow-md transition-shadow">\n${indent}    <CardContent className="p-6">\n${iconJsx}${indent}      <h3 className="font-semibold text-black mb-2">${w.title ?? ''}</h3>\n${indent}      <p className="text-sm text-black/50 leading-relaxed">${w.body ?? ''}</p>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
     } else {
-      out += `${indent}  <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">{/* ${w.type} widget */}</div>\n`;
+      out += `${indent}  <div className="bg-white rounded-xl border border-black/10 p-5 shadow-sm">{/* ${w.type} widget */}</div>\n`;
     }
   }
   out += `${indent}</div>\n`;
@@ -221,11 +221,11 @@ function renderAlertList(section: any, indent: string): string {
   const widgets: any[] = section.widgets ?? [];
   const title = section.title ?? '';
   let out = `${indent}<div className="space-y-3">\n`;
-  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700">${title}</h3>\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-black/70">${title}</h3>\n`;
   for (const w of widgets) {
     const severity = w.severity ?? 'info';
     const badgeVariant = severity === 'warning' || severity === 'critical' ? 'destructive' : severity === 'info' ? 'secondary' : 'outline';
-    out += `${indent}  <Card>\n${indent}    <CardContent className="flex items-start gap-3 px-4 py-3">\n${indent}      <Badge variant="${badgeVariant}">${severity}</Badge>\n${indent}      <span className="text-xs leading-relaxed text-stone-700">${w.message ?? ''}</span>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
+    out += `${indent}  <Card>\n${indent}    <CardContent className="flex items-start gap-3 px-4 py-3">\n${indent}      <Badge variant="${badgeVariant}">${severity}</Badge>\n${indent}      <span className="text-xs leading-relaxed text-black/70">${w.message ?? ''}</span>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
   }
   out += `${indent}</div>\n`;
   return out;
@@ -245,7 +245,7 @@ function renderActionCards(section: any, indent: string, isAuth = false): string
     if (href === '#') onClickBody = `toast('${label || 'Coming soon'}')`;
     else if (isAuth) onClickBody = `navigate('${href}')`;
     else onClickBody = `window.location.href = '${href}'`;
-    out += `${indent}  <Card className="hover:shadow-md transition-all cursor-pointer" onClick={() => { ${onClickBody}; }}>\n${indent}    <CardContent className="flex flex-col items-center gap-3 p-6 text-center">\n${indent}      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '${PRIMARY}20' }}>\n${indent}        <${iconName} className="w-5 h-5" style={{ color: '${PRIMARY}' }} />\n${indent}      </div>\n${indent}      <span className="text-sm font-medium text-stone-700">${label}</span>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
+    out += `${indent}  <Card className="hover:shadow-md transition-all cursor-pointer" onClick={() => { ${onClickBody}; }}>\n${indent}    <CardContent className="flex flex-col items-center gap-3 p-6 text-center">\n${indent}      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '${PRIMARY}20' }}>\n${indent}        <${iconName} className="w-5 h-5" style={{ color: '${PRIMARY}' }} />\n${indent}      </div>\n${indent}      <span className="text-sm font-medium text-black/70">${label}</span>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
   }
   out += `${indent}</div>\n`;
   return out;
@@ -266,17 +266,17 @@ function renderCardGrid(section: any, indent: string): string {
   const title = section.title ?? '';
   const widgets: any[] = section.widgets ?? [];
   let out = `${indent}<div>\n`;
-  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-black/70 mb-3">${title}</h3>\n`;
   if (widgets.length > 0) {
     out += `${indent}  <div className="grid grid-cols-1 sm:grid-cols-${cols} gap-4">\n`;
     for (const w of widgets) {
       const badgeVariant = w.status === 'connected' ? 'default' : 'outline';
-      out += `${indent}    <Card>\n${indent}      <CardContent className="flex items-center justify-between px-5 py-4">\n${indent}        <div>\n${indent}          <p className="text-sm font-medium text-stone-800">${w.name ?? w.provider ?? ''}</p>\n${indent}          <p className="text-xs text-stone-400 capitalize">${w.provider ?? ''}</p>\n${indent}        </div>\n${indent}        <Badge variant="${badgeVariant}">${w.status ?? ''}</Badge>\n${indent}      </CardContent>\n${indent}    </Card>\n`;
+      out += `${indent}    <Card>\n${indent}      <CardContent className="flex items-center justify-between px-5 py-4">\n${indent}        <div>\n${indent}          <p className="text-sm font-medium text-black/80">${w.name ?? w.provider ?? ''}</p>\n${indent}          <p className="text-xs text-black/30 capitalize">${w.provider ?? ''}</p>\n${indent}        </div>\n${indent}        <Badge variant="${badgeVariant}">${w.status ?? ''}</Badge>\n${indent}      </CardContent>\n${indent}    </Card>\n`;
     }
     out += `${indent}  </div>\n`;
   } else {
     out += `${indent}  <div className="grid grid-cols-1 sm:grid-cols-${cols} gap-4">\n`;
-    out += `${indent}    {((${src}) as any[] ?? []).map((item: any, i: number) => (\n${indent}      <Card key={i} className="hover:shadow-md transition-shadow">\n${indent}        <CardContent className="p-5">\n${indent}          <div className="flex items-start justify-between">\n${indent}            <h4 className="font-medium text-stone-900 text-sm">{item.name ?? item.title ?? \`Item \${i + 1}\`}</h4>\n${indent}            {item.status && (\n${indent}              <Badge variant=${badgeVariantExpr('item.status')}>{item.status}</Badge>\n${indent}            )}\n${indent}          </div>\n${indent}          {item.description && <p className="mt-1.5 text-xs text-stone-500 line-clamp-2">{item.description}</p>}\n${indent}        </CardContent>\n${indent}      </Card>\n${indent}    ))}\n${indent}  </div>\n`;
+    out += `${indent}    {((${src}) as any[] ?? []).map((item: any, i: number) => (\n${indent}      <Card key={i} className="hover:shadow-md transition-shadow">\n${indent}        <CardContent className="p-5">\n${indent}          <div className="flex items-start justify-between">\n${indent}            <h4 className="font-medium text-black text-sm">{item.name ?? item.title ?? \`Item \${i + 1}\`}</h4>\n${indent}            {item.status && (\n${indent}              <Badge variant=${badgeVariantExpr('item.status')}>{item.status}</Badge>\n${indent}            )}\n${indent}          </div>\n${indent}          {item.description && <p className="mt-1.5 text-xs text-black/50 line-clamp-2">{item.description}</p>}\n${indent}        </CardContent>\n${indent}      </Card>\n${indent}    ))}\n${indent}  </div>\n`;
   }
   out += `${indent}</div>\n`;
   return out;
@@ -284,28 +284,28 @@ function renderCardGrid(section: any, indent: string): string {
 
 function renderFilterBar(section: any, indent: string): string {
   const filters: any[] = section.filters ?? [];
-  let out = `${indent}<div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl border border-stone-200 shadow-sm">\n`;
+  let out = `${indent}<div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl border border-black/10 shadow-sm">\n`;
   for (const f of filters) {
     if (f.type === 'search') {
-      out += `${indent}  <div className="flex items-center gap-2 flex-1 min-w-48 px-3 py-2 border border-stone-200 rounded-lg">\n${indent}    <Search className="w-4 h-4 text-stone-400 flex-shrink-0" />\n${indent}    <input type="search" placeholder="${f.placeholder ?? 'Search...'}" className="flex-1 text-sm focus:outline-none placeholder-stone-400" />\n${indent}  </div>\n`;
+      out += `${indent}  <div className="flex items-center gap-2 flex-1 min-w-48 px-3 py-2 border border-black/10 rounded-lg">\n${indent}    <Search className="w-4 h-4 text-black/30 flex-shrink-0" />\n${indent}    <input type="search" placeholder="${f.placeholder ?? 'Search...'}" className="flex-1 text-sm focus:outline-none placeholder-black/30" />\n${indent}  </div>\n`;
     } else if (f.type === 'select') {
-      out += `${indent}  <select className="px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none bg-white text-stone-700">\n`;
+      out += `${indent}  <select className="px-3 py-2 text-sm border border-black/10 rounded-lg focus:outline-none bg-white text-black/70">\n`;
       for (const opt of (f.options ?? [])) out += `${indent}    <option>${opt}</option>\n`;
       out += `${indent}  </select>\n`;
     } else if (f.type === 'tag-filter') {
-      out += `${indent}  <div className="flex flex-wrap gap-1.5">\n${indent}    {(activeTags.length === 0 ? [{ label: 'All', value: '' }] : [{ label: 'All', value: '' }, ...activeTags.map((t) => ({ label: t, value: t }))]).map((tag) => (\n${indent}      <button key={tag.value} onClick={() => setActiveTags(tag.value ? (activeTags.includes(tag.value) ? activeTags.filter((t) => t !== tag.value) : [...activeTags, tag.value]) : [])} className={\`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors \${tag.value === '' && activeTags.length === 0 ? 'text-white' : activeTags.includes(tag.value) ? 'text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}\`} style={tag.value === '' && activeTags.length === 0 ? { backgroundColor: '${PRIMARY}' } : activeTags.includes(tag.value) ? { backgroundColor: '${PRIMARY}' } : {}}>\n${indent}        {tag.label}\n${indent}      </button>\n${indent}    ))}\n${indent}  </div>\n`;
+      out += `${indent}  <div className="flex flex-wrap gap-1.5">\n${indent}    {(activeTags.length === 0 ? [{ label: 'All', value: '' }] : [{ label: 'All', value: '' }, ...activeTags.map((t) => ({ label: t, value: t }))]).map((tag) => (\n${indent}      <button key={tag.value} onClick={() => setActiveTags(tag.value ? (activeTags.includes(tag.value) ? activeTags.filter((t) => t !== tag.value) : [...activeTags, tag.value]) : [])} className={\`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors \${tag.value === '' && activeTags.length === 0 ? 'text-white' : activeTags.includes(tag.value) ? 'text-white' : 'bg-black/[0.02] text-black/60 hover:bg-black/[0.07]'}\`} style={tag.value === '' && activeTags.length === 0 ? { backgroundColor: '${PRIMARY}' } : activeTags.includes(tag.value) ? { backgroundColor: '${PRIMARY}' } : {}}>\n${indent}        {tag.label}\n${indent}      </button>\n${indent}    ))}\n${indent}  </div>\n`;
     } else if (f.type === 'status-filter') {
       const opts: string[] = f.options ?? ['All', 'Active', 'Paused', 'Draft'];
       out += `${indent}  <div className="flex gap-1">\n`;
       for (const opt of opts) {
         const val = opt === 'All' ? '' : opt;
-        out += `${indent}    <button onClick={() => setActiveStatus('${val}')} className={\`px-3 py-1.5 rounded-full text-xs font-medium transition-colors \${activeStatus === '${val}' ? 'text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}\`} style={activeStatus === '${val}' ? { backgroundColor: '${PRIMARY}' } : {}}>${opt}</button>\n`;
+        out += `${indent}    <button onClick={() => setActiveStatus('${val}')} className={\`px-3 py-1.5 rounded-full text-xs font-medium transition-colors \${activeStatus === '${val}' ? 'text-white' : 'bg-black/[0.02] text-black/60 hover:bg-black/[0.07]'}\`} style={activeStatus === '${val}' ? { backgroundColor: '${PRIMARY}' } : {}}>${opt}</button>\n`;
       }
       out += `${indent}  </div>\n`;
     } else if (f.type === 'view-toggle') {
-      out += `${indent}  <div className="ml-auto flex items-center gap-0.5 bg-stone-100 rounded-lg p-0.5">\n${indent}    <button onClick={() => setViewMode('grid')} className={\`p-1.5 rounded-md transition-colors \${viewMode === 'grid' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-400 hover:text-stone-600'}\`}><LayoutGrid className="w-4 h-4" /></button>\n${indent}    <button onClick={() => setViewMode('list')} className={\`p-1.5 rounded-md transition-colors \${viewMode === 'list' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-400 hover:text-stone-600'}\`}><List className="w-4 h-4" /></button>\n${indent}  </div>\n`;
+      out += `${indent}  <div className="ml-auto flex items-center gap-0.5 bg-black/[0.02] rounded-lg p-0.5">\n${indent}    <button onClick={() => setViewMode('grid')} className={\`p-1.5 rounded-md transition-colors \${viewMode === 'grid' ? 'bg-white shadow-sm text-black' : 'text-black/30 hover:text-black/60'}\`}><LayoutGrid className="w-4 h-4" /></button>\n${indent}    <button onClick={() => setViewMode('list')} className={\`p-1.5 rounded-md transition-colors \${viewMode === 'list' ? 'bg-white shadow-sm text-black' : 'text-black/30 hover:text-black/60'}\`}><List className="w-4 h-4" /></button>\n${indent}  </div>\n`;
     } else {
-      out += `${indent}  <div className="px-3 py-2 text-sm border border-stone-200 rounded-lg text-stone-500">{/* ${f.name ?? f.type} */}</div>\n`;
+      out += `${indent}  <div className="px-3 py-2 text-sm border border-black/10 rounded-lg text-black/50">{/* ${f.name ?? f.type} */}</div>\n`;
     }
   }
   out += `${indent}</div>\n`;
@@ -320,7 +320,7 @@ function renderSettingsSection(section: any, indent: string): string {
   const desc = section.description ?? '';
   let out = `${indent}<Card>\n${indent}  <CardHeader>\n${indent}    <CardTitle className="text-sm">${title}</CardTitle>\n`;
   if (desc) out += `${indent}    <CardDescription>${desc}</CardDescription>\n`;
-  out += `${indent}  </CardHeader>\n${indent}  <CardContent className="divide-y divide-stone-50">\n`;
+  out += `${indent}  </CardHeader>\n${indent}  <CardContent className="divide-y divide-black/[0.04]">\n`;
   for (const f of fields) {
     out += `${indent}    <div className="flex items-center justify-between py-3.5">\n${indent}      <Label>${f.label ?? f.name}</Label>\n`;
     if (f.type === 'link') { out += `${indent}      <a href="${f.href ?? '#'}" className="text-sm font-medium hover:underline" style={{ color: '${SECONDARY}' }}>Manage</a>\n`;
@@ -328,21 +328,21 @@ function renderSettingsSection(section: any, indent: string): string {
     } else { out += `${indent}      <Input type="text" placeholder="${f.label ?? ''}" className="w-64" />\n`; }
     out += `${indent}    </div>\n`;
   }
-  if (widgets.length > 0) out += `${indent}    <div className="py-4 text-xs text-stone-400">{/* ${widgets.map((w) => w.type).join(', ')} */}</div>\n`;
+  if (widgets.length > 0) out += `${indent}    <div className="py-4 text-xs text-black/30">{/* ${widgets.map((w) => w.type).join(', ')} */}</div>\n`;
   out += `${indent}  </CardContent>\n${indent}</Card>\n`;
   return out;
 }
 
 function renderHero(section: any, indent: string): string {
   const ctas: any[] = section.ctas ?? [];
-  return `${indent}<section className="py-24 text-center">\n${indent}  <h1 className="text-5xl lg:text-6xl font-bold text-stone-900 leading-tight max-w-3xl mx-auto">\n${indent}    ${section.heading ?? ''}\n${indent}  </h1>\n${indent}  <p className="mt-6 text-lg text-stone-500 max-w-2xl mx-auto leading-relaxed">\n${indent}    ${section.subheading ?? ''}\n${indent}  </p>\n${ctas.length ? `${indent}  <div className="mt-10 flex flex-wrap items-center justify-center gap-3">\n${ctas.map((c) => renderButton(c, indent + '    ')).join('\n')}\n${indent}  </div>\n` : ''}${indent}</section>\n`;
+  return `${indent}<section className="py-24 text-center">\n${indent}  <h1 className="text-5xl lg:text-6xl font-bold text-black leading-tight max-w-3xl mx-auto">\n${indent}    ${section.heading ?? ''}\n${indent}  </h1>\n${indent}  <p className="mt-6 text-lg text-black/50 max-w-2xl mx-auto leading-relaxed">\n${indent}    ${section.subheading ?? ''}\n${indent}  </p>\n${ctas.length ? `${indent}  <div className="mt-10 flex flex-wrap items-center justify-center gap-3">\n${ctas.map((c) => renderButton(c, indent + '    ')).join('\n')}\n${indent}  </div>\n` : ''}${indent}</section>\n`;
 }
 
 function renderNavbar(section: any, indent: string): string {
   shadcnNeeds.add('button');
   const links: string[] = section.widgets?.find((w: any) => w.type === 'nav-links')?.items ?? ['Product', 'Solutions', 'FAQ', 'About us'];
   const ctaLabel = section.widgets?.find((w: any) => w.type === 'cta-button')?.label ?? 'Try it now';
-  return `${indent}<nav className="flex items-center justify-between py-5 border-b border-stone-100 bg-white sticky top-0 z-10">\n${indent}  <span className="font-bold text-stone-900 text-xl tracking-tight">flusk</span>\n${indent}  <div className="hidden md:flex items-center gap-8">\n${indent}    {${JSON.stringify(links)}.map((item: string) => (\n${indent}      <button key={item} onClick={() => { const el = document.getElementById(item.toLowerCase().replace(/\\s+/g, '-')); el?.scrollIntoView({ behavior: 'smooth' }); }} className="text-sm text-stone-600 hover:text-stone-900 transition-colors">{item}</button>\n${indent}    ))}\n${indent}  </div>\n${indent}  <Button variant="default" onClick={() => navigate('/signup')} style={{ backgroundColor: '${PRIMARY}' }}>${ctaLabel}</Button>\n${indent}</nav>\n`;
+  return `${indent}<nav className="flex items-center justify-between py-5 border-b border-black/[0.06] bg-white sticky top-0 z-10">\n${indent}  <span className="font-bold text-black text-xl tracking-tight">flusk</span>\n${indent}  <div className="hidden md:flex items-center gap-8">\n${indent}    {${JSON.stringify(links)}.map((item: string) => (\n${indent}      <button key={item} onClick={() => { const el = document.getElementById(item.toLowerCase().replace(/\\s+/g, '-')); el?.scrollIntoView({ behavior: 'smooth' }); }} className="text-sm text-black/60 hover:text-black transition-colors">{item}</button>\n${indent}    ))}\n${indent}  </div>\n${indent}  <Button variant="default" onClick={() => navigate('/signup')} style={{ backgroundColor: '${PRIMARY}' }}>${ctaLabel}</Button>\n${indent}</nav>\n`;
 }
 
 function renderFooter(section: any, indent: string): string {
@@ -350,11 +350,11 @@ function renderFooter(section: any, indent: string): string {
   const cta = section.cta;
   const copyright = section.copyright ?? '';
   const heading = section.heading ?? '';
-  return `${indent}<footer className="bg-stone-900 text-stone-300 rounded-2xl p-12 mt-4">\n${indent}  <div className="max-w-4xl mx-auto text-center">\n${indent}    <h3 className="text-2xl font-bold text-white mb-6 leading-snug">${heading}</h3>\n${cta ? `${indent}    ${renderButton(cta, '').trim()}\n` : ''}${links.length ? `${indent}    <div className="flex flex-wrap justify-center gap-6 text-sm mt-8">\n${indent}      {${JSON.stringify(links)}.map((link: string) => (\n${indent}        <button key={link} onClick={() => { const el = document.getElementById(link.toLowerCase().replace(/\\s+/g, '-')); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors">{link}</button>\n${indent}      ))}\n${indent}    </div>\n` : ''}${indent}    <p className="mt-8 text-xs text-stone-500">${copyright}</p>\n${indent}  </div>\n${indent}</footer>\n`;
+  return `${indent}<footer className="bg-black text-black/20 rounded-2xl p-12 mt-4">\n${indent}  <div className="max-w-4xl mx-auto text-center">\n${indent}    <h3 className="text-2xl font-bold text-white mb-6 leading-snug">${heading}</h3>\n${cta ? `${indent}    ${renderButton(cta, '').trim()}\n` : ''}${links.length ? `${indent}    <div className="flex flex-wrap justify-center gap-6 text-sm mt-8">\n${indent}      {${JSON.stringify(links)}.map((link: string) => (\n${indent}        <button key={link} onClick={() => { const el = document.getElementById(link.toLowerCase().replace(/\\s+/g, '-')); el?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors">{link}</button>\n${indent}      ))}\n${indent}    </div>\n` : ''}${indent}    <p className="mt-8 text-xs text-black/50">${copyright}</p>\n${indent}  </div>\n${indent}</footer>\n`;
 }
 
 function renderValueProp(section: any, indent: string): string {
-  return `${indent}<section className="py-16 border-t border-stone-100">\n${indent}  <div className="max-w-2xl mx-auto text-center">\n${indent}    <h2 className="text-3xl font-bold text-stone-900 leading-snug">${section.heading ?? ''}</h2>\n${indent}    <p className="mt-4 text-stone-500 leading-relaxed text-lg">${section.body ?? ''}</p>\n${indent}  </div>\n${indent}</section>\n`;
+  return `${indent}<section className="py-16 border-t border-black/[0.06]">\n${indent}  <div className="max-w-2xl mx-auto text-center">\n${indent}    <h2 className="text-3xl font-bold text-black leading-snug">${section.heading ?? ''}</h2>\n${indent}    <p className="mt-4 text-black/50 leading-relaxed text-lg">${section.body ?? ''}</p>\n${indent}  </div>\n${indent}</section>\n`;
 }
 
 function renderProductMockup(section: any, indent: string): string {
@@ -363,42 +363,42 @@ function renderProductMockup(section: any, indent: string): string {
   let chatLines = '';
   for (const msg of messages) {
     if (msg.from === 'user') {
-      chatLines += `${indent}    <div className="flex justify-end">\n${indent}      <span className="bg-stone-700 text-white text-xs px-3 py-2 rounded-2xl rounded-br-sm max-w-xs">${msg.text}</span>\n${indent}    </div>\n`;
+      chatLines += `${indent}    <div className="flex justify-end">\n${indent}      <span className="bg-black/70 text-white text-xs px-3 py-2 rounded-2xl rounded-br-sm max-w-xs">${msg.text}</span>\n${indent}    </div>\n`;
     } else if (msg.from === 'system') {
-      chatLines += `${indent}    <p className="text-xs text-stone-500 text-center">${msg.text}</p>\n`;
+      chatLines += `${indent}    <p className="text-xs text-black/50 text-center">${msg.text}</p>\n`;
     } else {
       const color = agentColors[msg.color ?? ''] ?? SECONDARY;
-      chatLines += `${indent}    <div className="flex items-start gap-2">\n${indent}      <span className="text-xs font-medium px-1.5 py-0.5 rounded whitespace-nowrap" style={{ backgroundColor: '${color}20', color: '${color}' }}>${msg.agent ?? 'Agent'}</span>\n${indent}      <span className="text-xs text-stone-300 leading-relaxed">${msg.text}</span>\n${indent}    </div>\n`;
+      chatLines += `${indent}    <div className="flex items-start gap-2">\n${indent}      <span className="text-xs font-medium px-1.5 py-0.5 rounded whitespace-nowrap" style={{ backgroundColor: '${color}20', color: '${color}' }}>${msg.agent ?? 'Agent'}</span>\n${indent}      <span className="text-xs text-black/20 leading-relaxed">${msg.text}</span>\n${indent}    </div>\n`;
     }
   }
-  return `${indent}<div className="mx-auto max-w-2xl bg-stone-900 rounded-2xl p-6 shadow-2xl border border-stone-700">\n${indent}  <div className="flex items-center gap-1.5 mb-5">\n${indent}    <span className="w-3 h-3 rounded-full bg-red-500/80" />\n${indent}    <span className="w-3 h-3 rounded-full bg-amber-400/80" />\n${indent}    <span className="w-3 h-3 rounded-full bg-emerald-500/80" />\n${indent}    <span className="ml-4 text-xs text-stone-500">flusk orchestrator</span>\n${indent}  </div>\n${indent}  <div className="space-y-3">\n${chatLines}${indent}  </div>\n${indent}</div>\n`;
+  return `${indent}<div className="mx-auto max-w-2xl bg-black rounded-2xl p-6 shadow-2xl border border-black/70">\n${indent}  <div className="flex items-center gap-1.5 mb-5">\n${indent}    <span className="w-3 h-3 rounded-full bg-red-500/80" />\n${indent}    <span className="w-3 h-3 rounded-full bg-amber-400/80" />\n${indent}    <span className="w-3 h-3 rounded-full bg-emerald-500/80" />\n${indent}    <span className="ml-4 text-xs text-black/50">flusk orchestrator</span>\n${indent}  </div>\n${indent}  <div className="space-y-3">\n${chatLines}${indent}  </div>\n${indent}</div>\n`;
 }
 
 function renderSectionHeading(section: any, indent: string): string {
-  return `${indent}<h2 className="text-lg font-semibold text-stone-800 pt-2">${section.title ?? section.name ?? ''}</h2>\n`;
+  return `${indent}<h2 className="text-lg font-semibold text-black/80 pt-2">${section.title ?? section.name ?? ''}</h2>\n`;
 }
 
 function renderStepWizard(section: any, indent: string): string {
   shadcnNeeds.add('card'); shadcnNeeds.add('button'); shadcnNeeds.add('input'); shadcnNeeds.add('label'); shadcnNeeds.add('sonner');
   const steps: any[] = section.steps ?? [];
-  let out = `${indent}<Card>\n${indent}  <div className="flex border-b border-stone-100 overflow-x-auto">\n`;
+  let out = `${indent}<Card>\n${indent}  <div className="flex border-b border-black/[0.06] overflow-x-auto">\n`;
   for (let i = 0; i < steps.length; i++) {
     const s = steps[i];
-    out += `${indent}    <button className="flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap ${i === 0 ? 'border-b-2 text-stone-900' : 'text-stone-400 hover:text-stone-600'}" style={{ ${i === 0 ? `borderColor: '${PRIMARY}'` : ''} }}>\n${indent}      <span className="w-5 h-5 rounded-full text-xs flex items-center justify-center ${i === 0 ? 'text-white' : 'bg-stone-100 text-stone-400'}" style={{ ${i === 0 ? `backgroundColor: '${PRIMARY}'` : ''} }}>${i + 1}</span>\n${indent}      ${s.name}\n${indent}    </button>\n`;
+    out += `${indent}    <button className="flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap ${i === 0 ? 'border-b-2 text-black' : 'text-black/30 hover:text-black/60'}" style={{ ${i === 0 ? `borderColor: '${PRIMARY}'` : ''} }}>\n${indent}      <span className="w-5 h-5 rounded-full text-xs flex items-center justify-center ${i === 0 ? 'text-white' : 'bg-black/[0.02] text-black/30'}" style={{ ${i === 0 ? `backgroundColor: '${PRIMARY}'` : ''} }}>${i + 1}</span>\n${indent}      ${s.name}\n${indent}    </button>\n`;
   }
   out += `${indent}  </div>\n${indent}  <CardContent className="p-8">\n`;
   if (steps[0]) {
-    out += `${indent}    <h2 className="text-xl font-semibold text-stone-900 mb-1">${steps[0].title ?? steps[0].name}</h2>\n`;
-    if (steps[0].subtitle) out += `${indent}    <p className="text-sm text-stone-500 mb-6">${steps[0].subtitle}</p>\n`;
+    out += `${indent}    <h2 className="text-xl font-semibold text-black mb-1">${steps[0].title ?? steps[0].name}</h2>\n`;
+    if (steps[0].subtitle) out += `${indent}    <p className="text-sm text-black/50 mb-6">${steps[0].subtitle}</p>\n`;
     if (steps[0].fields) {
       for (const f of steps[0].fields) {
         out += `${indent}    <div className="mb-4">\n${indent}      <Label className="mb-1.5">${f.label ?? f.name}</Label>\n`;
         if (f.type === 'select') {
-          out += `${indent}      <select className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none bg-white">\n`;
+          out += `${indent}      <select className="w-full px-3 py-2 text-sm border border-black/10 rounded-lg focus:outline-none bg-white">\n`;
           for (const o of (f.options ?? [])) out += `${indent}        <option>${o}</option>\n`;
           out += `${indent}      </select>\n`;
         } else if (f.type === 'textarea') {
-          out += `${indent}      <textarea rows={${f.rows ?? 4}} placeholder="${f.placeholder ?? ''}" className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none resize-none" />\n`;
+          out += `${indent}      <textarea rows={${f.rows ?? 4}} placeholder="${f.placeholder ?? ''}" className="w-full px-3 py-2 text-sm border border-black/10 rounded-lg focus:outline-none resize-none" />\n`;
         } else {
           out += `${indent}      <Input type="text" placeholder="${f.placeholder ?? ''}" className="w-full" />\n`;
         }
@@ -414,7 +414,7 @@ function renderCtaBanner(section: any, indent: string): string {
   const heading = section.heading ?? '';
   const subheading = section.subheading ?? '';
   const cta = section.cta;
-  return `${indent}<section className="bg-stone-900 rounded-2xl px-10 py-14 text-center">\n${indent}  <h2 className="text-3xl font-bold text-white leading-snug">${heading}</h2>\n${subheading ? `${indent}  <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">${subheading}</p>\n` : ''}${cta ? `${indent}  <div className="mt-8">\n${renderButton(cta, indent + '    ')}\n${indent}  </div>\n` : ''}${indent}</section>\n`;
+  return `${indent}<section className="bg-black rounded-2xl px-10 py-14 text-center">\n${indent}  <h2 className="text-3xl font-bold text-white leading-snug">${heading}</h2>\n${subheading ? `${indent}  <p className="mt-3 text-black/30 text-lg max-w-xl mx-auto">${subheading}</p>\n` : ''}${cta ? `${indent}  <div className="mt-8">\n${renderButton(cta, indent + '    ')}\n${indent}  </div>\n` : ''}${indent}</section>\n`;
 }
 
 function renderFolderGrid(section: any, indent: string): string {
@@ -456,18 +456,18 @@ function renderConnectorGrid(section: any, indent: string): string {
   const title = section.title ?? section.name ?? '';
   const widgets: any[] = section.widgets ?? [];
   let out = '';
-  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-black/70 mb-3">${title}</h3>\n`;
   out += `${indent}<div className="grid grid-cols-1 sm:grid-cols-${cols} gap-4">\n`;
   if (widgets.length > 0) {
     for (const w of widgets) {
       const status = w.status ?? 'inactive';
       const badgeVariant = status === 'active' || status === 'connected' ? 'default' : 'outline';
-      const statusDot = status === 'active' || status === 'connected' ? 'bg-emerald-400' : 'bg-stone-300';
+      const statusDot = status === 'active' || status === 'connected' ? 'bg-emerald-400' : 'bg-black/20';
       const type = w.type ?? 'integration';
-      out += `${indent}  <Card className="hover:shadow-md transition-shadow">\n${indent}    <CardContent className="p-5">\n${indent}      <div className="flex items-start justify-between mb-3">\n${indent}        <div className="flex items-center gap-2.5">\n${indent}          <div className="w-2 h-2 rounded-full ${statusDot} flex-shrink-0" />\n${indent}          <span className="text-sm font-semibold text-stone-900">${w.name ?? ''}</span>\n${indent}        </div>\n${indent}        <Badge variant="outline">${type}</Badge>\n${indent}      </div>\n${indent}      <div className="flex items-center justify-between text-xs text-stone-400">\n${indent}        <span>${w.requests != null ? String(w.requests) + ' req/day' : 'No data'}</span>\n${indent}        <span>${w.latency != null ? String(w.latency) + 'ms' : ''}</span>\n${indent}      </div>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
+      out += `${indent}  <Card className="hover:shadow-md transition-shadow">\n${indent}    <CardContent className="p-5">\n${indent}      <div className="flex items-start justify-between mb-3">\n${indent}        <div className="flex items-center gap-2.5">\n${indent}          <div className="w-2 h-2 rounded-full ${statusDot} flex-shrink-0" />\n${indent}          <span className="text-sm font-semibold text-black">${w.name ?? ''}</span>\n${indent}        </div>\n${indent}        <Badge variant="outline">${type}</Badge>\n${indent}      </div>\n${indent}      <div className="flex items-center justify-between text-xs text-black/30">\n${indent}        <span>${w.requests != null ? String(w.requests) + ' req/day' : 'No data'}</span>\n${indent}        <span>${w.latency != null ? String(w.latency) + 'ms' : ''}</span>\n${indent}      </div>\n${indent}    </CardContent>\n${indent}  </Card>\n`;
     }
   } else {
-    out += `${indent}  {((${src}) as any[] ?? []).map((item: any, i: number) => (\n${indent}    <Card key={i} className="hover:shadow-md transition-shadow">\n${indent}      <CardContent className="p-5">\n${indent}        <div className="flex items-start justify-between mb-3">\n${indent}          <div className="flex items-center gap-2.5">\n${indent}            <div className={\`w-2 h-2 rounded-full flex-shrink-0 \${item.status === 'active' || item.status === 'connected' ? 'bg-emerald-400' : 'bg-stone-300'}\`} />\n${indent}            <span className="text-sm font-semibold text-stone-900">{item.name}</span>\n${indent}          </div>\n${indent}          <Badge variant="outline">{item.type ?? 'integration'}</Badge>\n${indent}        </div>\n${indent}        <div className="flex items-center justify-between text-xs text-stone-400">\n${indent}          <span>{item.requests != null ? \`\${item.requests} req/day\` : 'No data'}</span>\n${indent}          <span>{item.latency != null ? \`\${item.latency}ms\` : ''}</span>\n${indent}        </div>\n${indent}      </CardContent>\n${indent}    </Card>\n${indent}  ))}\n`;
+    out += `${indent}  {((${src}) as any[] ?? []).map((item: any, i: number) => (\n${indent}    <Card key={i} className="hover:shadow-md transition-shadow">\n${indent}      <CardContent className="p-5">\n${indent}        <div className="flex items-start justify-between mb-3">\n${indent}          <div className="flex items-center gap-2.5">\n${indent}            <div className={\`w-2 h-2 rounded-full flex-shrink-0 \${item.status === 'active' || item.status === 'connected' ? 'bg-emerald-400' : 'bg-black/20'}\`} />\n${indent}            <span className="text-sm font-semibold text-black">{item.name}</span>\n${indent}          </div>\n${indent}          <Badge variant="outline">{item.type ?? 'integration'}</Badge>\n${indent}        </div>\n${indent}        <div className="flex items-center justify-between text-xs text-black/30">\n${indent}          <span>{item.requests != null ? \`\${item.requests} req/day\` : 'No data'}</span>\n${indent}          <span>{item.latency != null ? \`\${item.latency}ms\` : ''}</span>\n${indent}        </div>\n${indent}      </CardContent>\n${indent}    </Card>\n${indent}  ))}\n`;
   }
   out += `${indent}</div>\n`;
   return out;
@@ -493,7 +493,7 @@ function renderTriggerTable(section: any, indent: string): string {
     }
     out += `${indent}  </CardHeader>\n`;
   }
-  out += `${indent}  <CardContent className="p-0">\n${indent}    <Table>\n${indent}      <TableHeader>\n${indent}        <TableRow>\n${indent}          <TableHead>Name</TableHead>\n${indent}          <TableHead>Type</TableHead>\n${indent}          <TableHead>Schedule</TableHead>\n${indent}          <TableHead>Last Run</TableHead>\n${indent}          <TableHead>Status</TableHead>\n${indent}          <TableHead>Runs</TableHead>\n${indent}          <TableHead className="w-8" />\n${indent}        </TableRow>\n${indent}      </TableHeader>\n${indent}      <TableBody>\n${indent}        {((${src}) as any[] ?? [{ name: 'Daily Report', type: 'schedule', schedule: '0 9 * * *', lastRun: '2h ago', status: 'active', executions: 142 }]).map((row: any, i: number) => (\n${indent}          <TableRow key={i}>\n${indent}            <TableCell className="font-medium">{row.name}</TableCell>\n${indent}            <TableCell><Badge variant="secondary" className="capitalize"><Zap className="w-2.5 h-2.5 mr-1" />{row.type}</Badge></TableCell>\n${indent}            <TableCell className="text-xs font-mono text-stone-500">{row.schedule}</TableCell>\n${indent}            <TableCell className="text-stone-400">{row.lastRun ?? row.last_run}</TableCell>\n${indent}            <TableCell><Badge variant={(row.status ?? '').toLowerCase() === 'active' ? 'default' : 'secondary'}>{row.status}</Badge></TableCell>\n${indent}            <TableCell className="tabular-nums">{row.executions ?? row.execution_count ?? 0}</TableCell>\n${indent}            <TableCell><Button variant="ghost" size="sm" onClick={() => toast(\`Actions for \${row.name}\`)}><MoreHorizontal className="w-4 h-4" /></Button></TableCell>\n${indent}          </TableRow>\n${indent}        ))}\n${indent}      </TableBody>\n${indent}    </Table>\n${indent}  </CardContent>\n${indent}</Card>\n`;
+  out += `${indent}  <CardContent className="p-0">\n${indent}    <Table>\n${indent}      <TableHeader>\n${indent}        <TableRow>\n${indent}          <TableHead>Name</TableHead>\n${indent}          <TableHead>Type</TableHead>\n${indent}          <TableHead>Schedule</TableHead>\n${indent}          <TableHead>Last Run</TableHead>\n${indent}          <TableHead>Status</TableHead>\n${indent}          <TableHead>Runs</TableHead>\n${indent}          <TableHead className="w-8" />\n${indent}        </TableRow>\n${indent}      </TableHeader>\n${indent}      <TableBody>\n${indent}        {((${src}) as any[] ?? [{ name: 'Daily Report', type: 'schedule', schedule: '0 9 * * *', lastRun: '2h ago', status: 'active', executions: 142 }]).map((row: any, i: number) => (\n${indent}          <TableRow key={i}>\n${indent}            <TableCell className="font-medium">{row.name}</TableCell>\n${indent}            <TableCell><Badge variant="secondary" className="capitalize"><Zap className="w-2.5 h-2.5 mr-1" />{row.type}</Badge></TableCell>\n${indent}            <TableCell className="text-xs font-mono text-black/50">{row.schedule}</TableCell>\n${indent}            <TableCell className="text-black/30">{row.lastRun ?? row.last_run}</TableCell>\n${indent}            <TableCell><Badge variant={(row.status ?? '').toLowerCase() === 'active' ? 'default' : 'secondary'}>{row.status}</Badge></TableCell>\n${indent}            <TableCell className="tabular-nums">{row.executions ?? row.execution_count ?? 0}</TableCell>\n${indent}            <TableCell><Button variant="ghost" size="sm" onClick={() => toast(\`Actions for \${row.name}\`)}><MoreHorizontal className="w-4 h-4" /></Button></TableCell>\n${indent}          </TableRow>\n${indent}        ))}\n${indent}      </TableBody>\n${indent}    </Table>\n${indent}  </CardContent>\n${indent}</Card>\n`;
   return out;
 }
 
@@ -510,7 +510,7 @@ function renderForm(section: any, indent: string): string {
   const actions: any[] = section.actions ?? [];
   const footer: any[] = section.footer ?? [];
   const onSuccess = normalizeRoute(section.on_success?.navigate ?? '/app/dashboard');
-  let out = `${indent}<div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">\n${indent}  <div className="w-full max-w-sm">\n${indent}    <div className="text-center mb-8">\n${indent}      <div className="w-12 h-12 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-lg" style={{ backgroundColor: '${PRIMARY}' }}><span className="text-white font-bold text-lg">F</span></div>\n${indent}      <h1 className="text-2xl font-bold text-stone-900">Sign in to Flusk</h1>\n${indent}      <p className="mt-2 text-sm text-stone-500">Enter your credentials to continue</p>\n${indent}    </div>\n${indent}    <Card>\n${indent}      <CardContent className="pt-6">\n${indent}        <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); localStorage.setItem('flusk_user', JSON.stringify({ email: fd.get('email'), loggedIn: true })); toast.success('Signed in successfully'); window.location.href = '${onSuccess}'; }} className="space-y-4">\n`;
+  let out = `${indent}<div className="min-h-screen flex items-center justify-center bg-white px-4">\n${indent}  <div className="w-full max-w-sm">\n${indent}    <div className="text-center mb-8">\n${indent}      <div className="w-12 h-12 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-lg" style={{ backgroundColor: '${PRIMARY}' }}><span className="text-white font-bold text-lg">F</span></div>\n${indent}      <h1 className="text-2xl font-bold text-black">Sign in to Flusk</h1>\n${indent}      <p className="mt-2 text-sm text-black/50">Enter your credentials to continue</p>\n${indent}    </div>\n${indent}    <Card>\n${indent}      <CardContent className="pt-6">\n${indent}        <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); localStorage.setItem('flusk_user', JSON.stringify({ email: fd.get('email'), loggedIn: true })); toast.success('Signed in successfully'); window.location.href = '${onSuccess}'; }} className="space-y-4">\n`;
   for (const field of fields) {
     const ftype = field.type ?? (field.name === 'password' ? 'password' : 'text');
     out += `${indent}          <div className="space-y-2">\n${indent}            <Label htmlFor="${field.name}">${field.label ?? field.name}</Label>\n${indent}            <Input id="${field.name}" name="${field.name}" type="${ftype}" placeholder="${field.placeholder ?? ''}" ${field.required ? 'required' : ''} ${field.autofocus ? 'autoFocus' : ''} />\n${indent}          </div>\n`;
@@ -519,7 +519,7 @@ function renderForm(section: any, indent: string): string {
     if (action.type === 'submit') {
       out += `${indent}          <Button type="submit" className="w-full" style={{ backgroundColor: '${PRIMARY}' }}>${action.label ?? 'Sign In'}</Button>\n`;
     } else if (action.type === 'divider') {
-      out += `${indent}          <div className="relative my-2">\n${indent}            <Separator />\n${indent}            <div className="absolute inset-0 flex items-center justify-center"><span className="bg-white px-3 text-xs text-stone-400">${action.label ?? 'or'}</span></div>\n${indent}          </div>\n`;
+      out += `${indent}          <div className="relative my-2">\n${indent}            <Separator />\n${indent}            <div className="absolute inset-0 flex items-center justify-center"><span className="bg-white px-3 text-xs text-black/30">${action.label ?? 'or'}</span></div>\n${indent}          </div>\n`;
     } else if (action.type === 'button') {
       const toastMsg = action.on_click?.toast?.message ?? 'Coming soon';
       out += `${indent}          <Button type="button" variant="outline" className="w-full" onClick={() => toast('${toastMsg}')}>${action.label ?? 'Continue'}</Button>\n`;
@@ -527,7 +527,7 @@ function renderForm(section: any, indent: string): string {
   }
   out += `${indent}        </form>\n${indent}      </CardContent>\n${indent}    </Card>\n`;
   if (footer.length > 0) {
-    out += `${indent}    <div className="mt-6 text-center text-sm text-stone-500 space-y-1">\n`;
+    out += `${indent}    <div className="mt-6 text-center text-sm text-black/50 space-y-1">\n`;
     for (const f of footer) {
       if (f.link) out += `${indent}      <p>${f.text ?? ''} <a href="${normalizeRoute(f.link.href ?? '#')}" className="font-medium hover:underline" style={{ color: '${PRIMARY}' }}>${f.link.label}</a></p>\n`;
       else out += `${indent}      <p>${f.text ?? ''}</p>\n`;
@@ -550,9 +550,9 @@ function renderContentCard(section: any, indent: string): string {
   let out = `${indent}<Card>\n`;
   if (title) out += `${indent}  <CardHeader>\n${indent}    <CardTitle className="text-sm">${title}</CardTitle>\n${indent}  </CardHeader>\n`;
   out += `${indent}  <CardContent>\n`;
-  out += `${indent}    <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{${contentExpr} ?? ${JSON.stringify(fallback)}}</p>\n`;
+  out += `${indent}    <p className="text-sm text-black/70 whitespace-pre-wrap leading-relaxed">{${contentExpr} ?? ${JSON.stringify(fallback)}}</p>\n`;
   if (footerStats.length > 0) {
-    out += `${indent}    <div className="mt-4 pt-3 border-t border-stone-100 flex flex-wrap gap-2">\n`;
+    out += `${indent}    <div className="mt-4 pt-3 border-t border-black/[0.06] flex flex-wrap gap-2">\n`;
     for (const stat of footerStats) {
       const statExpr = stat.source ? sourceExpr(stat.source) : `${src}?.${stat.field ?? 'value'}`;
       out += `${indent}      <Badge variant="outline">${stat.label ? stat.label + ': ' : ''}{${statExpr} ?? '—'}</Badge>\n`;
@@ -573,20 +573,20 @@ function renderTimeline(section: any, indent: string): string {
   const moodField = display.mood_field ?? 'mood';
   const stats: any[] = display.stats ?? [];
   let out = '';
-  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-black/70 mb-3">${title}</h3>\n`;
   out += `${indent}<div className="space-y-4">\n`;
   out += `${indent}  {((${src}) as any[] ?? []).map((entry: any, i: number) => (\n`;
   out += `${indent}    <div key={i} className="flex gap-4">\n`;
   out += `${indent}      <div className="flex flex-col items-center">\n`;
-  out += `${indent}        <div className="w-2 h-2 rounded-full bg-stone-400 mt-2 flex-shrink-0" />\n`;
-  out += `${indent}        <div className="w-px flex-1 bg-stone-200" />\n`;
+  out += `${indent}        <div className="w-2 h-2 rounded-full bg-black/30 mt-2 flex-shrink-0" />\n`;
+  out += `${indent}        <div className="w-px flex-1 bg-black/[0.07]" />\n`;
   out += `${indent}      </div>\n`;
   out += `${indent}      <div className="pb-4 min-w-0 flex-1">\n`;
   out += `${indent}        <div className="flex items-center gap-2 mb-1">\n`;
-  out += `${indent}          <span className="text-xs font-medium text-stone-500">{entry.${dateField}}</span>\n`;
+  out += `${indent}          <span className="text-xs font-medium text-black/50">{entry.${dateField}}</span>\n`;
   out += `${indent}          {entry.${moodField} && <span className="text-sm">{entry.${moodField}}</span>}\n`;
   out += `${indent}        </div>\n`;
-  out += `${indent}        <p className="text-sm text-stone-700 line-clamp-3">{entry.${contentField}}</p>\n`;
+  out += `${indent}        <p className="text-sm text-black/70 line-clamp-3">{entry.${contentField}}</p>\n`;
   if (stats.length > 0) {
     out += `${indent}        <div className="mt-2 flex flex-wrap gap-1.5">\n`;
     for (const stat of stats) {
@@ -612,23 +612,23 @@ function renderGroupedList(section: any, indent: string): string {
   const actions: any[] = section.actions ?? [];
   const groupLabelsJson = JSON.stringify(groupLabels);
   let out = '';
-  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-black/70 mb-3">${title}</h3>\n`;
   out += `${indent}{(() => {\n`;
   out += `${indent}  const items = (${src}) as any[] ?? [];\n`;
-  out += `${indent}  if (items.length === 0) return <p className="text-sm text-stone-400 py-6 text-center">${emptyState}</p>;\n`;
+  out += `${indent}  if (items.length === 0) return <p className="text-sm text-black/30 py-6 text-center">${emptyState}</p>;\n`;
   out += `${indent}  const labels: Record<string, string> = ${groupLabelsJson};\n`;
   out += `${indent}  const groups: Record<string, any[]> = {};\n`;
   out += `${indent}  for (const item of items) { const key = item.${groupBy} ?? 'other'; if (!groups[key]) groups[key] = []; groups[key].push(item); }\n`;
   out += `${indent}  return (<div className="space-y-4">{Object.entries(groups).map(([key, groupItems]) => (\n`;
   out += `${indent}    <div key={key}>\n`;
-  out += `${indent}      <h4 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">{labels[key] ?? key}</h4>\n`;
+  out += `${indent}      <h4 className="text-xs font-semibold text-black/50 uppercase tracking-wide mb-2">{labels[key] ?? key}</h4>\n`;
   out += `${indent}      <div className="space-y-2">\n`;
   out += `${indent}        {groupItems.map((item: any, i: number) => (\n`;
   out += `${indent}          <Card key={i}>\n`;
   out += `${indent}            <CardContent className="flex items-center justify-between px-4 py-3">\n`;
   out += `${indent}              <div className="min-w-0 flex-1">\n`;
-  out += `${indent}                <p className="text-sm font-medium text-stone-900 truncate">{item.${display.title_field ?? 'name'} ?? item.name}</p>\n`;
-  if (display.subtitle_field) out += `${indent}                {item.${display.subtitle_field} && <p className="text-xs text-stone-500 truncate">{item.${display.subtitle_field}}</p>}\n`;
+  out += `${indent}                <p className="text-sm font-medium text-black truncate">{item.${display.title_field ?? 'name'} ?? item.name}</p>\n`;
+  if (display.subtitle_field) out += `${indent}                {item.${display.subtitle_field} && <p className="text-xs text-black/50 truncate">{item.${display.subtitle_field}}</p>}\n`;
   out += `${indent}              </div>\n`;
   if (display.status_field) out += `${indent}              {item.${display.status_field} && <Badge variant="outline">{item.${display.status_field}}</Badge>}\n`;
   out += `${indent}            </CardContent>\n`;
@@ -649,7 +649,7 @@ function renderTagList(section: any, indent: string): string {
   const iconName = section.icon ? lucideIcon(section.icon) : null;
   const iconJsx = iconName ? `<${iconName} className="w-3 h-3 mr-1" />` : '';
   let out = '';
-  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-black/70 mb-3">${title}</h3>\n`;
   out += `${indent}<div className="flex flex-wrap gap-2">\n`;
   out += `${indent}  {((${src}?.${field}) as string[] ?? []).map((tag: string, i: number) => (\n`;
   out += `${indent}    <Badge key={i} variant="secondary">${iconJsx}{tag}</Badge>\n`;
@@ -665,12 +665,12 @@ function renderProgressList(section: any, indent: string): string {
   const field = section.field ?? 'name';
   const condition = section.condition ?? 'completed';
   let out = '';
-  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-black/70 mb-3">${title}</h3>\n`;
   out += `${indent}<div className="space-y-2">\n`;
   out += `${indent}  {((${src}) as any[] ?? []).map((item: any, i: number) => (\n`;
   out += `${indent}    <div key={i} className="flex items-center gap-3 py-1.5">\n`;
-  out += `${indent}      {item.${condition} ? <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" /> : <Circle className="w-4 h-4 text-stone-300 flex-shrink-0" />}\n`;
-  out += `${indent}      <span className={\`text-sm \${item.${condition} ? 'text-stone-500 line-through' : 'text-stone-700'}\`}>{item.${field}}</span>\n`;
+  out += `${indent}      {item.${condition} ? <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" /> : <Circle className="w-4 h-4 text-black/20 flex-shrink-0" />}\n`;
+  out += `${indent}      <span className={\`text-sm \${item.${condition} ? 'text-black/50 line-through' : 'text-black/70'}\`}>{item.${field}}</span>\n`;
   out += `${indent}    </div>\n`;
   out += `${indent}  ))}\n`;
   out += `${indent}</div>\n`;
@@ -686,12 +686,12 @@ function renderCollapsible(section: any, indent: string): string {
   const field = display.field ?? 'content';
   let out = `${indent}<Card>\n`;
   out += `${indent}  <button onClick={() => set${stateId}((v) => !v)} className="w-full flex items-center justify-between px-5 py-4 text-left">\n`;
-  out += `${indent}    <span className="text-sm font-semibold text-stone-900">${title}</span>\n`;
-  out += `${indent}    {${stateId} ? <ChevronDown className="w-4 h-4 text-stone-400" /> : <ChevronRight className="w-4 h-4 text-stone-400" />}\n`;
+  out += `${indent}    <span className="text-sm font-semibold text-black">${title}</span>\n`;
+  out += `${indent}    {${stateId} ? <ChevronDown className="w-4 h-4 text-black/30" /> : <ChevronRight className="w-4 h-4 text-black/30" />}\n`;
   out += `${indent}  </button>\n`;
   out += `${indent}  {${stateId} && (\n`;
   out += `${indent}    <div className="px-5 pb-4">\n`;
-  out += `${indent}      <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{${src}?.${field} ?? ''}</p>\n`;
+  out += `${indent}      <p className="text-sm text-black/70 whitespace-pre-wrap leading-relaxed">{${src}?.${field} ?? ''}</p>\n`;
   out += `${indent}    </div>\n`;
   out += `${indent}  )}\n`;
   out += `${indent}</Card>\n`;
@@ -706,20 +706,20 @@ function renderStatGrid(section: any, indent: string): string {
   // section-level source is the default for all stats
   const sectionSrc = section.source ? sourceExpr(section.source) : null;
   let out = '';
-  if (title) out += `${indent}<h3 className="text-sm font-semibold text-stone-700 mb-3">${title}</h3>\n`;
+  if (title) out += `${indent}<h3 className="text-sm font-semibold text-black/70 mb-3">${title}</h3>\n`;
   out += `${indent}<div className="grid grid-cols-2 md:grid-cols-${cols} gap-4">\n`;
   for (const stat of stats) {
     const src = stat.source ? sourceExpr(stat.source) : (sectionSrc ?? 'undefined');
     const valExpr = stat.field ? `${src}?.${stat.field}` : src;
     const iconName = stat.icon ? lucideIcon(stat.icon) : null;
-    const iconJsx = iconName ? `<${iconName} className="w-4 h-4 text-stone-400" />` : '';
+    const iconJsx = iconName ? `<${iconName} className="w-4 h-4 text-black/30" />` : '';
     const format = stat.format ?? 'number';
     out += `${indent}  <Card>\n${indent}    <CardContent className="p-5">\n`;
     out += `${indent}      <div className="flex items-start justify-between">\n`;
-    out += `${indent}        <p className="text-sm font-medium text-stone-500 leading-tight">${stat.label ?? ''}</p>\n`;
+    out += `${indent}        <p className="text-sm font-medium text-black/50 leading-tight">${stat.label ?? ''}</p>\n`;
     if (iconJsx) out += `${indent}        ${iconJsx}\n`;
     out += `${indent}      </div>\n`;
-    out += `${indent}      <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{${valExpr} ?? '—'}</p>\n`;
+    out += `${indent}      <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{${valExpr} ?? '—'}</p>\n`;
     out += `${indent}    </CardContent>\n${indent}  </Card>\n`;
   }
   out += `${indent}</div>\n`;
@@ -732,18 +732,18 @@ function renderEventFeed(section: any, indent: string): string {
   const title = section.title ?? section.name ?? '';
   const footerAction = section.footer?.action;
   let out = `${indent}<div className="space-y-3">\n`;
-  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700">${title}</h3>\n`;
-  out += `${indent}  <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-black/70">${title}</h3>\n`;
+  out += `${indent}  <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">\n`;
   out += `${indent}    {((${src}) as any[] ?? []).slice(0, 20).map((event: any, i: number) => (\n`;
-  out += `${indent}      <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors">\n`;
-  out += `${indent}        <span className="text-xs text-stone-400 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>\n`;
-  out += `${indent}        <span className="text-xs font-medium text-stone-600 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>\n`;
-  out += `${indent}        <span className="text-xs text-stone-500 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>\n`;
+  out += `${indent}      <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.02] transition-colors">\n`;
+  out += `${indent}        <span className="text-xs text-black/30 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>\n`;
+  out += `${indent}        <span className="text-xs font-medium text-black/60 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>\n`;
+  out += `${indent}        <span className="text-xs text-black/50 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>\n`;
   out += `${indent}        {event.blocked && <Badge variant="destructive" className="text-xs flex-shrink-0">blocked</Badge>}\n`;
   out += `${indent}      </div>\n`;
   out += `${indent}    ))}\n`;
   out += `${indent}    {!(${src})?.length && (\n`;
-  out += `${indent}      <div className="px-4 py-8 text-center text-sm text-stone-400">${section.empty_state?.description ?? 'No events yet'}</div>\n`;
+  out += `${indent}      <div className="px-4 py-8 text-center text-sm text-black/30">${section.empty_state?.description ?? 'No events yet'}</div>\n`;
   out += `${indent}    )}\n`;
   out += `${indent}  </div>\n`;
   if (footerAction) {
@@ -762,22 +762,22 @@ function renderCardList(section: any, indent: string, isAuth = false): string {
   const actions: any[] = section.actions ?? [];
   const emptyAction = section.empty_state?.action;
   let out = `${indent}<div className="space-y-3">\n`;
-  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700">${title}</h3>\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-black/70">${title}</h3>\n`;
   out += `${indent}  <div className="space-y-2">\n`;
   out += `${indent}    {((${src}) as any[] ?? []).map((item: any, i: number) => (\n`;
   out += `${indent}      <Card key={i}>\n`;
   out += `${indent}        <CardContent className="flex items-center justify-between px-4 py-3">\n`;
   out += `${indent}          <div className="flex items-center gap-3">\n`;
-  out += `${indent}            <span className="text-sm font-medium text-stone-800">{item.type ?? item.name ?? item.title ?? ''}</span>\n`;
+  out += `${indent}            <span className="text-sm font-medium text-black/80">{item.type ?? item.name ?? item.title ?? ''}</span>\n`;
   out += `${indent}            {item.status && <Badge variant="outline">{item.status}</Badge>}\n`;
   out += `${indent}          </div>\n`;
-  out += `${indent}          <span className="text-xs text-stone-400">{item.message_count != null ? \`\${item.message_count} msgs\` : ''}</span>\n`;
+  out += `${indent}          <span className="text-xs text-black/30">{item.message_count != null ? \`\${item.message_count} msgs\` : ''}</span>\n`;
   out += `${indent}        </CardContent>\n`;
   out += `${indent}      </Card>\n`;
   out += `${indent}    ))}\n`;
   out += `${indent}    {!(${src})?.length && (\n`;
-  out += `${indent}      <Card><CardContent className="px-4 py-6 text-center text-sm text-stone-400">\n`;
-  out += `${indent}        <p className="font-medium text-stone-600">${section.empty_state?.title ?? 'Nothing here'}</p>\n`;
+  out += `${indent}      <Card><CardContent className="px-4 py-6 text-center text-sm text-black/30">\n`;
+  out += `${indent}        <p className="font-medium text-black/60">${section.empty_state?.title ?? 'Nothing here'}</p>\n`;
   out += `${indent}        <p className="mt-1">${section.empty_state?.description ?? ''}</p>\n`;
   if (emptyAction) { shadcnNeeds.add('button'); out += `${indent}        <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('${emptyAction.to ?? '#}'}')}>${emptyAction.label ?? 'Get started'}</Button>\n`; }
   out += `${indent}      </CardContent></Card>\n`;
@@ -801,15 +801,15 @@ function renderFileList(section: any, indent: string): string {
   const desc = section.description ?? '';
   const actions: any[] = section.actions ?? [];
   let out = `${indent}<div className="space-y-3">\n`;
-  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-stone-700">${title}</h3>\n`;
-  if (desc) out += `${indent}  <p className="text-xs text-stone-500">${desc}</p>\n`;
-  out += `${indent}  <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">\n`;
+  if (title) out += `${indent}  <h3 className="text-sm font-semibold text-black/70">${title}</h3>\n`;
+  if (desc) out += `${indent}  <p className="text-xs text-black/50">${desc}</p>\n`;
+  out += `${indent}  <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">\n`;
   out += `${indent}    {((${src}) as any[] ?? []).map((file: any, i: number) => (\n`;
-  out += `${indent}      <div key={i} className="flex items-center gap-3 px-4 py-3 hover:bg-stone-50 group">\n`;
+  out += `${indent}      <div key={i} className="flex items-center gap-3 px-4 py-3 hover:bg-black/[0.02] group">\n`;
   out += `${indent}        <span className="text-lg flex-shrink-0">{file.type === 'md' || file.type === 'txt' ? '📄' : file.type === 'json' || file.type === 'yaml' ? '📋' : file.type === 'py' || file.type === 'js' || file.type === 'ts' ? '💻' : '📁'}</span>\n`;
   out += `${indent}        <div className="flex-1 min-w-0">\n`;
-  out += `${indent}          <p className="text-sm font-medium text-stone-800 truncate">{file.name ?? ''}</p>\n`;
-  out += `${indent}          <p className="text-xs text-stone-400">{file.size ? \`\${Math.round(file.size / 1024)} KB\` : ''} {file.modified_at ? \`· \${new Date(file.modified_at).toLocaleDateString('en', { month: 'short', day: 'numeric' })}\` : ''}</p>\n`;
+  out += `${indent}          <p className="text-sm font-medium text-black/80 truncate">{file.name ?? ''}</p>\n`;
+  out += `${indent}          <p className="text-xs text-black/30">{file.size ? \`\${Math.round(file.size / 1024)} KB\` : ''} {file.modified_at ? \`· \${new Date(file.modified_at).toLocaleDateString('en', { month: 'short', day: 'numeric' })}\` : ''}</p>\n`;
   out += `${indent}        </div>\n`;
   if (actions.length) {
     out += `${indent}        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">\n`;
@@ -822,7 +822,7 @@ function renderFileList(section: any, indent: string): string {
   out += `${indent}      </div>\n`;
   out += `${indent}    ))}\n`;
   out += `${indent}    {!(${src})?.length && (\n`;
-  out += `${indent}      <div className="px-4 py-8 text-center text-sm text-stone-400">${section.empty_state?.description ?? 'No files yet'}</div>\n`;
+  out += `${indent}      <div className="px-4 py-8 text-center text-sm text-black/30">${section.empty_state?.description ?? 'No files yet'}</div>\n`;
   out += `${indent}    )}\n`;
   out += `${indent}  </div>\n`;
   out += `${indent}</div>\n`;
@@ -841,12 +841,12 @@ function renderStatusCard(section: any, indent: string): string {
   out += `${indent}    <CardTitle className="text-sm">${title}</CardTitle>\n`;
   if (desc) out += `${indent}    <CardDescription>${desc}</CardDescription>\n`;
   out += `${indent}  </CardHeader>\n`;
-  out += `${indent}  <CardContent className="divide-y divide-stone-50">\n`;
+  out += `${indent}  <CardContent className="divide-y divide-black/[0.04]">\n`;
   for (const f of fields) {
     const valExpr = f.value != null ? JSON.stringify(f.value) : f.source ? sourceExpr(f.source) : `${src}?.${f.name}`;
     const type = f.type ?? 'display';
     out += `${indent}    <div className="flex items-center justify-between py-3">\n`;
-    out += `${indent}      <span className="text-sm text-stone-500">${f.label ?? f.name ?? ''}</span>\n`;
+    out += `${indent}      <span className="text-sm text-black/50">${f.label ?? f.name ?? ''}</span>\n`;
     if (type === 'toggle-display') {
       out += `${indent}      <Badge variant={{${valExpr} ? 'default' : 'secondary'}}>{${valExpr} ? 'Enabled' : 'Disabled'}</Badge>\n`;
     } else if (type === 'currency') {
@@ -854,7 +854,7 @@ function renderStatusCard(section: any, indent: string): string {
     } else if (type === 'status-indicator') {
       out += `${indent}      <Badge variant="outline" className="capitalize">{${valExpr} ?? '—'}</Badge>\n`;
     } else {
-      out += `${indent}      <span className="text-sm font-medium text-stone-800">{${valExpr} ?? '—'}</span>\n`;
+      out += `${indent}      <span className="text-sm font-medium text-black/80">{${valExpr} ?? '—'}</span>\n`;
     }
     out += `${indent}    </div>\n`;
   }
@@ -903,20 +903,20 @@ function renderFileBrowserPage(schema: any, indent: string, isAuth: boolean): st
   const controls = schema.controls?.toolbar ?? [];
   const hasSearch = controls.some((c: any) => c.type === 'search');
   const hasNewFile = controls.some((c: any) => c.type === 'button');
-  let out = `${indent}<div className="flex h-full min-h-[600px] gap-0 rounded-xl border border-stone-200 overflow-hidden bg-white">\n`;
+  let out = `${indent}<div className="flex h-full min-h-[600px] gap-0 rounded-xl border border-black/10 overflow-hidden bg-white">\n`;
   // Sidebar
   out += `${indent}  {/* Finder Sidebar */}\n`;
-  out += `${indent}  <div className="w-52 flex-shrink-0 border-r border-stone-200 bg-stone-50 flex flex-col">\n`;
-  out += `${indent}    <div className="px-3 py-3 border-b border-stone-200">\n`;
-  out += `${indent}      <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Workspace</p>\n`;
+  out += `${indent}  <div className="w-52 flex-shrink-0 border-r border-black/10 bg-white flex flex-col">\n`;
+  out += `${indent}    <div className="px-3 py-3 border-b border-black/10">\n`;
+  out += `${indent}      <p className="text-xs font-semibold text-black/50 uppercase tracking-wider">Workspace</p>\n`;
   out += `${indent}    </div>\n`;
   out += `${indent}    <nav className="flex-1 p-2 space-y-0.5">\n`;
   for (const s of sidebarSections) {
     const srcVar = s.source ? `data?.${s.source}` : '[]';
-    out += `${indent}      <button onClick={() => setSelectedSection('${s.id ?? s.label}')} className={\`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left \${selectedSection === '${s.id ?? s.label}' ? 'bg-black text-white' : 'text-stone-600 hover:bg-stone-100'}\`}>\n`;
+    out += `${indent}      <button onClick={() => setSelectedSection('${s.id ?? s.label}')} className={\`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left \${selectedSection === '${s.id ?? s.label}' ? 'bg-black text-white' : 'text-black/60 hover:bg-black/[0.04]'}\`}>\n`;
     out += `${indent}        <span className="w-4 h-4 flex-shrink-0">📁</span>\n`;
     out += `${indent}        <span className="flex-1 truncate">${s.label ?? s.id ?? ''}</span>\n`;
-    out += `${indent}        <span className={\`text-xs \${selectedSection === '${s.id ?? s.label}' ? 'text-white/60' : 'text-stone-400'}\`}>{((${srcVar}) as any[] ?? []).length}</span>\n`;
+    out += `${indent}        <span className={\`text-xs \${selectedSection === '${s.id ?? s.label}' ? 'text-white/60' : 'text-black/30'}\`}>{((${srcVar}) as any[] ?? []).length}</span>\n`;
     out += `${indent}      </button>\n`;
   }
   out += `${indent}    </nav>\n`;
@@ -925,11 +925,11 @@ function renderFileBrowserPage(schema: any, indent: string, isAuth: boolean): st
   out += `${indent}  {/* Main Content */}\n`;
   out += `${indent}  <div className="flex-1 flex flex-col min-w-0">\n`;
   // Toolbar
-  out += `${indent}    <div className="flex items-center gap-2 px-4 py-2 border-b border-stone-200 bg-white">\n`;
+  out += `${indent}    <div className="flex items-center gap-2 px-4 py-2 border-b border-black/10 bg-white">\n`;
   if (hasSearch) {
-    out += `${indent}      <div className="flex items-center gap-2 flex-1 px-3 py-1.5 border border-stone-200 rounded-lg">\n`;
-    out += `${indent}        <Search className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />\n`;
-    out += `${indent}        <input type="search" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 text-sm focus:outline-none placeholder-stone-400" />\n`;
+    out += `${indent}      <div className="flex items-center gap-2 flex-1 px-3 py-1.5 border border-black/10 rounded-lg">\n`;
+    out += `${indent}        <Search className="w-3.5 h-3.5 text-black/30 flex-shrink-0" />\n`;
+    out += `${indent}        <input type="search" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 text-sm focus:outline-none placeholder-black/30" />\n`;
     out += `${indent}      </div>\n`;
   }
   if (hasNewFile) {
@@ -940,13 +940,13 @@ function renderFileBrowserPage(schema: any, indent: string, isAuth: boolean): st
   out += `${indent}    <div className="flex-1 p-4 overflow-auto">\n`;
   out += `${indent}      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">\n`;
   out += `${indent}        {(currentFiles.filter((f: any) => !searchQuery || f.name?.toLowerCase().includes(searchQuery.toLowerCase()))).map((file: any, i: number) => (\n`;
-  out += `${indent}          <button key={i} onClick={() => setSelectedFile(file)} onDoubleClick={() => setPreviewFile(file)} className={\`flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-stone-100 transition-colors text-center \${selectedFile === file ? 'bg-stone-100 ring-1 ring-stone-300' : ''}\`}>\n`;
+  out += `${indent}          <button key={i} onClick={() => setSelectedFile(file)} onDoubleClick={() => setPreviewFile(file)} className={\`flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-black/[0.04] transition-colors text-center \${selectedFile === file ? 'bg-black/[0.02] ring-1 ring-black/20' : ''}\`}>\n`;
   out += `${indent}            <span className="text-3xl">{file.type === 'md' || file.type === 'txt' ? '📄' : file.type === 'json' || file.type === 'yaml' ? '📋' : file.type === 'py' || file.type === 'js' || file.type === 'ts' ? '💻' : file.type === 'png' || file.type === 'jpg' ? '🖼️' : '📁'}</span>\n`;
-  out += `${indent}            <span className="text-xs text-stone-700 truncate w-full text-center leading-tight">{file.name ?? ''}</span>\n`;
+  out += `${indent}            <span className="text-xs text-black/70 truncate w-full text-center leading-tight">{file.name ?? ''}</span>\n`;
   out += `${indent}          </button>\n`;
   out += `${indent}        ))}\n`;
   out += `${indent}        {currentFiles.length === 0 && (\n`;
-  out += `${indent}          <div className="col-span-full py-16 text-center text-stone-400">\n`;
+  out += `${indent}          <div className="col-span-full py-16 text-center text-black/30">\n`;
   out += `${indent}            <p className="text-sm font-medium">No files here</p>\n`;
   out += `${indent}            <p className="text-xs mt-1">Your bot will store files here as it works</p>\n`;
   out += `${indent}          </div>\n`;
@@ -957,13 +957,13 @@ function renderFileBrowserPage(schema: any, indent: string, isAuth: boolean): st
   // Preview panel
   out += `${indent}  {/* Preview Panel */}\n`;
   out += `${indent}  {previewFile && (\n`;
-  out += `${indent}    <div className="w-80 flex-shrink-0 border-l border-stone-200 bg-white flex flex-col">\n`;
-  out += `${indent}      <div className="flex items-center justify-between px-4 py-2 border-b border-stone-200">\n`;
-  out += `${indent}        <span className="text-sm font-medium text-stone-800 truncate">{previewFile.name}</span>\n`;
-  out += `${indent}        <button onClick={() => setPreviewFile(null)} className="text-stone-400 hover:text-stone-600 text-lg leading-none">×</button>\n`;
+  out += `${indent}    <div className="w-80 flex-shrink-0 border-l border-black/10 bg-white flex flex-col">\n`;
+  out += `${indent}      <div className="flex items-center justify-between px-4 py-2 border-b border-black/10">\n`;
+  out += `${indent}        <span className="text-sm font-medium text-black/80 truncate">{previewFile.name}</span>\n`;
+  out += `${indent}        <button onClick={() => setPreviewFile(null)} className="text-black/30 hover:text-black/60 text-lg leading-none">×</button>\n`;
   out += `${indent}      </div>\n`;
   out += `${indent}      <div className="flex-1 p-4 overflow-auto">\n`;
-  out += `${indent}        <pre className="text-xs text-stone-700 whitespace-pre-wrap font-mono leading-relaxed">{previewFile.content ?? 'Loading...'}</pre>\n`;
+  out += `${indent}        <pre className="text-xs text-black/70 whitespace-pre-wrap font-mono leading-relaxed">{previewFile.content ?? 'Loading...'}</pre>\n`;
   out += `${indent}      </div>\n`;
   out += `${indent}    </div>\n`;
   out += `${indent}  )}\n`;
@@ -984,12 +984,12 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
   out += `${indent}      <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center mx-auto mb-5 shadow-lg">\n`;
   out += `${indent}        <span className="text-white font-bold text-lg">F</span>\n`;
   out += `${indent}      </div>\n`;
-  out += `${indent}      <p className="text-stone-600 text-sm leading-relaxed">${greeting}</p>\n`;
+  out += `${indent}      <p className="text-black/60 text-sm leading-relaxed">${greeting}</p>\n`;
   out += `${indent}    </div>\n`;
   out += `${indent}    {/* Step Progress */}\n`;
   out += `${indent}    <div className="flex items-center gap-2 mb-8">\n`;
   for (let i = 0; i < steps.length; i++) {
-    out += `${indent}      <div className={\`flex-1 h-1 rounded-full transition-colors \${step > ${i} ? 'bg-black' : step === ${i} ? 'bg-black' : 'bg-stone-200'}\`} />\n`;
+    out += `${indent}      <div className={\`flex-1 h-1 rounded-full transition-colors \${step > ${i} ? 'bg-black' : step === ${i} ? 'bg-black' : 'bg-black/[0.07]'}\`} />\n`;
   }
   out += `${indent}    </div>\n`;
   out += `${indent}    {/* Steps */}\n`;
@@ -998,14 +998,14 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
     out += `${indent}    {currentStep === ${i} && (\n`;
     out += `${indent}      <Card className="shadow-sm">\n`;
     out += `${indent}        <CardContent className="p-6">\n`;
-    out += `${indent}          <h2 className="text-lg font-semibold text-stone-900 mb-1">${step.title ?? step.name ?? ''}</h2>\n`;
-    if (step.description) out += `${indent}          <p className="text-sm text-stone-500 mb-5">${step.description}</p>\n`;
+    out += `${indent}          <h2 className="text-lg font-semibold text-black mb-1">${step.title ?? step.name ?? ''}</h2>\n`;
+    if (step.description) out += `${indent}          <p className="text-sm text-black/50 mb-5">${step.description}</p>\n`;
     if (step.options?.length) {
       out += `${indent}          <div className="grid grid-cols-2 gap-3 mb-5">\n`;
       for (const opt of step.options) {
-        out += `${indent}            <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_${i}: '${opt.id}' }))} className={\`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left \${onboardingData.step_${i} === '${opt.id}' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}\`}>\n`;
+        out += `${indent}            <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_${i}: '${opt.id}' }))} className={\`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left \${onboardingData.step_${i} === '${opt.id}' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}\`}>\n`;
         out += `${indent}              <span className="text-sm font-medium">${opt.label}</span>\n`;
-        if (opt.description) out += `${indent}              <span className={\`text-xs \${onboardingData.step_${i} === '${opt.id}' ? 'text-white/70' : 'text-stone-400'}\`}>${opt.description}</span>\n`;
+        if (opt.description) out += `${indent}              <span className={\`text-xs \${onboardingData.step_${i} === '${opt.id}' ? 'text-white/70' : 'text-black/30'}\`}>${opt.description}</span>\n`;
         out += `${indent}            </button>\n`;
       }
       out += `${indent}          </div>\n`;
@@ -1019,21 +1019,21 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
     } else if (step.channels?.length) {
       out += `${indent}          <div className="space-y-2 mb-5">\n`;
       for (const ch of step.channels) {
-        out += `${indent}            <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200">\n`;
-        out += `${indent}              <span className="text-sm font-medium text-stone-800">${ch.label}</span>\n`;
+        out += `${indent}            <div className="flex items-center justify-between p-3 rounded-xl border border-black/10">\n`;
+        out += `${indent}              <span className="text-sm font-medium text-black/80">${ch.label}</span>\n`;
         out += `${indent}              <Button size="sm" variant="${ch.default ? 'default' : 'outline'}">${ch.default ? 'Default' : 'Connect'}</Button>\n`;
         out += `${indent}            </div>\n`;
       }
       out += `${indent}          </div>\n`;
     } else if (step.download_url) {
       out += `${indent}          <div className="text-center py-4 mb-5">\n`;
-      out += `${indent}            <Button size="lg" className="bg-black text-white hover:bg-stone-800" onClick={() => window.open('${step.download_url}', '_blank')}>Download FLUSK</Button>\n`;
-      out += `${indent}            <p className="mt-3 text-xs text-stone-400">macOS · Free download</p>\n`;
+      out += `${indent}            <Button size="lg" className="bg-black text-white hover:bg-black/80" onClick={() => window.open('${step.download_url}', '_blank')}>Download FLUSK</Button>\n`;
+      out += `${indent}            <p className="mt-3 text-xs text-black/30">macOS · Free download</p>\n`;
       out += `${indent}          </div>\n`;
     }
     out += `${indent}          <div className="flex justify-between pt-2">\n`;
     out += `${indent}            {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}\n`;
-    out += `${indent}            <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < ${steps.length - 1}) { setCurrentStep((s: number) => s + 1); } else { navigate('${redirectOnComplete}'); } }}>{currentStep < ${steps.length - 1} ? 'Continue →' : 'Get Started'}</Button>\n`;
+    out += `${indent}            <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < ${steps.length - 1}) { setCurrentStep((s: number) => s + 1); } else { navigate('${redirectOnComplete}'); } }}>{currentStep < ${steps.length - 1} ? 'Continue →' : 'Get Started'}</Button>\n`;
     out += `${indent}          </div>\n`;
     out += `${indent}        </CardContent>\n`;
     out += `${indent}      </Card>\n`;
@@ -1127,25 +1127,25 @@ function FolderGridSection({ folders, selectedFolder, onSelectFolder }: { folder
   return (
     <div className="w-56 flex-shrink-0">
       <Card>
-        <CardHeader className="px-4 py-3"><p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Folders</p></CardHeader>
+        <CardHeader className="px-4 py-3"><p className="text-xs font-semibold text-black/50 uppercase tracking-wide">Folders</p></CardHeader>
         <CardContent className="p-2">
-          <button onClick={() => onSelectFolder(null)} className={\`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors \${selectedFolder === null ? 'bg-stone-100 font-medium text-stone-900' : 'text-stone-600 hover:bg-stone-50'}\`}>
-            <Folder className="w-4 h-4 flex-shrink-0 text-stone-400" />All Solutions
+          <button onClick={() => onSelectFolder(null)} className={\`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors \${selectedFolder === null ? 'bg-black/[0.02] font-medium text-black' : 'text-black/60 hover:bg-black/[0.02]'}\`}>
+            <Folder className="w-4 h-4 flex-shrink-0 text-black/30" />All Solutions
           </button>
           {folders.map((folder: any, i: number) => {
             const folderId = folder.id ?? folder.name ?? String(i);
             const isExp = expanded.has(folderId); const isSel = selectedFolder === folderId;
             return (
               <div key={folderId}>
-                <button onClick={() => { onSelectFolder(folderId); toggle(folderId); }} className={\`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors \${isSel ? 'bg-stone-100 font-medium text-stone-900' : 'text-stone-600 hover:bg-stone-50'}\`}>
-                  {isExp ? <FolderOpen className="w-4 h-4 flex-shrink-0 text-stone-400" /> : <Folder className="w-4 h-4 flex-shrink-0 text-stone-400" />}
+                <button onClick={() => { onSelectFolder(folderId); toggle(folderId); }} className={\`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors \${isSel ? 'bg-black/[0.02] font-medium text-black' : 'text-black/60 hover:bg-black/[0.02]'}\`}>
+                  {isExp ? <FolderOpen className="w-4 h-4 flex-shrink-0 text-black/30" /> : <Folder className="w-4 h-4 flex-shrink-0 text-black/30" />}
                   <span className="flex-1 text-left truncate">{folder.name ?? \`Folder \${i + 1}\`}</span>
-                  {folder.count != null && <span className="text-xs text-stone-400">{folder.count}</span>}
-                  {isExp ? <ChevronDown className="w-3.5 h-3.5 text-stone-300 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-stone-300 flex-shrink-0" />}
+                  {folder.count != null && <span className="text-xs text-black/30">{folder.count}</span>}
+                  {isExp ? <ChevronDown className="w-3.5 h-3.5 text-black/20 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-black/20 flex-shrink-0" />}
                 </button>
                 {isExp && (folder.children ?? []).map((child: any, j: number) => (
-                  <button key={j} onClick={() => onSelectFolder(child.id ?? child.name)} className="w-full flex items-center gap-2 pl-8 pr-3 py-1.5 rounded-lg text-xs text-stone-500 hover:bg-stone-50 transition-colors">
-                    <ChevronRight className="w-3 h-3 text-stone-300" />{child.name}
+                  <button key={j} onClick={() => onSelectFolder(child.id ?? child.name)} className="w-full flex items-center gap-2 pl-8 pr-3 py-1.5 rounded-lg text-xs text-black/50 hover:bg-black/[0.02] transition-colors">
+                    <ChevronRight className="w-3 h-3 text-black/20" />{child.name}
                   </button>
                 ))}
               </div>
@@ -1163,37 +1163,42 @@ function spotlightSearchHelper(section: any, primary: string): string {
   const placeholder = section.placeholder ?? 'Search... (Cmd+K)';
   const searchFields = JSON.stringify(section.searchFields ?? ['name', 'description']);
   return `
+// Module-level keyboard state for spotlight (no useEffect — React 18 useSyncExternalStore pattern)
+let _spotOpen = false; let _spotSession = 0;
+const _spotSubs = new Set<() => void>();
+const _spotNotify = () => _spotSubs.forEach(fn => fn());
+const _spotToggle = () => { _spotOpen = !_spotOpen; if (_spotOpen) _spotSession++; _spotNotify(); };
+const _spotClose = () => { if (_spotOpen) { _spotOpen = false; _spotNotify(); } };
+if (typeof document !== 'undefined') { document.addEventListener('keydown', (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); _spotToggle(); } if (e.key === 'Escape') _spotClose(); }); }
+function _useSpotState() { return React.useSyncExternalStore(cb => { _spotSubs.add(cb); return () => _spotSubs.delete(cb); }, () => ({ open: _spotOpen, session: _spotSession })); }
+
 function SpotlightSearchSection({ items, searchFields }: { items: any[]; searchFields: string[] }) {
-  const [open, setOpen] = React.useState(false);
+  const { open, session } = _useSpotState();
   const [query, setQuery] = React.useState('');
   const [selected, setSelected] = React.useState(0);
-  React.useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setOpen((v) => !v); } if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('keydown', handler); return () => document.removeEventListener('keydown', handler);
-  }, []);
   const fields: string[] = ${searchFields};
   const filtered = query ? items.filter((item: any) => fields.some((f) => String(item[f] ?? '').toLowerCase().includes(query.toLowerCase()))) : items.slice(0, 8);
   return (
     <>
-      <button onClick={() => setOpen(true)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-stone-400 bg-white border border-stone-200 rounded-xl shadow-sm hover:border-stone-300 transition-colors text-left">
+      <button onClick={() => _spotToggle()} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-black/30 bg-white border border-black/10 rounded-xl shadow-sm hover:border-black/20 transition-colors text-left">
         <Search className="w-4 h-4 flex-shrink-0" /><span className="flex-1">${placeholder}</span>
-        <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs border border-stone-200 rounded text-stone-400 font-mono">Cmd K</kbd>
+        <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs border border-black/10 rounded text-black/30 font-mono">Cmd K</kbd>
       </button>
       {open && (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => v ? _spotToggle() : _spotClose()}>
           <DialogContent className="max-w-xl p-0">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-stone-100">
-              <Search className="w-4 h-4 text-stone-400 flex-shrink-0" />
-              <input autoFocus value={query} onChange={(e) => { setQuery(e.target.value); setSelected(0); }} onKeyDown={(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); setSelected((s) => Math.min(s + 1, filtered.length - 1)); } if (e.key === 'ArrowUp') { e.preventDefault(); setSelected((s) => Math.max(s - 1, 0)); } if (e.key === 'Escape') setOpen(false); }} placeholder="Search solutions..." className="flex-1 text-sm text-stone-900 placeholder-stone-400 focus:outline-none" />
-              <DialogClose className="text-stone-400 hover:text-stone-600 transition-colors"><X className="w-4 h-4" /></DialogClose>
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]">
+              <Search className="w-4 h-4 text-black/30 flex-shrink-0" />
+              <input autoFocus value={query} onChange={(e) => { setQuery(e.target.value); setSelected(0); }} onKeyDown={(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); setSelected((s) => Math.min(s + 1, filtered.length - 1)); } if (e.key === 'ArrowUp') { e.preventDefault(); setSelected((s) => Math.max(s - 1, 0)); } if (e.key === 'Escape') _spotClose(); }} placeholder="Search solutions..." className="flex-1 text-sm text-black placeholder-black/30 focus:outline-none" />
+              <DialogClose className="text-black/30 hover:text-black/60 transition-colors"><X className="w-4 h-4" /></DialogClose>
             </div>
             <div className="max-h-80 overflow-y-auto p-2">
-              {filtered.length === 0 ? (<p className="px-3 py-10 text-sm text-stone-400 text-center">No results found</p>) : (filtered.map((item: any, i: number) => (
-                <div key={i} className={\`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer \${i === selected ? 'bg-stone-100' : 'hover:bg-stone-50'}\`} onClick={() => setOpen(false)}>
-                  <div className="min-w-0 flex-1"><p className="text-sm font-medium text-stone-900 truncate">{item.name ?? \`Result \${i + 1}\`}</p>{item.description && <p className="text-xs text-stone-500 truncate">{item.description}</p>}</div>
+              {filtered.length === 0 ? (<p className="px-3 py-10 text-sm text-black/30 text-center">No results found</p>) : (filtered.map((item: any, i: number) => (
+                <div key={i} className={\`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer \${i === selected ? 'bg-black/[0.02]' : 'hover:bg-black/[0.02]'}\`} onClick={() => _spotClose()}>
+                  <div className="min-w-0 flex-1"><p className="text-sm font-medium text-black truncate">{item.name ?? \`Result \${i + 1}\`}</p>{item.description && <p className="text-xs text-black/50 truncate">{item.description}</p>}</div>
                   <div className="flex gap-1.5 ml-3 flex-shrink-0">
-                    <Button size="sm" onClick={(e: React.MouseEvent) => { e.stopPropagation(); toast('Launching...'); setOpen(false); }} style={{ backgroundColor: '${primary}' }}><Play className="w-3 h-3 mr-1" /> Launch</Button>
-                    <Button size="sm" variant="outline" onClick={(e: React.MouseEvent) => { e.stopPropagation(); toast('Opening details...'); setOpen(false); }}><Eye className="w-3 h-3 mr-1" /> View</Button>
+                    <Button size="sm" onClick={(e: React.MouseEvent) => { e.stopPropagation(); toast('Launching...'); _spotClose(); }} style={{ backgroundColor: '${primary}' }}><Play className="w-3 h-3 mr-1" /> Launch</Button>
+                    <Button size="sm" variant="outline" onClick={(e: React.MouseEvent) => { e.stopPropagation(); toast('Opening details...'); _spotClose(); }}><Eye className="w-3 h-3 mr-1" /> View</Button>
                   </div>
                 </div>
               )))}
@@ -1212,9 +1217,9 @@ function solutionCardsHelper(section: any, primary: string): string {
   return `
 function SolutionCardsSection({ items, viewMode, selectedFolder }: { items: any[]; viewMode: 'grid' | 'list'; selectedFolder: string | null }) {
   const visible = selectedFolder ? items.filter((item: any) => item.folder === selectedFolder || item.folderId === selectedFolder) : items;
-  if (visible.length === 0) return (<div className="flex-1 flex flex-col items-center justify-center py-16 text-center"><div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mb-3"><LayoutGrid className="w-6 h-6 text-stone-300" /></div><p className="text-sm font-medium text-stone-500">No solutions found</p></div>);
-  if (viewMode === 'list') return (<div className="flex-1 space-y-2">{visible.map((item: any, i: number) => (<Card key={i} className="hover:shadow-md transition-shadow"><CardContent className="flex items-center justify-between px-5 py-4"><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="text-sm font-semibold text-stone-900 truncate">{item.name ?? \`Solution \${i + 1}\`}</p>{item.status && <Badge variant="outline">{item.status}</Badge>}</div>{item.description && <p className="mt-0.5 text-xs text-stone-500 truncate">{item.description}</p>}</div><div className="flex items-center gap-2 ml-4 flex-shrink-0"><Button size="sm" onClick={() => toast('Launching...')} style={{ backgroundColor: '${primary}' }}><Play className="w-3 h-3 mr-1" /> Launch</Button><Button variant="ghost" size="sm" onClick={() => toast('Edit coming soon')}><Pencil className="w-3.5 h-3.5" /></Button><Button variant="ghost" size="sm" onClick={() => toast('Copied!')}><Copy className="w-3.5 h-3.5" /></Button></div></CardContent></Card>))}</div>);
-  return (<div className={\`flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cols} gap-4\`}>{visible.map((item: any, i: number) => (<Card key={i} className="hover:shadow-md transition-shadow flex flex-col"><CardContent className="p-5 flex flex-col flex-1"><div className="flex items-start justify-between mb-2"><h4 className="font-semibold text-stone-900 text-sm leading-snug">{item.name ?? \`Solution \${i + 1}\`}</h4>{item.status && <Badge variant="outline">{item.status}</Badge>}</div>{item.description && <p className="text-xs text-stone-500 leading-relaxed line-clamp-2 mb-3">{item.description}</p>}<div className="mt-auto pt-3 border-t border-stone-100 flex items-center gap-2"><Button size="sm" className="flex-1" onClick={() => toast('Launching...')} style={{ backgroundColor: '${primary}' }}><Play className="w-3 h-3 mr-1" /> Launch</Button><Button variant="ghost" size="sm" onClick={() => toast('Edit coming soon')}><Pencil className="w-3.5 h-3.5" /></Button><Button variant="ghost" size="sm" onClick={() => toast('Copied!')}><Copy className="w-3.5 h-3.5" /></Button></div></CardContent></Card>))}</div>);
+  if (visible.length === 0) return (<div className="flex-1 flex flex-col items-center justify-center py-16 text-center"><div className="w-12 h-12 rounded-full bg-black/[0.02] flex items-center justify-center mb-3"><LayoutGrid className="w-6 h-6 text-black/20" /></div><p className="text-sm font-medium text-black/50">No solutions found</p></div>);
+  if (viewMode === 'list') return (<div className="flex-1 space-y-2">{visible.map((item: any, i: number) => (<Card key={i} className="hover:shadow-md transition-shadow"><CardContent className="flex items-center justify-between px-5 py-4"><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="text-sm font-semibold text-black truncate">{item.name ?? \`Solution \${i + 1}\`}</p>{item.status && <Badge variant="outline">{item.status}</Badge>}</div>{item.description && <p className="mt-0.5 text-xs text-black/50 truncate">{item.description}</p>}</div><div className="flex items-center gap-2 ml-4 flex-shrink-0"><Button size="sm" onClick={() => toast('Launching...')} style={{ backgroundColor: '${primary}' }}><Play className="w-3 h-3 mr-1" /> Launch</Button><Button variant="ghost" size="sm" onClick={() => toast('Edit coming soon')}><Pencil className="w-3.5 h-3.5" /></Button><Button variant="ghost" size="sm" onClick={() => toast('Copied!')}><Copy className="w-3.5 h-3.5" /></Button></div></CardContent></Card>))}</div>);
+  return (<div className={\`flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cols} gap-4\`}>{visible.map((item: any, i: number) => (<Card key={i} className="hover:shadow-md transition-shadow flex flex-col"><CardContent className="p-5 flex flex-col flex-1"><div className="flex items-start justify-between mb-2"><h4 className="font-semibold text-black text-sm leading-snug">{item.name ?? \`Solution \${i + 1}\`}</h4>{item.status && <Badge variant="outline">{item.status}</Badge>}</div>{item.description && <p className="text-xs text-black/50 leading-relaxed line-clamp-2 mb-3">{item.description}</p>}<div className="mt-auto pt-3 border-t border-black/[0.06] flex items-center gap-2"><Button size="sm" className="flex-1" onClick={() => toast('Launching...')} style={{ backgroundColor: '${primary}' }}><Play className="w-3 h-3 mr-1" /> Launch</Button><Button variant="ghost" size="sm" onClick={() => toast('Edit coming soon')}><Pencil className="w-3.5 h-3.5" /></Button><Button variant="ghost" size="sm" onClick={() => toast('Copied!')}><Copy className="w-3.5 h-3.5" /></Button></div></CardContent></Card>))}</div>);
 }
 `;
 }
@@ -1225,8 +1230,8 @@ function WorkflowPipelineSection({ workflows }: { workflows: any[] | undefined }
   const SAMPLE = [{ id: '1', name: 'Daily Report', status: 'active', trigger: { type: 'schedule', label: '0 9 * * *' }, steps: [{ name: 'Fetch Data', status: 'completed', duration: '1.2s' }, { name: 'Generate Report', status: 'completed', duration: '3.4s' }, { name: 'Send Email', status: 'running', duration: null }], runs: 142, lastRun: '2h ago' }];
   const items = workflows && workflows.length > 0 ? workflows : SAMPLE;
   const stepBadgeVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => { if (status === 'completed') return 'default'; if (status === 'running') return 'secondary'; if (status === 'error') return 'destructive'; return 'outline'; };
-  const StepIcon = ({ status }: { status: string }) => { if (status === 'completed') return <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />; if (status === 'running') return <Clock className="w-3.5 h-3.5 text-blue-500" />; if (status === 'error') return <AlertCircle className="w-3.5 h-3.5 text-red-500" />; return <div className="w-3.5 h-3.5 rounded-full border-2 border-stone-300" />; };
-  return (<div className="space-y-3">{items.map((wf: any) => (<Card key={wf.id ?? wf.name} className="hover:shadow-md transition-shadow"><CardContent className="p-5"><div className="flex items-center justify-between mb-4"><div className="flex items-center gap-3"><span className="text-sm font-semibold text-stone-900">{wf.name}</span><Badge variant={wf.status === 'active' ? 'default' : 'secondary'}>{wf.status}</Badge></div><div className="flex items-center gap-3 text-xs text-stone-400"><span>{wf.runs ?? 0} runs</span><span>Last: {wf.lastRun ?? wf.last_run ?? 'never'}</span><Button variant="ghost" size="sm" onClick={() => toast(\`Running \${wf.name}...\`)}><Play className="w-3.5 h-3.5" /></Button></div></div><div className="flex items-center gap-2 overflow-x-auto pb-1"><Badge variant="outline" className="flex-shrink-0"><Zap className="w-3 h-3 mr-1" />{wf.trigger?.label ?? wf.trigger?.type ?? 'Trigger'}</Badge>{(wf.steps ?? []).map((step: any, si: number) => (<React.Fragment key={si}><ChevronRight className="w-4 h-4 text-stone-300 flex-shrink-0" /><Badge variant={stepBadgeVariant(step.status)} className="flex-shrink-0"><StepIcon status={step.status} /><span className="ml-1">{step.name}</span>{step.duration && <span className="opacity-60 ml-1">({step.duration})</span>}</Badge></React.Fragment>))}</div></CardContent></Card>))}</div>);
+  const StepIcon = ({ status }: { status: string }) => { if (status === 'completed') return <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />; if (status === 'running') return <Clock className="w-3.5 h-3.5 text-blue-500" />; if (status === 'error') return <AlertCircle className="w-3.5 h-3.5 text-red-500" />; return <div className="w-3.5 h-3.5 rounded-full border-2 border-black/20" />; };
+  return (<div className="space-y-3">{items.map((wf: any) => (<Card key={wf.id ?? wf.name} className="hover:shadow-md transition-shadow"><CardContent className="p-5"><div className="flex items-center justify-between mb-4"><div className="flex items-center gap-3"><span className="text-sm font-semibold text-black">{wf.name}</span><Badge variant={wf.status === 'active' ? 'default' : 'secondary'}>{wf.status}</Badge></div><div className="flex items-center gap-3 text-xs text-black/30"><span>{wf.runs ?? 0} runs</span><span>Last: {wf.lastRun ?? wf.last_run ?? 'never'}</span><Button variant="ghost" size="sm" onClick={() => toast(\`Running \${wf.name}...\`)}><Play className="w-3.5 h-3.5" /></Button></div></div><div className="flex items-center gap-2 overflow-x-auto pb-1"><Badge variant="outline" className="flex-shrink-0"><Zap className="w-3 h-3 mr-1" />{wf.trigger?.label ?? wf.trigger?.type ?? 'Trigger'}</Badge>{(wf.steps ?? []).map((step: any, si: number) => (<React.Fragment key={si}><ChevronRight className="w-4 h-4 text-black/20 flex-shrink-0" /><Badge variant={stepBadgeVariant(step.status)} className="flex-shrink-0"><StepIcon status={step.status} /><span className="ml-1">{step.name}</span>{step.duration && <span className="opacity-60 ml-1">({step.duration})</span>}</Badge></React.Fragment>))}</div></CardContent></Card>))}</div>);
 }
 `;
 }
@@ -1241,7 +1246,7 @@ function AgentTreeSection({ items, title }: { items: any[] | undefined; title: s
   const statusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => { const s = (status ?? '').toLowerCase(); if (s === 'active' || s === 'running') return 'default'; if (s === 'idle') return 'outline'; if (s === 'error') return 'destructive'; return 'secondary'; };
   const renderNode = (item: any, depth: number): React.ReactNode => {
     const id = item.id ?? item.name ?? String(depth); const isExp = expanded.has(id); const children = item.children ?? item.sub_agents ?? []; const hasChildren = children.length > 0;
-    return (<div key={id}><div className="flex items-center gap-2 py-2.5 rounded-lg hover:bg-stone-50 transition-colors cursor-default" style={{ paddingLeft: \`\${16 + depth * 20}px\`, paddingRight: '12px' }}>{hasChildren ? (<button onClick={() => toggle(id)} className="text-stone-400 hover:text-stone-600 flex-shrink-0">{isExp ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}</button>) : <span className="w-3.5 h-3.5 flex-shrink-0" />}<div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '${primary}20' }}><Bot className="w-3.5 h-3.5" style={{ color: '${primary}' }} /></div><div className="flex-1 min-w-0"><div className="flex items-center gap-2"><span className="text-sm font-medium text-stone-900 truncate">{item.name}</span>{item.type && <span className="text-xs text-stone-400 capitalize">{item.type}</span>}</div>{item.model && <span className="text-xs text-stone-400 font-mono">{item.model}</span>}</div><div className="flex items-center gap-2 flex-shrink-0">{item.skills && <span className="text-xs text-stone-400">{(item.skills ?? []).length} skills</span>}{item.status && <Badge variant={statusVariant(item.status)}>{item.status}</Badge>}</div></div>{isExp && children.map((child: any) => renderNode(child, depth + 1))}</div>);
+    return (<div key={id}><div className="flex items-center gap-2 py-2.5 rounded-lg hover:bg-black/[0.02] transition-colors cursor-default" style={{ paddingLeft: \`\${16 + depth * 20}px\`, paddingRight: '12px' }}>{hasChildren ? (<button onClick={() => toggle(id)} className="text-black/30 hover:text-black/60 flex-shrink-0">{isExp ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}</button>) : <span className="w-3.5 h-3.5 flex-shrink-0" />}<div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '${primary}20' }}><Bot className="w-3.5 h-3.5" style={{ color: '${primary}' }} /></div><div className="flex-1 min-w-0"><div className="flex items-center gap-2"><span className="text-sm font-medium text-black truncate">{item.name}</span>{item.type && <span className="text-xs text-black/30 capitalize">{item.type}</span>}</div>{item.model && <span className="text-xs text-black/30 font-mono">{item.model}</span>}</div><div className="flex items-center gap-2 flex-shrink-0">{item.skills && <span className="text-xs text-black/30">{(item.skills ?? []).length} skills</span>}{item.status && <Badge variant={statusVariant(item.status)}>{item.status}</Badge>}</div></div>{isExp && children.map((child: any) => renderNode(child, depth + 1))}</div>);
   };
   return (<Card><CardHeader><CardTitle className="text-sm">{title}</CardTitle></CardHeader><CardContent className="p-2">{allItems.map((item: any) => renderNode(item, 0))}</CardContent></Card>);
 }
@@ -1256,7 +1261,7 @@ function GoalTreeSection({ items, title }: { items: any[] | undefined; title: st
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['1']));
   const toggle = (id: string) => setExpanded((s) => { const next = new Set(s); next.has(id) ? next.delete(id) : next.add(id); return next; });
   const statusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => { const s = (status ?? '').toLowerCase().replace(' ', '-'); if (s === 'completed') return 'default'; if (s === 'in-progress') return 'secondary'; if (s === 'blocked') return 'destructive'; return 'outline'; };
-  return (<Card><CardHeader><CardTitle className="text-sm">{title}</CardTitle></CardHeader><CardContent className="p-0 divide-y divide-stone-50">{allItems.map((goal: any) => { const gid = goal.id ?? goal.name; const isExp = expanded.has(gid); const tasks = goal.tasks ?? goal.children ?? []; const progress = goal.progress ?? 0; return (<div key={gid} className="p-5"><div className="flex items-start justify-between mb-3"><div className="flex items-center gap-2">{tasks.length > 0 && (<button onClick={() => toggle(gid)} className="text-stone-400 hover:text-stone-600 flex-shrink-0">{isExp ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}</button>)}<div className="w-7 h-7 rounded-lg bg-stone-900 flex items-center justify-center flex-shrink-0"><Target className="w-3.5 h-3.5 text-white" /></div><div><p className="text-sm font-semibold text-stone-900">{goal.name}</p>{goal.deadline && <p className="text-xs text-stone-400">Due: {goal.deadline}</p>}</div></div><div className="flex items-center gap-2 flex-shrink-0"><span className="text-xs font-semibold text-stone-700 tabular-nums">{progress}%</span><Badge variant={statusVariant(goal.status ?? 'pending')}>{goal.status ?? 'pending'}</Badge></div></div><div className="w-full bg-stone-100 rounded-full h-1.5"><div className="h-1.5 rounded-full transition-all" style={{ width: \`\${progress}%\`, backgroundColor: '${primary}' }} /></div>{tasks.length > 0 && isExp && (<div className="mt-3 space-y-2 pl-9">{tasks.map((task: any) => (<div key={task.id ?? task.name} className="flex items-center gap-3">{(task.status ?? '').toLowerCase() === 'completed' ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-stone-300 flex-shrink-0" />}<div className="flex-1 min-w-0"><p className={\`text-xs font-medium \${(task.status ?? '').toLowerCase() === 'completed' ? 'text-stone-400 line-through' : 'text-stone-700'}\`}>{task.name}</p></div>{task.progress != null && task.progress > 0 && task.progress < 100 && (<span className="text-xs text-stone-400 tabular-nums flex-shrink-0">{task.progress}%</span>)}</div>))}</div>)}</div>); })}</CardContent></Card>);
+  return (<Card><CardHeader><CardTitle className="text-sm">{title}</CardTitle></CardHeader><CardContent className="p-0 divide-y divide-black/[0.04]">{allItems.map((goal: any) => { const gid = goal.id ?? goal.name; const isExp = expanded.has(gid); const tasks = goal.tasks ?? goal.children ?? []; const progress = goal.progress ?? 0; return (<div key={gid} className="p-5"><div className="flex items-start justify-between mb-3"><div className="flex items-center gap-2">{tasks.length > 0 && (<button onClick={() => toggle(gid)} className="text-black/30 hover:text-black/60 flex-shrink-0">{isExp ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}</button>)}<div className="w-7 h-7 rounded-lg bg-black flex items-center justify-center flex-shrink-0"><Target className="w-3.5 h-3.5 text-white" /></div><div><p className="text-sm font-semibold text-black">{goal.name}</p>{goal.deadline && <p className="text-xs text-black/30">Due: {goal.deadline}</p>}</div></div><div className="flex items-center gap-2 flex-shrink-0"><span className="text-xs font-semibold text-black/70 tabular-nums">{progress}%</span><Badge variant={statusVariant(goal.status ?? 'pending')}>{goal.status ?? 'pending'}</Badge></div></div><div className="w-full bg-black/[0.02] rounded-full h-1.5"><div className="h-1.5 rounded-full transition-all" style={{ width: \`\${progress}%\`, backgroundColor: '${primary}' }} /></div>{tasks.length > 0 && isExp && (<div className="mt-3 space-y-2 pl-9">{tasks.map((task: any) => (<div key={task.id ?? task.name} className="flex items-center gap-3">{(task.status ?? '').toLowerCase() === 'completed' ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-black/20 flex-shrink-0" />}<div className="flex-1 min-w-0"><p className={\`text-xs font-medium \${(task.status ?? '').toLowerCase() === 'completed' ? 'text-black/30 line-through' : 'text-black/70'}\`}>{task.name}</p></div>{task.progress != null && task.progress > 0 && task.progress < 100 && (<span className="text-xs text-black/30 tabular-nums flex-shrink-0">{task.progress}%</span>)}</div>))}</div>)}</div>); })}</CardContent></Card>);
 }
 `;
 }
@@ -1284,7 +1289,7 @@ function CrudTableSection({ title, columns, data }: { title?: string; columns: A
       </CardHeader>
       <CardContent className="p-0">
         <Table><TableHeader><TableRow>{colDefs.map((col) => <TableHead key={col.key}>{col.label}</TableHead>)}<TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-          <TableBody>{items.map((row: any, i: number) => (<TableRow key={row.id ?? i}>{colDefs.map((col) => { const val = row[col.key]; const isStatus = col.key === 'status'; if (isStatus) { const v = String(val ?? '').toLowerCase(); const variant: 'default' | 'secondary' | 'outline' = v === 'active' ? 'default' : v === 'paused' ? 'secondary' : 'outline'; return <TableCell key={col.key}><Badge variant={variant}>{val}</Badge></TableCell>; } return <TableCell key={col.key}>{val != null ? String(val) : <span className="text-stone-300">—</span>}</TableCell>; })}<TableCell className="text-right"><div className="flex items-center justify-end gap-1"><Button variant="ghost" size="sm" onClick={() => openEdit(row)}><Pencil className="w-3.5 h-3.5" /></Button><Button variant="ghost" size="sm" onClick={() => handleDelete(row)}><Trash2 className="w-3.5 h-3.5 text-red-500" /></Button></div></TableCell></TableRow>))}</TableBody>
+          <TableBody>{items.map((row: any, i: number) => (<TableRow key={row.id ?? i}>{colDefs.map((col) => { const val = row[col.key]; const isStatus = col.key === 'status'; if (isStatus) { const v = String(val ?? '').toLowerCase(); const variant: 'default' | 'secondary' | 'outline' = v === 'active' ? 'default' : v === 'paused' ? 'secondary' : 'outline'; return <TableCell key={col.key}><Badge variant={variant}>{val}</Badge></TableCell>; } return <TableCell key={col.key}>{val != null ? String(val) : <span className="text-black/20">—</span>}</TableCell>; })}<TableCell className="text-right"><div className="flex items-center justify-end gap-1"><Button variant="ghost" size="sm" onClick={() => openEdit(row)}><Pencil className="w-3.5 h-3.5" /></Button><Button variant="ghost" size="sm" onClick={() => handleDelete(row)}><Trash2 className="w-3.5 h-3.5 text-red-500" /></Button></div></TableCell></TableRow>))}</TableBody>
         </Table>
       </CardContent>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -1343,8 +1348,8 @@ const COLOR_MAP: Record<string, string> = { blue: '${secondary}', green: '#22c55
 export function StatCard({ label, value, format, trend, color = 'blue', dark = false }: StatCardProps) {
   const accentColor = COLOR_MAP[color] ?? '${primary}';
   const TrendIcon = trend?.direction === 'up' ? TrendingUp : trend?.direction === 'down' ? TrendingDown : Minus;
-  const trendColor = trend?.direction === 'up' ? (dark ? 'text-emerald-400' : 'text-emerald-600') : trend?.direction === 'down' ? (dark ? 'text-red-400' : 'text-red-500') : (dark ? 'text-stone-500' : 'text-stone-400');
-  return (<div><div className="flex items-start justify-between"><p className={\`text-sm font-medium \${dark ? 'text-stone-400' : 'text-stone-500'} leading-tight\`}>{label}</p><div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ backgroundColor: accentColor }} /></div><p className={\`mt-3 text-2xl font-semibold \${dark ? 'text-white' : 'text-stone-900'} tabular-nums\`}>{formatValue(value, format)}</p>{trend && (<div className={\`mt-2 flex items-center gap-1 text-xs \${trendColor}\`}><TrendIcon className="w-3.5 h-3.5" /><span>{trend.value != null ? \`\${trend.value}%\` : ''}{trend.label ? \` \${trend.label}\` : ''}</span></div>)}</div>);
+  const trendColor = trend?.direction === 'up' ? (dark ? 'text-emerald-400' : 'text-emerald-600') : trend?.direction === 'down' ? (dark ? 'text-red-400' : 'text-red-500') : (dark ? 'text-black/50' : 'text-black/30');
+  return (<div><div className="flex items-start justify-between"><p className={\`text-sm font-medium \${dark ? 'text-black/30' : 'text-black/50'} leading-tight\`}>{label}</p><div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ backgroundColor: accentColor }} /></div><p className={\`mt-3 text-2xl font-semibold \${dark ? 'text-white' : 'text-black'} tabular-nums\`}>{formatValue(value, format)}</p>{trend && (<div className={\`mt-2 flex items-center gap-1 text-xs \${trendColor}\`}><TrendIcon className="w-3.5 h-3.5" /><span>{trend.value != null ? \`\${trend.value}%\` : ''}{trend.label ? \` \${trend.label}\` : ''}</span></div>)}</div>);
 }
 `;
 }
@@ -1374,7 +1379,7 @@ export function Chart({ type, data, title, xAxis = 'name', yAxis = 'value', donu
     const gradId = 'areaGrad';
     return (<AreaChart data={chartData} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>{gradient && (<defs><linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="${primary}" stopOpacity={0.15} /><stop offset="95%" stopColor="${primary}" stopOpacity={0} /></linearGradient></defs>)}<CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false} /><XAxis dataKey={xAxis} tick={AXIS_STYLE} axisLine={false} tickLine={false} /><YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false} /><Tooltip contentStyle={TOOLTIP_STYLE} /><Area type="monotone" dataKey={yAxis} stroke="${primary}" strokeWidth={2} fill={gradient ? \`url(#\${gradId})\` : '${primary}18'} /></AreaChart>);
   };
-  return (<div className={\`bg-white rounded-xl border border-stone-200 p-5 shadow-sm \${className}\`}>{title && <h3 className="text-sm font-semibold text-stone-700 mb-4">{title}</h3>}<ResponsiveContainer width="100%" height={220}>{renderInner()}</ResponsiveContainer></div>);
+  return (<div className={\`bg-white rounded-xl border border-black/10 p-5 shadow-sm \${className}\`}>{title && <h3 className="text-sm font-semibold text-black/70 mb-4">{title}</h3>}<ResponsiveContainer width="100%" height={220}>{renderInner()}</ResponsiveContainer></div>);
 }
 `;
 }
@@ -1391,25 +1396,25 @@ const PLACEHOLDER_ROWS = [{ name: 'Alice Chen', email: 'alice@example.com', role
 
 function StatusBadge({ value }: { value: string }) {
   const v = String(value).toLowerCase();
-  const cls = v === 'active' || v === 'connected' || v === 'admin' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : v === 'paused' || v === 'pending' || v === 'manager' ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-stone-100 text-stone-600 ring-stone-200';
+  const cls = v === 'active' || v === 'connected' || v === 'admin' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : v === 'paused' || v === 'pending' || v === 'manager' ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-black/[0.02] text-black/60 ring-black/10';
   return <span className={\`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ring-1 ring-inset \${cls}\`}>{value}</span>;
 }
 
 function CellValue({ value, col }: { value: any; col: Column }) {
-  if (value == null) return <span className="text-stone-300">\u2014</span>;
+  if (value == null) return <span className="text-black/20">\u2014</span>;
   const isStatus = col.widget === 'status-badge' || col.widget === 'role-badge' || col.key === 'status' || col.key === 'role';
   if (isStatus) return <StatusBadge value={String(value)} />;
-  return <span className="text-stone-700">{String(value)}</span>;
+  return <span className="text-black/70">{String(value)}</span>;
 }
 
 export function DataTable({ title, columns, data, actions, pagination }: DataTableProps) {
   const rows = data && data.length > 0 ? data : PLACEHOLDER_ROWS;
   const visibleCols = columns.filter((c) => c.label);
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-      {(title || (actions && actions.length > 0)) && (<div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">{title && <h3 className="text-sm font-semibold text-stone-800">{title}</h3>}<div className="flex gap-2">{actions?.map((action, i) => (<button key={i} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: '${primary}' }}>{action.label}</button>))}</div></div>)}
-      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="bg-stone-50 border-b border-stone-100">{visibleCols.map((col) => <th key={col.key} className="px-4 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide whitespace-nowrap">{col.label}</th>)}<th className="px-4 py-3 w-8" /></tr></thead><tbody className="divide-y divide-stone-50">{rows.map((row: any, i: number) => (<tr key={i} className="hover:bg-stone-50/80 transition-colors group">{visibleCols.map((col) => (<td key={col.key} className="px-4 py-3"><CellValue value={row[col.key]} col={col} /></td>))}<td className="px-4 py-3 text-right"><button className="text-stone-300 hover:text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal className="w-4 h-4" /></button></td></tr>))}</tbody></table></div>
-      {pagination && (<div className="px-5 py-3 border-t border-stone-100 flex items-center justify-between"><span className="text-xs text-stone-400">Showing {rows.length} results</span><div className="flex gap-1"><button className="px-2.5 py-1 text-xs text-stone-600 border border-stone-200 rounded-md hover:bg-stone-50">Prev</button><button className="px-2.5 py-1 text-xs text-stone-600 border border-stone-200 rounded-md hover:bg-stone-50">Next</button></div></div>)}
+    <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden">
+      {(title || (actions && actions.length > 0)) && (<div className="px-5 py-4 border-b border-black/[0.06] flex items-center justify-between">{title && <h3 className="text-sm font-semibold text-black/80">{title}</h3>}<div className="flex gap-2">{actions?.map((action, i) => (<button key={i} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: '${primary}' }}>{action.label}</button>))}</div></div>)}
+      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="bg-white border-b border-black/[0.06]">{visibleCols.map((col) => <th key={col.key} className="px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap">{col.label}</th>)}<th className="px-4 py-3 w-8" /></tr></thead><tbody className="divide-y divide-black/[0.04]">{rows.map((row: any, i: number) => (<tr key={i} className="hover:bg-black/[0.02]/80 transition-colors group">{visibleCols.map((col) => (<td key={col.key} className="px-4 py-3"><CellValue value={row[col.key]} col={col} /></td>))}<td className="px-4 py-3 text-right"><button className="text-black/20 hover:text-black/60 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal className="w-4 h-4" /></button></td></tr>))}</tbody></table></div>
+      {pagination && (<div className="px-5 py-3 border-t border-black/[0.06] flex items-center justify-between"><span className="text-xs text-black/30">Showing {rows.length} results</span><div className="flex gap-1"><button className="px-2.5 py-1 text-xs text-black/60 border border-black/10 rounded-md hover:bg-black/[0.02]">Prev</button><button className="px-2.5 py-1 text-xs text-black/60 border border-black/10 rounded-md hover:bg-black/[0.02]">Next</button></div></div>)}
     </div>
   );
 }
@@ -1423,14 +1428,26 @@ import { Search, X } from 'lucide-react';
 
 export interface SpotlightProps { items: any[]; placeholder?: string; onLaunch?: (item: any) => void; }
 
-export function Spotlight({ items, placeholder = 'Search... (\u2318K)', onLaunch }: SpotlightProps) {
-  const [open, setOpen] = React.useState(false);
+// Module-level keyboard state — no useEffect needed (React 18 useSyncExternalStore pattern)
+let _slOpen = false; let _slSession = 0;
+const _slSubs = new Set<() => void>();
+const _slNotify = () => _slSubs.forEach(fn => fn());
+const _slSetOpen = (v: boolean) => { if (_slOpen !== v) { _slOpen = v; if (v) _slSession++; _slNotify(); } };
+if (typeof window !== 'undefined') { window.addEventListener('keydown', (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); _slSetOpen(true); } }); }
+const _slSubscribe = (cb: () => void) => { _slSubs.add(cb); return () => _slSubs.delete(cb); };
+const _slSnapshot = () => ({ open: _slOpen, session: _slSession });
+
+function SpotlightModal({ items, placeholder, onLaunch, session }: { items: any[]; placeholder: string; onLaunch?: (item: any) => void; session: number }) {
   const [query, setQuery] = React.useState('');
   const [selected, setSelected] = React.useState(0);
-  React.useEffect(() => { const handler = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setOpen(true); setQuery(''); setSelected(0); } }; window.addEventListener('keydown', handler); return () => window.removeEventListener('keydown', handler); }, []);
   const filtered = React.useMemo(() => { if (!query.trim()) return items.slice(0, 8); const q = query.toLowerCase(); return items.filter((item: any) => (item.name ?? '').toLowerCase().includes(q) || (item.description ?? '').toLowerCase().includes(q)).slice(0, 8); }, [items, query]);
-  if (!open) return (<button onClick={() => { setOpen(true); setQuery(''); setSelected(0); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-stone-400 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors"><Search className="w-4 h-4" /><span className="flex-1 text-left">{placeholder}</span></button>);
-  return (<div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4"><div className="absolute inset-0 bg-stone-950/50 backdrop-blur-sm" onClick={() => setOpen(false)} /><div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden"><div className="flex items-center gap-3 px-4 py-3 border-b border-stone-100"><Search className="w-4 h-4 text-stone-400 flex-shrink-0" /><input autoFocus value={query} onChange={(e) => { setQuery(e.target.value); setSelected(0); }} onKeyDown={(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); setSelected((s) => Math.min(s + 1, filtered.length - 1)); } if (e.key === 'ArrowUp') { e.preventDefault(); setSelected((s) => Math.max(s - 1, 0)); } if (e.key === 'Escape') setOpen(false); if (e.key === 'Enter' && filtered[selected]) { onLaunch?.(filtered[selected]); setOpen(false); } }} placeholder={placeholder} className="flex-1 text-sm text-stone-900 placeholder-stone-400 focus:outline-none" /><button onClick={() => setOpen(false)} className="text-stone-400 hover:text-stone-600"><X className="w-4 h-4" /></button></div><div className="max-h-80 overflow-y-auto p-2">{filtered.length === 0 ? (<p className="px-3 py-10 text-sm text-stone-400 text-center">No results found</p>) : filtered.map((item: any, i: number) => (<div key={i} className={\`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer \${i === selected ? 'bg-stone-100' : 'hover:bg-stone-50'}\`} onClick={() => { onLaunch?.(item); setOpen(false); }}><div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ backgroundColor: '${primary}' }}>{(item.name ?? '?').charAt(0).toUpperCase()}</div><div className="min-w-0 flex-1"><p className="text-sm font-medium text-stone-900 truncate">{item.name ?? \`Item \${i + 1}\`}</p>{item.description && <p className="text-xs text-stone-500 truncate">{item.description}</p>}</div></div>))}</div></div></div>);
+  return (<div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4"><div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => _slSetOpen(false)} /><div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-black/10 overflow-hidden"><div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.06]"><Search className="w-4 h-4 text-black/30 flex-shrink-0" /><input autoFocus value={query} onChange={(e) => { setQuery(e.target.value); setSelected(0); }} onKeyDown={(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); setSelected((s) => Math.min(s + 1, filtered.length - 1)); } if (e.key === 'ArrowUp') { e.preventDefault(); setSelected((s) => Math.max(s - 1, 0)); } if (e.key === 'Escape') _slSetOpen(false); if (e.key === 'Enter' && filtered[selected]) { onLaunch?.(filtered[selected]); _slSetOpen(false); } }} placeholder={placeholder} className="flex-1 text-sm text-black placeholder-black/30 focus:outline-none" /><button onClick={() => _slSetOpen(false)} className="text-black/30 hover:text-black/60"><X className="w-4 h-4" /></button></div><div className="max-h-80 overflow-y-auto p-2">{filtered.length === 0 ? (<p className="px-3 py-10 text-sm text-black/30 text-center">No results found</p>) : filtered.map((item: any, i: number) => (<div key={i} className={\`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer \${i === selected ? 'bg-black/[0.02]' : 'hover:bg-black/[0.02]'}\`} onClick={() => { onLaunch?.(item); _slSetOpen(false); }}><div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ backgroundColor: '${primary}' }}>{(item.name ?? '?').charAt(0).toUpperCase()}</div><div className="min-w-0 flex-1"><p className="text-sm font-medium text-black truncate">{item.name ?? \`Item \${i + 1}\`}</p>{item.description && <p className="text-xs text-black/50 truncate">{item.description}</p>}</div></div>))}</div></div></div>);
+}
+
+export function Spotlight({ items, placeholder = 'Search... (\u2318K)', onLaunch }: SpotlightProps) {
+  const { open, session } = React.useSyncExternalStore(_slSubscribe, _slSnapshot);
+  if (!open) return (<button onClick={() => _slSetOpen(true)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-black/30 bg-black/[0.02] hover:bg-black/[0.07] rounded-xl transition-colors"><Search className="w-4 h-4" /><span className="flex-1 text-left">{placeholder}</span></button>);
+  return <SpotlightModal key={session} items={items} placeholder={placeholder ?? 'Search...'} onLaunch={onLaunch} session={session} />;
 }
 `;
 }
@@ -1594,7 +1611,7 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
     for (const section of sections) sectionJsx += renderSection(section, '        ', isAuth, { isMarketing });
     sectionJsx += `      </div>\n    </div>\n`;
   } else {
-    sectionJsx += `    <div className="min-h-screen bg-stone-50">\n      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">\n`;
+    sectionJsx += `    <div className="min-h-screen bg-white">\n      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">\n`;
     let i = 0;
     while (i < sections.length) {
       const section = sections[i];

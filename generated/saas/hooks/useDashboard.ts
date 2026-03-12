@@ -7,14 +7,12 @@ export function useDashboard() {
     queryKey: ['Dashboard'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any[]>('/api/solutions').catch(() => []),
-      apiClient.get<any[]>('/api/events').catch(() => [])
+      apiClient.get<any>('/api/gateway/status').catch(() => null),
+      apiClient.get<any>('/api/gateway/events', { params: {"limit":10,"order":"created_at DESC"} }).catch(() => null)
       ]);
       return {
-      solutions: results[0],
-      events: results[1],
-      status: {},
-      recentEvents: {}
+        status: results[0],
+        recentEvents: results[1]
       };
     },
   });

@@ -7,10 +7,14 @@ export function useEvents() {
     queryKey: ['Events'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any[]>('/api/events').catch(() => [])
+      apiClient.get<any>('/api/gateway/events', { params: {"limit":100,"order":"created_at DESC"} }).catch(() => null),
+      apiClient.get<any>('/api/gateway/events', { params: {"limit":100,"order":"created_at DESC","filter":"blocked=true,severity=warning|error"} }).catch(() => null),
+      apiClient.get<any>('/api/gateway/guard/stats').catch(() => null)
       ]);
       return {
-      events: results[0]
+        events: results[0],
+        guardEvents: results[1],
+        guardStats: results[2]
       };
     },
   });

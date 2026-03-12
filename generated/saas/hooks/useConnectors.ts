@@ -7,10 +7,12 @@ export function useConnectors() {
     queryKey: ['Connectors'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any[]>('/api/connectors').catch(() => [])
+      apiClient.get<any>('/api/gateway/channels').catch(() => null),
+      apiClient.get<any>('/api/gateway/tools').catch(() => null)
       ]);
       return {
-      connectors: results[0]
+        channels: results[0],
+        tools: results[1]
       };
     },
   });

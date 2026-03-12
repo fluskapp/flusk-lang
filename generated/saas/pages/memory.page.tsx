@@ -26,15 +26,15 @@ export function MemoryPage() {
         </TabsList>
         <TabsContent value="files" className="space-y-6">
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-stone-700">Bot Workspace</h3>
-            <p className="text-xs text-stone-500">Files your bot has created or stored in its workspace</p>
-            <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">
+            <h3 className="text-sm font-semibold text-black/70">Bot Workspace</h3>
+            <p className="text-xs text-black/50">Files your bot has created or stored in its workspace</p>
+            <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">
               {((data?.files) as any[] ?? []).map((file: any, i: number) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3 hover:bg-stone-50 group">
+                <div key={i} className="flex items-center gap-3 px-4 py-3 hover:bg-black/[0.02] group">
                   <span className="text-lg flex-shrink-0">{file.type === 'md' || file.type === 'txt' ? '📄' : file.type === 'json' || file.type === 'yaml' ? '📋' : file.type === 'py' || file.type === 'js' || file.type === 'ts' ? '💻' : '📁'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-stone-800 truncate">{file.name ?? ''}</p>
-                    <p className="text-xs text-stone-400">{file.size ? `${Math.round(file.size / 1024)} KB` : ''} {file.modified_at ? `· ${new Date(file.modified_at).toLocaleDateString('en', { month: 'short', day: 'numeric' })}` : ''}</p>
+                    <p className="text-sm font-medium text-black/80 truncate">{file.name ?? ''}</p>
+                    <p className="text-xs text-black/30">{file.size ? `${Math.round(file.size / 1024)} KB` : ''} {file.modified_at ? `· ${new Date(file.modified_at).toLocaleDateString('en', { month: 'short', day: 'numeric' })}` : ''}</p>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">View</Button>
@@ -44,16 +44,16 @@ export function MemoryPage() {
                 </div>
               ))}
               {!(data?.files)?.length && (
-                <div className="px-4 py-8 text-center text-sm text-stone-400">Your bot will store files here as it works</div>
+                <div className="px-4 py-8 text-center text-sm text-black/30">Your bot will store files here as it works</div>
               )}
             </div>
           </div>
-          <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
+          <div className="min-h-screen flex items-center justify-center bg-white px-4">
             <div className="w-full max-w-sm">
               <div className="text-center mb-8">
                 <div className="w-12 h-12 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-lg" style={{ backgroundColor: '#18181b' }}><span className="text-white font-bold text-lg">F</span></div>
-                <h1 className="text-2xl font-bold text-stone-900">Sign in to Flusk</h1>
-                <p className="mt-2 text-sm text-stone-500">Enter your credentials to continue</p>
+                <h1 className="text-2xl font-bold text-black">Sign in to Flusk</h1>
+                <p className="mt-2 text-sm text-black/50">Enter your credentials to continue</p>
               </div>
               <Card>
                 <CardContent className="pt-6">
@@ -73,31 +73,31 @@ export function MemoryPage() {
           </div>
           <Card>
             <button onClick={() => setRawMemory((v) => !v)} className="w-full flex items-center justify-between px-5 py-4 text-left">
-              <span className="text-sm font-semibold text-stone-900">Raw MEMORY.md</span>
-              {RawMemory ? <ChevronDown className="w-4 h-4 text-stone-400" /> : <ChevronRight className="w-4 h-4 text-stone-400" />}
+              <span className="text-sm font-semibold text-black">Raw MEMORY.md</span>
+              {RawMemory ? <ChevronDown className="w-4 h-4 text-black/30" /> : <ChevronRight className="w-4 h-4 text-black/30" />}
             </button>
             {RawMemory && (
               <div className="px-5 pb-4">
-                <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{data?.memoryRaw?.content ?? ''}</p>
+                <p className="text-sm text-black/70 whitespace-pre-wrap leading-relaxed">{data?.memoryRaw?.content ?? ''}</p>
               </div>
             )}
           </Card>
         </TabsContent>
         <TabsContent value="timeline" className="space-y-6">
-          <h3 className="text-sm font-semibold text-stone-700 mb-3">Daily Summaries</h3>
+          <h3 className="text-sm font-semibold text-black/70 mb-3">Daily Summaries</h3>
           <div className="space-y-4">
             {((data?.timeline) as any[] ?? []).map((entry: any, i: number) => (
               <div key={i} className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="w-2 h-2 rounded-full bg-stone-400 mt-2 flex-shrink-0" />
-                  <div className="w-px flex-1 bg-stone-200" />
+                  <div className="w-2 h-2 rounded-full bg-black/30 mt-2 flex-shrink-0" />
+                  <div className="w-px flex-1 bg-black/[0.07]" />
                 </div>
                 <div className="pb-4 min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-stone-500">{entry.date}</span>
+                    <span className="text-xs font-medium text-black/50">{entry.date}</span>
                     {entry.mood && <span className="text-sm">{entry.mood}</span>}
                   </div>
-                  <p className="text-sm text-stone-700 line-clamp-3">{entry.summary_text}</p>
+                  <p className="text-sm text-black/70 line-clamp-3">{entry.summary_text}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {entry.message_count != null && <Badge variant="outline">msgs: {entry.message_count}</Badge>}
                     {entry.action_count != null && <Badge variant="outline">actions: {entry.action_count}</Badge>}

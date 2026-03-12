@@ -28,27 +28,27 @@ export function isRouteSchema(schema: FluskSchema): boolean {
 
 function apiClientTemplate(): string {
   return `${HEADER}
-
-const BASE_URL =
-  typeof import.meta !== 'undefined' && (import.meta as unknown as Record<string, unknown>)['env'] != null
-    ? (String(((import.meta as unknown as Record<string, unknown>)['env'] as unknown as Record<string, unknown>)['VITE_API_URL'] ?? 'http://localhost:3042'))
-    : 'http://localhost:3042';
+// Uses relative URLs — Vite dev proxy routes:
+//   /api/gateway/* → :3000 (gateway)
+//   /api/*         → :3042 (Platformatic)
 
 export const apiClient = {
   async get<T>(url: string, opts?: { params?: Record<string, unknown> }): Promise<T> {
-    const fullUrl = new URL(url.startsWith('http') ? url : BASE_URL + url);
-    if (opts?.params) {
+    let fetchUrl = url;
+    if (opts?.params && Object.keys(opts.params).length > 0) {
+      const qs = new URLSearchParams();
       Object.entries(opts.params).forEach(([k, v]) => {
-        if (v !== undefined && v !== null) fullUrl.searchParams.set(k, String(v));
+        if (v !== undefined && v !== null) qs.set(k, String(v));
       });
+      fetchUrl = url + '?' + qs.toString();
     }
-    const res = await fetch(fullUrl.toString(), { credentials: 'include' });
+    const res = await fetch(fetchUrl, { credentials: 'include' });
     if (!res.ok) throw new Error(\`API \${res.status}: \${res.statusText}\`);
     return res.json() as Promise<T>;
   },
 
   async post<T>(url: string, body: unknown): Promise<T> {
-    const res = await fetch(BASE_URL + url, {
+    const res = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -59,7 +59,7 @@ export const apiClient = {
   },
 
   async put<T>(url: string, body: unknown): Promise<T> {
-    const res = await fetch(BASE_URL + url, {
+    const res = await fetch(url, {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -70,7 +70,7 @@ export const apiClient = {
   },
 
   async patch<T>(url: string, body: unknown): Promise<T> {
-    const res = await fetch(BASE_URL + url, {
+    const res = await fetch(url, {
       method: 'PATCH',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -81,7 +81,7 @@ export const apiClient = {
   },
 
   async delete(url: string): Promise<void> {
-    const res = await fetch(BASE_URL + url, {
+    const res = await fetch(url, {
       method: 'DELETE',
       credentials: 'include',
     });
@@ -251,99 +251,62 @@ function isViewSchema(schema: FluskSchema): boolean {
   return !!s['route'] && !!s['sections'];
 }
 
-/** Extract all unique entity sources from a view's sections (recursively) */
-function extractSources(sections: unknown[]): Set<string> {
-  const sources = new Set<string>();
-  function walk(obj: unknown): void {
-    if (!obj || typeof obj !== 'object') return;
-    if (Array.isArray(obj)) { obj.forEach(walk); return; }
-    const rec = obj as Record<string, unknown>;
-    if (typeof rec['source'] === 'string') {
-      const src = rec['source'] as string;
-      // Extract entity name from "entity.field" pattern (e.g., "solutions.list" → "solutions")
-      const entity = src.split('.')[0]!;
-      if (entity && !entity.includes('API') && !entity.includes('Form') && entity !== 'filters') {
-        sources.add(entity);
-      }
-    }
-    for (const v of Object.values(rec)) walk(v);
-  }
-  walk(sections);
-  return sources;
+
+interface ViewDataSource {
+  endpoint?: string;
+  params?: Record<string, unknown>;
+  description?: string;
+  lazy?: boolean;
 }
 
-/** Map entity source names to Platformatic API endpoints */
-function entityToEndpoint(entity: string): string {
-  // Platformatic uses plural snake_case: solutions, events, connectors, etc.
-  return `/api/${entity.replace(/([A-Z])/g, '_$1').toLowerCase()}`;
-}
-
-function generateViewHookFile(view: FluskSchema, entitySchemas: FluskSchema[]): string {
+function generateViewHookFile(view: FluskSchema, _entitySchemas: FluskSchema[]): string {
   const viewName = view.name.replace(/[\s\-]+/g, '');
   const hookName = `use${viewName}`;
   const s = view as unknown as Record<string, unknown>;
-  const sections = (s['sections'] ?? []) as unknown[];
-  const sources = extractSources(sections);
 
-  // Find which entities have real API endpoints
-  const entityNames = new Set(entitySchemas.map(e => e.name.toLowerCase().replace(/[\s\-_]+/g, '')));
-  const knownEntities = ['solutions', 'events', 'connectors', 'agents', 'automations', 'deployables'];
+  // Use data_sources field directly — each entry has endpoint: "METHOD /path"
+  const dataSources = s['data_sources'] as Record<string, ViewDataSource> | undefined;
 
-  // Determine which real API calls we need
-  const neededApis = new Set<string>();
-  const viewWords = view.name.toLowerCase().split(/[\s\-]+/);
-  const lastWord = viewWords[viewWords.length - 1] ?? '';
-  const firstWord = viewWords[0] ?? '';
-
-  // Direct entity sources
-  for (const src of sources) {
-    const normalized = src.toLowerCase().replace(/[\s\-_]+/g, '');
-    if (knownEntities.includes(src) || entityNames.has(normalized) || entityNames.has(normalized.replace(/s$/, ''))) {
-      neededApis.add(src);
-    }
-  }
-
-  // Derive from view name if no direct entities
-  if (neededApis.size === 0) {
-    if (knownEntities.includes(lastWord)) {
-      neededApis.add(lastWord);
-    } else if (firstWord === 'observe' || ['dashboard', 'analytics', 'compliance'].includes(lastWord)) {
-      neededApis.add('solutions');
-      neededApis.add('events');
-    }
-  }
-
-  // Build the data mapping — pages access data by source namespace (data.solutions, data.stats, etc.)
-  // We fetch from real APIs and map results to the namespaces the page expects
-  const apiCalls: string[] = [];
-  const apiNames: string[] = [];
-  for (const api of neededApis) {
-    apiCalls.push(`      apiClient.get<any[]>('${entityToEndpoint(api)}').catch(() => [])`);
-    apiNames.push(api);
-  }
-
-  // Map fetched data to all namespaces the view uses
-  const dataFields: string[] = [];
-  for (let i = 0; i < apiNames.length; i++) {
-    dataFields.push(`      ${apiNames[i]}: results[${i}]`);
-  }
-  // For abstract namespaces (stats, observe, analytics, compliance), provide empty objects
-  // so the page doesn't crash — these need real aggregation endpoints eventually
-  for (const src of sources) {
-    if (!neededApis.has(src) && src !== 'filters' && src !== 'event' && src !== 'connector') {
-      dataFields.push(`      ${src}: {}`);
-    }
-  }
-
-  if (apiCalls.length === 0) {
-    // Fallback: return empty data for views that don't map to entities (landing, login)
+  if (!dataSources || Object.keys(dataSources).length === 0) {
     return `${HEADER}
-// View hook for ${view.name} — no entity endpoints detected
+// View hook for ${view.name} — no data_sources defined
 export function ${hookName}(): { data: Record<string, any>; isLoading: boolean } {
   return { data: {}, isLoading: false };
 }
 `;
   }
+
+  // Skip lazy data sources (fetched on-demand, not in initial load)
+  const entries = Object.entries(dataSources).filter(([, src]) => !src.lazy);
+
+  if (entries.length === 0) {
+    return `${HEADER}
+// View hook for ${view.name} — all data sources are lazy
+export function ${hookName}(): { data: Record<string, any>; isLoading: boolean } {
+  return { data: {}, isLoading: false };
+}
+`;
+  }
+
+  const apiCalls: string[] = [];
+  const resultKeys: string[] = [];
+
+  for (const [key, source] of entries) {
+    // Parse "GET /api/..." format — extract path after the method prefix
+    const endpointRaw = source.endpoint ?? '';
+    const spaceIdx = endpointRaw.indexOf(' ');
+    const path = spaceIdx >= 0 ? endpointRaw.slice(spaceIdx + 1).trim() : endpointRaw;
+
+    const params = source.params;
+    if (params && Object.keys(params).length > 0) {
+      apiCalls.push(`      apiClient.get<any>('${path}', { params: ${JSON.stringify(params)} }).catch(() => null)`);
+    } else {
+      apiCalls.push(`      apiClient.get<any>('${path}').catch(() => null)`);
+    }
+    resultKeys.push(key);
+  }
+
+  const dataFields = resultKeys.map((key, i) => `        ${key}: results[${i}]`);
 
   return `${HEADER}
 import { useQuery } from '@tanstack/react-query';

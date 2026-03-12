@@ -23,23 +23,23 @@ export function OnboardingPage() {
           <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center mx-auto mb-5 shadow-lg">
             <span className="text-white font-bold text-lg">F</span>
           </div>
-          <p className="text-stone-600 text-sm leading-relaxed">Hey, I'm FLUSK — your bot that actually has a personality. Let's get you set up. Won't take long, promise.</p>
+          <p className="text-black/60 text-sm leading-relaxed">Hey, I'm FLUSK — your bot that actually has a personality. Let's get you set up. Won't take long, promise.</p>
         </div>
         {/* Step Progress */}
         <div className="flex items-center gap-2 mb-8">
-          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 0 ? 'bg-black' : step === 0 ? 'bg-black' : 'bg-stone-200'}`} />
-          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 1 ? 'bg-black' : step === 1 ? 'bg-black' : 'bg-stone-200'}`} />
-          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 2 ? 'bg-black' : step === 2 ? 'bg-black' : 'bg-stone-200'}`} />
-          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 3 ? 'bg-black' : step === 3 ? 'bg-black' : 'bg-stone-200'}`} />
-          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 4 ? 'bg-black' : step === 4 ? 'bg-black' : 'bg-stone-200'}`} />
-          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 5 ? 'bg-black' : step === 5 ? 'bg-black' : 'bg-stone-200'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 0 ? 'bg-black' : step === 0 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 1 ? 'bg-black' : step === 1 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 2 ? 'bg-black' : step === 2 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 3 ? 'bg-black' : step === 3 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 4 ? 'bg-black' : step === 4 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 5 ? 'bg-black' : step === 5 ? 'bg-black' : 'bg-black/[0.07]'}`} />
         </div>
         {/* Steps */}
         {currentStep === 0 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-stone-900 mb-1">Meet FLUSK</h2>
-              <p className="text-sm text-stone-500 mb-5">Introduction and name collection</p>
+              <h2 className="text-lg font-semibold text-black mb-1">Meet FLUSK</h2>
+              <p className="text-sm text-black/50 mb-5">Introduction and name collection</p>
               <div className="space-y-2 mb-4">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" name="name" placeholder="name" value={onboardingData['name'] ?? ''} onChange={(e) => setOnboardingData((d: any) => ({ ...d, 'name': e.target.value }))} />
@@ -54,7 +54,7 @@ export function OnboardingPage() {
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -62,29 +62,29 @@ export function OnboardingPage() {
         {currentStep === 1 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-stone-900 mb-1">Your Style</h2>
-              <p className="text-sm text-stone-500 mb-5">How the bot should talk</p>
+              <h2 className="text-lg font-semibold text-black mb-1">Your Style</h2>
+              <p className="text-sm text-black/50 mb-5">How the bot should talk</p>
               <div className="grid grid-cols-2 gap-3 mb-5">
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'professional' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'professional' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'professional' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'professional' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Professional</span>
-                  <span className={`text-xs ${onboardingData.step_1 === 'professional' ? 'text-white/70' : 'text-stone-400'}`}>Straight to the point, formal tone</span>
+                  <span className={`text-xs ${onboardingData.step_1 === 'professional' ? 'text-white/70' : 'text-black/30'}`}>Straight to the point, formal tone</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'casual' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'casual' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'casual' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'casual' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Casual</span>
-                  <span className={`text-xs ${onboardingData.step_1 === 'casual' ? 'text-white/70' : 'text-stone-400'}`}>Relaxed, friendly, like texting a friend</span>
+                  <span className={`text-xs ${onboardingData.step_1 === 'casual' ? 'text-white/70' : 'text-black/30'}`}>Relaxed, friendly, like texting a friend</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'sarcastic' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'sarcastic' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'sarcastic' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'sarcastic' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Sarcastic</span>
-                  <span className={`text-xs ${onboardingData.step_1 === 'sarcastic' ? 'text-white/70' : 'text-stone-400'}`}>Witty, playful, with attitude (our favorite)</span>
+                  <span className={`text-xs ${onboardingData.step_1 === 'sarcastic' ? 'text-white/70' : 'text-black/30'}`}>Witty, playful, with attitude (our favorite)</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'custom' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'custom' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_1: 'custom' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_1 === 'custom' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Custom</span>
-                  <span className={`text-xs ${onboardingData.step_1 === 'custom' ? 'text-white/70' : 'text-stone-400'}`}>Tell me in your own words</span>
+                  <span className={`text-xs ${onboardingData.step_1 === 'custom' ? 'text-white/70' : 'text-black/30'}`}>Tell me in your own words</span>
                 </button>
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -92,31 +92,31 @@ export function OnboardingPage() {
         {currentStep === 2 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-stone-900 mb-1">What Can I Help With?</h2>
-              <p className="text-sm text-stone-500 mb-5">Primary use cases</p>
+              <h2 className="text-lg font-semibold text-black mb-1">What Can I Help With?</h2>
+              <p className="text-sm text-black/50 mb-5">Primary use cases</p>
               <div className="grid grid-cols-2 gap-3 mb-5">
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'calendar' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'calendar' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'calendar' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'calendar' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Calendar & Scheduling</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'reminders' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'reminders' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'reminders' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'reminders' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Reminders & Tasks</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'research' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'research' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'research' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'research' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Web Research</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'coding' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'coding' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'coding' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'coding' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Code Assistant</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'writing' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'writing' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'writing' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'writing' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Writing & Editing</span>
                 </button>
-                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'home' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'home' ? 'border-black bg-black text-white' : 'border-stone-200 hover:border-stone-400'}`}>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_2: 'home' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_2 === 'home' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
                   <span className="text-sm font-medium">Smart Home</span>
                 </button>
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -124,15 +124,15 @@ export function OnboardingPage() {
         {currentStep === 3 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-stone-900 mb-1">Install FLUSK</h2>
-              <p className="text-sm text-stone-500 mb-5">Download and install the Mac app</p>
+              <h2 className="text-lg font-semibold text-black mb-1">Install FLUSK</h2>
+              <p className="text-sm text-black/50 mb-5">Download and install the Mac app</p>
               <div className="text-center py-4 mb-5">
-                <Button size="lg" className="bg-black text-white hover:bg-stone-800" onClick={() => window.open('https://flusk.app/download/mac', '_blank')}>Download FLUSK</Button>
-                <p className="mt-3 text-xs text-stone-400">macOS · Free download</p>
+                <Button size="lg" className="bg-black text-white hover:bg-black/80" onClick={() => window.open('https://flusk.app/download/mac', '_blank')}>Download FLUSK</Button>
+                <p className="mt-3 text-xs text-black/30">macOS · Free download</p>
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -140,33 +140,33 @@ export function OnboardingPage() {
         {currentStep === 4 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-stone-900 mb-1">Connect Channels</h2>
-              <p className="text-sm text-stone-500 mb-5">Where to talk to your bot</p>
+              <h2 className="text-lg font-semibold text-black mb-1">Connect Channels</h2>
+              <p className="text-sm text-black/50 mb-5">Where to talk to your bot</p>
               <div className="space-y-2 mb-5">
-                <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200">
-                  <span className="text-sm font-medium text-stone-800">WhatsApp</span>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-black/10">
+                  <span className="text-sm font-medium text-black/80">WhatsApp</span>
                   <Button size="sm" variant="outline">Connect</Button>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200">
-                  <span className="text-sm font-medium text-stone-800">Telegram</span>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-black/10">
+                  <span className="text-sm font-medium text-black/80">Telegram</span>
                   <Button size="sm" variant="outline">Connect</Button>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200">
-                  <span className="text-sm font-medium text-stone-800">iMessage</span>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-black/10">
+                  <span className="text-sm font-medium text-black/80">iMessage</span>
                   <Button size="sm" variant="outline">Connect</Button>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200">
-                  <span className="text-sm font-medium text-stone-800">Signal</span>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-black/10">
+                  <span className="text-sm font-medium text-black/80">Signal</span>
                   <Button size="sm" variant="outline">Connect</Button>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-stone-200">
-                  <span className="text-sm font-medium text-stone-800">Discord</span>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-black/10">
+                  <span className="text-sm font-medium text-black/80">Discord</span>
                   <Button size="sm" variant="outline">Connect</Button>
                 </div>
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -174,10 +174,10 @@ export function OnboardingPage() {
         {currentStep === 5 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-stone-900 mb-1">You're All Set!</h2>
+              <h2 className="text-lg font-semibold text-black mb-1">You're All Set!</h2>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-stone-800" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>

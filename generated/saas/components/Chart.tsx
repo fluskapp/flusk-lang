@@ -21,5 +21,5 @@ export function Chart({ type, data, title, xAxis = 'name', yAxis = 'value', donu
     const gradId = 'areaGrad';
     return (<AreaChart data={chartData} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>{gradient && (<defs><linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#18181b" stopOpacity={0.15} /><stop offset="95%" stopColor="#18181b" stopOpacity={0} /></linearGradient></defs>)}<CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false} /><XAxis dataKey={xAxis} tick={AXIS_STYLE} axisLine={false} tickLine={false} /><YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false} /><Tooltip contentStyle={TOOLTIP_STYLE} /><Area type="monotone" dataKey={yAxis} stroke="#18181b" strokeWidth={2} fill={gradient ? `url(#${gradId})` : '#18181b18'} /></AreaChart>);
   };
-  return (<div className={`bg-white rounded-xl border border-stone-200 p-5 shadow-sm ${className}`}>{title && <h3 className="text-sm font-semibold text-stone-700 mb-4">{title}</h3>}<ResponsiveContainer width="100%" height={220}>{renderInner()}</ResponsiveContainer></div>);
+  return (<div className={`bg-white rounded-xl border border-black/10 p-5 shadow-sm ${className}`}>{title && <h3 className="text-sm font-semibold text-black/70 mb-4">{title}</h3>}<ResponsiveContainer width="100%" height={220}>{renderInner()}</ResponsiveContainer></div>);
 }

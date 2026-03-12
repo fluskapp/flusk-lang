@@ -18,7 +18,7 @@ export function SettingsPage() {
           <CardTitle className="text-sm">Personality</CardTitle>
           <CardDescription>Shape how your bot thinks, speaks, and behaves</CardDescription>
         </CardHeader>
-        <CardContent className="divide-y divide-stone-50">
+        <CardContent className="divide-y divide-black/[0.04]">
           <div className="flex items-center justify-between py-3.5">
             <Label>Bot Name</Label>
             <Input type="text" placeholder="Bot Name" className="w-64" />
@@ -38,14 +38,14 @@ export function SettingsPage() {
           <CardTitle className="text-sm">Downloads</CardTitle>
           <CardDescription>Get the native app for a better experience</CardDescription>
         </CardHeader>
-        <CardContent className="divide-y divide-stone-50">
+        <CardContent className="divide-y divide-black/[0.04]">
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Danger Zone</CardTitle>
         </CardHeader>
-        <CardContent className="divide-y divide-stone-50">
+        <CardContent className="divide-y divide-black/[0.04]">
           <div className="flex items-center justify-between py-3.5">
             <Label>Account Email</Label>
             <Badge variant="outline">{/* email */}</Badge>

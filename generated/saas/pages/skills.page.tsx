@@ -20,18 +20,18 @@ export function SkillsPage() {
         </TabsList>
         <TabsContent value="installed" className="space-y-6">
           <div>
-            <h3 className="text-sm font-semibold text-stone-700 mb-3">Installed Skills</h3>
+            <h3 className="text-sm font-semibold text-black/70 mb-3">Installed Skills</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {((data?.installed) as any[] ?? []).map((item: any, i: number) => (
                 <Card key={i} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between">
-                      <h4 className="font-medium text-stone-900 text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
+                      <h4 className="font-medium text-black text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
                       {item.status && (
                         <Badge variant={(() => { const s = (item.status ?? '').toLowerCase(); if (s === 'active' || s === 'connected') return 'default'; if (s === 'paused' || s === 'warning' || s === 'info') return 'secondary'; if (s === 'error' || s === 'critical') return 'destructive'; return 'outline'; })()}>{item.status}</Badge>
                       )}
                     </div>
-                    {item.description && <p className="mt-1.5 text-xs text-stone-500 line-clamp-2">{item.description}</p>}
+                    {item.description && <p className="mt-1.5 text-xs text-black/50 line-clamp-2">{item.description}</p>}
                   </CardContent>
                 </Card>
               ))}
@@ -40,18 +40,18 @@ export function SkillsPage() {
         </TabsContent>
         <TabsContent value="marketplace" className="space-y-6">
           <div>
-            <h3 className="text-sm font-semibold text-stone-700 mb-3">Available Skills</h3>
+            <h3 className="text-sm font-semibold text-black/70 mb-3">Available Skills</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {((undefined) as any[] ?? []).map((item: any, i: number) => (
                 <Card key={i} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between">
-                      <h4 className="font-medium text-stone-900 text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
+                      <h4 className="font-medium text-black text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
                       {item.status && (
                         <Badge variant={(() => { const s = (item.status ?? '').toLowerCase(); if (s === 'active' || s === 'connected') return 'default'; if (s === 'paused' || s === 'warning' || s === 'info') return 'secondary'; if (s === 'error' || s === 'critical') return 'destructive'; return 'outline'; })()}>{item.status}</Badge>
                       )}
                     </div>
-                    {item.description && <p className="mt-1.5 text-xs text-stone-500 line-clamp-2">{item.description}</p>}
+                    {item.description && <p className="mt-1.5 text-xs text-black/50 line-clamp-2">{item.description}</p>}
                   </CardContent>
                 </Card>
               ))}

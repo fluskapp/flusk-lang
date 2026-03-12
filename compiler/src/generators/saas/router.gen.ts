@@ -17,10 +17,18 @@ function toKebab(name: string): string {
     .replace(/[^a-z0-9-]/g, '');
 }
 
-/** Detect view schemas: have a `route` field and `sections` array */
+/** Detect view schemas: have a `route` field plus any content (sections, tabs, steps, layout) */
 export function isViewSchema(schema: FluskSchema): boolean {
   const s = schema as unknown as Record<string, unknown>;
-  return typeof s['route'] === 'string' && Array.isArray(s['sections']);
+  return (
+    typeof s['route'] === 'string' &&
+    (
+      Array.isArray(s['sections']) ||
+      Array.isArray(s['tabs']) ||
+      Array.isArray(s['steps']) ||
+      (s['layout'] !== null && typeof s['layout'] === 'object')
+    )
+  );
 }
 
 /**

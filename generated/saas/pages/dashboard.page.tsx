@@ -12,94 +12,94 @@ export function DashboardPage() {
   void isLoading;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <h3 className="text-sm font-semibold text-stone-700 mb-3">Bot Status</h3>
+        <h3 className="text-sm font-semibold text-black/70 mb-3">Bot Status</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-stone-500 leading-tight">Status</p>
-                <Activity className="w-4 h-4 text-stone-400" />
+                <p className="text-sm font-medium text-black/50 leading-tight">Status</p>
+                <Activity className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.status?.status ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.status ?? '—'}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-stone-500 leading-tight">Uptime</p>
-                <Clock className="w-4 h-4 text-stone-400" />
+                <p className="text-sm font-medium text-black/50 leading-tight">Uptime</p>
+                <Clock className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.status?.uptime_seconds ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.uptime_seconds ?? '—'}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-stone-500 leading-tight">Messages Today</p>
-                <MessageSquare className="w-4 h-4 text-stone-400" />
+                <p className="text-sm font-medium text-black/50 leading-tight">Messages Today</p>
+                <MessageSquare className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.status?.messages_today ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.messages_today ?? '—'}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-stone-500 leading-tight">Active Skills</p>
-                <Layers className="w-4 h-4 text-stone-400" />
+                <p className="text-sm font-medium text-black/50 leading-tight">Active Skills</p>
+                <Layers className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.status?.skills_active ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.skills_active ?? '—'}</p>
             </CardContent>
           </Card>
         </div>
-        <h3 className="text-sm font-semibold text-stone-700 mb-3">Today</h3>
+        <h3 className="text-sm font-semibold text-black/70 mb-3">Today</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-stone-500 leading-tight">Conversations</p>
-                <MessageCircle className="w-4 h-4 text-stone-400" />
+                <p className="text-sm font-medium text-black/50 leading-tight">Conversations</p>
+                <MessageCircle className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.status?.conversations_today ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.conversations_today ?? '—'}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-stone-500 leading-tight">Actions Taken</p>
-                <Zap className="w-4 h-4 text-stone-400" />
+                <p className="text-sm font-medium text-black/50 leading-tight">Actions Taken</p>
+                <Zap className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.status?.actions_today ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.actions_today ?? '—'}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-stone-500 leading-tight">Guard Blocks</p>
-                <ShieldOff className="w-4 h-4 text-stone-400" />
+                <p className="text-sm font-medium text-black/50 leading-tight">Guard Blocks</p>
+                <ShieldOff className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-stone-900 tabular-nums">{data?.status?.guard_blocks_today ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.guard_blocks_today ?? '—'}</p>
             </CardContent>
           </Card>
         </div>
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-stone-700">Connected Channels</h3>
+          <h3 className="text-sm font-semibold text-black/70">Connected Channels</h3>
           <div className="space-y-2">
             {((data?.status?.channels) as any[] ?? []).map((item: any, i: number) => (
               <Card key={i}>
                 <CardContent className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-stone-800">{item.type ?? item.name ?? item.title ?? ''}</span>
+                    <span className="text-sm font-medium text-black/80">{item.type ?? item.name ?? item.title ?? ''}</span>
                     {item.status && <Badge variant="outline">{item.status}</Badge>}
                   </div>
-                  <span className="text-xs text-stone-400">{item.message_count != null ? `${item.message_count} msgs` : ''}</span>
+                  <span className="text-xs text-black/30">{item.message_count != null ? `${item.message_count} msgs` : ''}</span>
                 </CardContent>
               </Card>
             ))}
             {!(data?.status?.channels)?.length && (
-              <Card><CardContent className="px-4 py-6 text-center text-sm text-stone-400">
-                <p className="font-medium text-stone-600">No channels connected</p>
+              <Card><CardContent className="px-4 py-6 text-center text-sm text-black/30">
+                <p className="font-medium text-black/60">No channels connected</p>
                 <p className="mt-1">Connect WhatsApp, Telegram, or other channels to start chatting</p>
                 <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('/app/connectors')}>Connect a Channel</Button>
               </CardContent></Card>
@@ -108,18 +108,18 @@ export function DashboardPage() {
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/connectors')}>Manage Channels</Button>
         </div>
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-stone-700">Recent Activity</h3>
-          <div className="divide-y divide-stone-100 rounded-xl border border-stone-200 bg-white overflow-hidden">
+          <h3 className="text-sm font-semibold text-black/70">Recent Activity</h3>
+          <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">
             {((data?.recentEvents) as any[] ?? []).slice(0, 20).map((event: any, i: number) => (
-              <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 transition-colors">
-                <span className="text-xs text-stone-400 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
-                <span className="text-xs font-medium text-stone-600 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>
-                <span className="text-xs text-stone-500 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>
+              <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.02] transition-colors">
+                <span className="text-xs text-black/30 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                <span className="text-xs font-medium text-black/60 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>
+                <span className="text-xs text-black/50 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>
                 {event.blocked && <Badge variant="destructive" className="text-xs flex-shrink-0">blocked</Badge>}
               </div>
             ))}
             {!(data?.recentEvents)?.length && (
-              <div className="px-4 py-8 text-center text-sm text-stone-400">Send a message to your bot to get started</div>
+              <div className="px-4 py-8 text-center text-sm text-black/30">Send a message to your bot to get started</div>
             )}
           </div>
           <div className="text-right"><Button variant="ghost" size="sm" onClick={() => navigate('/app/events')}>View All Events</Button></div>
