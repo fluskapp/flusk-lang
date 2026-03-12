@@ -1,132 +1,146 @@
 name: Onboarding
-type: marketing
-description: Post-login onboarding — pick your machine and setup
+type: chat-onboarding
+description: Full-screen AI-driven onboarding — conversational setup with generative UI components
 route: /onboarding
 auth: true
 ssr: false
-sections:
-  - name: MachinePicker
-    type: card-grid
-    columns: 3
-    title: "Pick your machine"
-    subtitle: "Choose the right size for you — or run it free on your computer"
-    cards:
-      - name: local
-        title: "Local"
-        subtitle: "Your computer"
-        price: "Free"
-        price_period: "forever"
-        features:
-          - "Run on your own machine"
-          - "Bring your own LLM key"
-          - "Flusk Guard included"
-          - "Dashboard access"
-        cta: "Download"
-        variant: outline
-      - name: starter
-        title: "Starter"
-        subtitle: "Good for trying out"
-        price: "$19"
-        price_period: "/month"
-        specs:
-          cpu: "1 vCPU"
-          memory: "512MB RAM"
-          storage: "5GB Storage"
-        features:
-          - "All channels included"
-          - "Bot GitHub account"
-          - "Pre-installed skills"
-          - "Event monitoring"
-        cta: "Get Started"
-        variant: default
-      - name: pro
-        title: "Pro"
-        subtitle: "For daily use"
-        price: "$49"
-        price_period: "/month"
-        badge: "Recommended"
-        specs:
-          cpu: "2 vCPU"
-          memory: "2GB RAM"
-          storage: "20GB Storage"
-        features:
-          - "Everything in Starter"
-          - "Code execution"
-          - "Advanced automations"
-          - "Priority support"
-        cta: "Get Started"
-        variant: primary
-      - name: power
-        title: "Power"
-        subtitle: "Heavy workloads"
-        price: "$99"
-        price_period: "/month"
-        specs:
-          cpu: "4 vCPU"
-          memory: "8GB RAM"
-          storage: "50GB Storage"
-        features:
-          - "Everything in Pro"
-          - "Multiple agents"
-          - "Custom skills"
-          - "Max performance"
-        cta: "Get Started"
-        variant: default
+layout: fullscreen
+blocking: true  # User cannot skip — must complete to access dashboard
+redirect_on_complete: /app/dashboard
 
-  - name: LLMChoice
-    type: form
-    title: "AI Model"
-    subtitle: "Bring your own key or pay through us"
-    fields:
-      - name: llm_mode
-        type: radio
-        options:
-          - value: byok
-            label: "I have my own key"
-            description: "Paste your Anthropic, OpenAI, or Google key. Free."
-          - value: managed
-            label: "Use Flusk AI"
-            description: "We handle the AI. Usage billed at cost + 15%."
-      - name: llm_provider
-        type: select
-        label: "Provider"
-        options: [anthropic, openai, google]
-        condition: "llm_mode == 'byok'"
-      - name: api_key
-        type: password
-        label: "API Key"
-        placeholder: "sk-..."
-        condition: "llm_mode == 'byok'"
+design:
+  theme: monochrome  # Black and white only
+  background: white
+  text: black
+  accent: black
 
-  - name: ChannelSetup
-    type: card-grid
-    columns: 2
-    title: "Connect your channels"
-    subtitle: "Choose where you want to talk to your assistant"
-    cards:
-      - name: whatsapp
-        title: "WhatsApp"
-        icon: "message-circle"
-        description: "Scan QR code to connect"
-        action: "qr-scan"
-      - name: telegram
-        title: "Telegram"
-        icon: "send"
-        description: "Click to connect your Telegram"
-        action: "oauth-link"
-      - name: discord
-        title: "Discord"
-        icon: "hash"
-        description: "Invite bot to your server"
-        action: "oauth-link"
-      - name: slack
-        title: "Slack"
-        icon: "slack"
-        description: "Install Flusk app in Slack"
-        action: "oauth-link"
-      - name: web
-        title: "Web Chat"
-        icon: "globe"
-        description: "Always available at flusk.app"
-        action: "auto"
-        default: true
+personality:
+  name: FLUSK
+  voice: "Sarcastic but tactful, witty with awareness, helpful with attitude"
+  greeting: "Hey, I'm FLUSK — your bot that actually has a personality. Let's get you set up. Won't take long, promise."
+
+steps:
+  - name: welcome
+    title: "Meet FLUSK"
+    description: "Introduction and name collection"
+    tool: show_welcome
+    collects:
+      - name
+      - role
+      - company
+    generates: USER.md
+
+  - name: personality
+    title: "Your Style"
+    description: "How the bot should talk"
+    tool: ask_personality
+    options:
+      - id: professional
+        label: "Professional"
+        description: "Straight to the point, formal tone"
+        icon: briefcase
+      - id: casual
+        label: "Casual"
+        description: "Relaxed, friendly, like texting a friend"
+        icon: message-circle
+      - id: sarcastic
+        label: "Sarcastic"
+        description: "Witty, playful, with attitude (our favorite)"
+        icon: flame
+      - id: custom
+        label: "Custom"
+        description: "Tell me in your own words"
+        icon: edit
+    collects:
+      - tone
+      - language_preference
+    generates: SOUL.md
+
+  - name: use_cases
+    title: "What Can I Help With?"
+    description: "Primary use cases"
+    tool: ask_use_cases
+    options:
+      - id: calendar
+        label: "Calendar & Scheduling"
+        icon: calendar
+      - id: reminders
+        label: "Reminders & Tasks"
+        icon: bell
+      - id: research
+        label: "Web Research"
+        icon: search
+      - id: coding
+        label: "Code Assistant"
+        icon: code
+      - id: writing
+        label: "Writing & Editing"
+        icon: pen-tool
+      - id: home
+        label: "Smart Home"
+        icon: home
+    collects:
+      - selected_skills
+    installs: skills
+
+  - name: installation
+    title: "Install FLUSK"
+    description: "Download and install the Mac app"
+    tool: show_download
+    platform: mac
+    download_url: "https://flusk.app/download/mac"
+    instructions:
+      - "Download the .dmg file"
+      - "Open and drag FLUSK to Applications"
+      - "Launch FLUSK from Applications"
+      - "It will auto-configure with your settings"
+
+  - name: channels
+    title: "Connect Channels"
+    description: "Where to talk to your bot"
+    tool: show_channels
+    channels:
+      - id: whatsapp
+        label: "WhatsApp"
+        icon: message-circle
+        setup: qr-scan
+        description: "Scan QR code from your phone"
+      - id: telegram
+        label: "Telegram"
+        icon: send
+        setup: bot-token
+        description: "Connect via Telegram bot"
+      - id: imessage
+        label: "iMessage"
+        icon: message-square
+        setup: mac-app
+        description: "Chat via iMessage on your Mac"
+      - id: signal
+        label: "Signal"
+        icon: shield
+        setup: phone-link
+        description: "Connect via Signal on your phone"
+      - id: discord
+        label: "Discord"
+        icon: hash
+        setup: oauth
+        description: "Add to your Discord server"
+
+  - name: complete
+    title: "You're All Set!"
+    tool: show_complete
+    message: "Your bot is configured and ready. Send a message and watch the magic happen."
+
+outputs:
+  - type: file
+    name: SOUL.md
+    source: personality_step
+  - type: file
+    name: USER.md
+    source: welcome_step
+  - type: config
+    name: openclaw.json
+    source: all_steps
+  - type: db
+    field: onboarding_completed
+    value: true

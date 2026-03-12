@@ -6,7 +6,6 @@ import { AgentsPage } from '../pages/agents.page';
 import { AnalyticsPage } from '../pages/analytics.page';
 import { AutomationsPage } from '../pages/automations.page';
 import { BotBuilderPage } from '../pages/bot-builder.page';
-import { BotDashboardPage } from '../pages/bot-dashboard.page';
 import { BudgetManagementPage } from '../pages/budgetmanagement.page';
 import { ChatUIPage } from '../pages/chatui.page';
 import { ConversationViewPage } from '../pages/conversation-view.page';
@@ -14,15 +13,12 @@ import { ConversationsPage } from '../pages/conversations.page';
 import { CostOverviewPage } from '../pages/costoverview.page';
 import { DayDetailPage } from '../pages/daydetail.page';
 import { GuardEventsPage } from '../pages/guardevents.page';
-import { MemoryPage } from '../pages/memory.page';
-import { OnboardingPage } from '../pages/onboarding.page';
-import { SkillsPage } from '../pages/skills.page';
 import { SlackSettingsPage } from '../pages/slack-settings.page';
 import { SolutionBuilderPage } from '../pages/solutionbuilder.page';
 import { SolutionsTablePage } from '../pages/solutionstable.page';
 import { TeamAnalyticsPage } from '../pages/teamanalytics.page';
 import { UserDashboardPage } from '../pages/userdashboard.page';
-import { UserSettingsPage } from '../pages/usersettings.page';
+import { SettingsPage } from '../pages/settings.page';
 
 /**
  * Application router — generated from view YAML schemas.
@@ -32,17 +28,13 @@ export const router = createBrowserRouter([
   { path: '/app/agents', element: <AgentsPage /> },
   { path: '/app/automations', element: <AutomationsPage /> },
   { path: '/bots/new', element: <BotBuilderPage /> },
-  { path: '/dashboard', element: <BotDashboardPage /> },
   { path: '/bots/:id/conversations/:conversationId', element: <ConversationViewPage /> },
   { path: '/app/conversations', element: <ConversationsPage /> },
   { path: '/app/days/:date', element: <DayDetailPage /> },
   { path: '/app/guard', element: <GuardEventsPage /> },
-  { path: '/app/memory', element: <MemoryPage /> },
-  { path: '/onboarding', element: <OnboardingPage /> },
-  { path: '/app/skills', element: <SkillsPage /> },
   { path: '/settings/slack', element: <SlackSettingsPage /> },
   { path: '/app/dashboard', element: <UserDashboardPage /> },
-  { path: '/app/settings', element: <UserSettingsPage /> },
+  { path: '/app/settings', element: <SettingsPage /> },
   {
     path: '/:tenant',
     children: [

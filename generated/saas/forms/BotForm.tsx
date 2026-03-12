@@ -8,19 +8,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-
+import { Textarea } from '@/components/ui/textarea';
 import type { Bot } from '../types/Bot';
 
 // ── Validation schema ──────────────────────────────────────────────────────
 const botFormSchema = z.object({
   name: z.string(),
-  phone_number: z.string().optional(),
-  system_prompt: z.string().optional(),
-  model: z.enum(['gpt-4o', 'claude-sonnet', 'gemini-pro']).optional(),
-  temperature: z.number().optional(),
-  max_tokens: z.number().optional(),
+  owner_id: z.number().int().optional(),
+  runtime: z.enum(['openclaw', 'langchain', 'crewai', 'generic']).optional(),
+  runtime_url: z.string().optional(),
+  runtime_status: z.enum(['running', 'stopped', 'provisioning', 'error', 'unknown']).optional(),
+  tier: z.enum(['free', 'starter', 'pro', 'power']).optional(),
+  model: z.string().optional(),
+  soul: z.string().optional(),
+  identity: z.string().optional(),
+  user_context: z.string().optional(),
+  workspace_path: z.string().optional(),
   active: z.boolean().optional(),
-  owner_id: z.string().optional(),
 });
 
 export type BotFormValues = z.infer<typeof botFormSchema>;
@@ -49,67 +53,132 @@ export function BotForm({ mode, defaultValues, onSubmit, isLoading }: BotFormPro
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1">
           <Label htmlFor="name">Name *</Label>
-
+          <p className="text-xs text-muted-foreground">User-chosen name for the bot</p>
           <Input id="name" type="text" {...register('name')} />
           {errors.name && <p className="text-sm text-destructive">{errors.name?.message}</p>}
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="phone_number">Phone_number</Label>
-
-          <Input id="phone_number" type="text" {...register('phone_number')} />
-          {errors.phone_number && <p className="text-sm text-destructive">{errors.phone_number?.message}</p>}
+          <Label htmlFor="owner_id">Owner_id</Label>
+          <p className="text-xs text-muted-foreground">User who owns this bot</p>
+          <Input
+            id="owner_id"
+            type="number"
+            {...register('owner_id', { valueAsNumber: true })}
+          />
+          {errors.owner_id && <p className="text-sm text-destructive">{errors.owner_id?.message}</p>}
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="system_prompt">System_prompt</Label>
-
-          <Input id="system_prompt" type="text" {...register('system_prompt')} />
-          {errors.system_prompt && <p className="text-sm text-destructive">{errors.system_prompt?.message}</p>}
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="model">Model</Label>
-
+          <Label htmlFor="runtime">Runtime</Label>
+          <p className="text-xs text-muted-foreground">Which AI runtime this bot uses</p>
           <Controller
-            name="model"
+            name="runtime"
             control={control}
             render={({ field: f }) => (
               <Select onValueChange={f.onChange} defaultValue={f.value}>
-                <SelectTrigger id="model">
-                  <SelectValue placeholder="Select model" />
+                <SelectTrigger id="runtime">
+                  <SelectValue placeholder="Select runtime" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gpt-4o">gpt-4o</SelectItem>
-                  <SelectItem value="claude-sonnet">claude-sonnet</SelectItem>
-                  <SelectItem value="gemini-pro">gemini-pro</SelectItem>
+                  <SelectItem value="openclaw">openclaw</SelectItem>
+                  <SelectItem value="langchain">langchain</SelectItem>
+                  <SelectItem value="crewai">crewai</SelectItem>
+                  <SelectItem value="generic">generic</SelectItem>
                 </SelectContent>
               </Select>
             )}
           />
+          {errors.runtime && <p className="text-sm text-destructive">{errors.runtime?.message}</p>}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="runtime_url">Runtime_url</Label>
+          <p className="text-xs text-muted-foreground">URL of the runtime (e.g. localhost:18789)</p>
+          <Input id="runtime_url" type="text" {...register('runtime_url')} />
+          {errors.runtime_url && <p className="text-sm text-destructive">{errors.runtime_url?.message}</p>}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="runtime_status">Runtime_status</Label>
+
+          <Controller
+            name="runtime_status"
+            control={control}
+            render={({ field: f }) => (
+              <Select onValueChange={f.onChange} defaultValue={f.value}>
+                <SelectTrigger id="runtime_status">
+                  <SelectValue placeholder="Select runtime_status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="running">running</SelectItem>
+                  <SelectItem value="stopped">stopped</SelectItem>
+                  <SelectItem value="provisioning">provisioning</SelectItem>
+                  <SelectItem value="error">error</SelectItem>
+                  <SelectItem value="unknown">unknown</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.runtime_status && <p className="text-sm text-destructive">{errors.runtime_status?.message}</p>}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="tier">Tier</Label>
+
+          <Controller
+            name="tier"
+            control={control}
+            render={({ field: f }) => (
+              <Select onValueChange={f.onChange} defaultValue={f.value}>
+                <SelectTrigger id="tier">
+                  <SelectValue placeholder="Select tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">free</SelectItem>
+                  <SelectItem value="starter">starter</SelectItem>
+                  <SelectItem value="pro">pro</SelectItem>
+                  <SelectItem value="power">power</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.tier && <p className="text-sm text-destructive">{errors.tier?.message}</p>}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="model">Model</Label>
+          <p className="text-xs text-muted-foreground">Current LLM model</p>
+          <Input id="model" type="text" {...register('model')} />
           {errors.model && <p className="text-sm text-destructive">{errors.model?.message}</p>}
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="temperature">Temperature</Label>
-
-          <Input
-            id="temperature"
-            type="number"
-            {...register('temperature', { valueAsNumber: true })}
-          />
-          {errors.temperature && <p className="text-sm text-destructive">{errors.temperature?.message}</p>}
+          <Label htmlFor="soul">Soul</Label>
+          <p className="text-xs text-muted-foreground">Path or content of SOUL.md</p>
+          <Textarea id="soul" {...register('soul')} />
+          {errors.soul && <p className="text-sm text-destructive">{errors.soul?.message}</p>}
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="max_tokens">Max_tokens</Label>
+          <Label htmlFor="identity">Identity</Label>
+          <p className="text-xs text-muted-foreground">Path or content of IDENTITY.md</p>
+          <Textarea id="identity" {...register('identity')} />
+          {errors.identity && <p className="text-sm text-destructive">{errors.identity?.message}</p>}
+        </div>
 
-          <Input
-            id="max_tokens"
-            type="number"
-            {...register('max_tokens', { valueAsNumber: true })}
-          />
-          {errors.max_tokens && <p className="text-sm text-destructive">{errors.max_tokens?.message}</p>}
+        <div className="space-y-1">
+          <Label htmlFor="user_context">User_context</Label>
+          <p className="text-xs text-muted-foreground">Path or content of USER.md</p>
+          <Textarea id="user_context" {...register('user_context')} />
+          {errors.user_context && <p className="text-sm text-destructive">{errors.user_context?.message}</p>}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="workspace_path">Workspace_path</Label>
+          <p className="text-xs text-muted-foreground">Local filesystem path to the bot workspace</p>
+          <Input id="workspace_path" type="text" {...register('workspace_path')} />
+          {errors.workspace_path && <p className="text-sm text-destructive">{errors.workspace_path?.message}</p>}
         </div>
 
         <div className="flex flex-row items-center justify-between rounded-lg border p-3">
@@ -125,13 +194,6 @@ export function BotForm({ mode, defaultValues, onSubmit, isLoading }: BotFormPro
             )}
           />
           {errors.active && <p className="text-sm text-destructive">{errors.active?.message}</p>}
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="owner_id">Owner_id</Label>
-
-          <Input id="owner_id" type="text" {...register('owner_id')} />
-          {errors.owner_id && <p className="text-sm text-destructive">{errors.owner_id?.message}</p>}
         </div>
 
       <Button type="submit" disabled={isLoading}>

@@ -1,0 +1,116 @@
+name: Dashboard
+type: dashboard
+description: Overview of bot status and key metrics
+route: /app/dashboard
+auth: true
+ssr: false
+
+design:
+  theme: monochrome
+  background: white
+  text: black
+  accent: black
+
+data_sources:
+  status:
+    endpoint: GET /api/gateway/status
+    description: "Live bot status, uptime, and runtime metrics"
+  recentEvents:
+    endpoint: GET /api/gateway/events
+    description: "Recent activity events"
+    params:
+      limit: 10
+      order: created_at DESC
+
+sections:
+  - name: BotStatus
+    type: stat-grid
+    columns: 4
+    title: "Bot Status"
+    source: status
+    stats:
+      - label: "Status"
+        field: status
+        type: status-indicator
+        icon: activity
+      - label: "Uptime"
+        field: uptime_seconds
+        format: duration
+        icon: clock
+      - label: "Messages Today"
+        field: messages_today
+        type: number
+        icon: message-square
+      - label: "Active Skills"
+        field: skills_active
+        type: number
+        icon: layers
+
+  - name: RuntimeMetrics
+    type: stat-grid
+    columns: 3
+    title: "Today"
+    source: status
+    stats:
+      - label: "Conversations"
+        field: conversations_today
+        type: number
+        icon: message-circle
+      - label: "Actions Taken"
+        field: actions_today
+        type: number
+        icon: zap
+      - label: "Guard Blocks"
+        field: guard_blocks_today
+        type: warning-stat
+        icon: shield-off
+        condition: "guard_blocks_today > 0"
+
+  - name: ConnectedChannels
+    type: card-list
+    title: "Connected Channels"
+    source: status
+    field: channels
+    display:
+      - field: type
+        label: "Channel"
+        type: icon-label
+      - field: status
+        label: "Status"
+        type: status-badge
+      - field: message_count
+        label: "Messages"
+        type: number
+    actions:
+      - label: "Manage Channels"
+        action: navigate
+        to: /app/connectors
+    empty_state:
+      title: "No channels connected"
+      description: "Connect WhatsApp, Telegram, or other channels to start chatting"
+      action:
+        label: "Connect a Channel"
+        to: /app/connectors
+
+  - name: RecentActivity
+    type: event-feed
+    title: "Recent Activity"
+    source: recentEvents
+    display:
+      - field: created_at
+        type: timestamp
+        format: "HH:mm"
+      - field: event_type
+        type: label
+      - field: channel
+        type: icon
+      - field: details
+        type: text-preview
+        max_length: 80
+    footer:
+      action:
+        label: "View All Events"
+        to: /app/events
+    empty_state:
+      title: "No activity yet"
+      description: "Send a message to your bot to get started"

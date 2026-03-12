@@ -1,121 +1,77 @@
-name: UserSettings
+name: Settings
 type: form
-description: Assistant and account settings
+description: Bot personality, downloads, and account management
 route: /app/settings
 auth: true
 ssr: false
+
+design:
+  theme: monochrome
+  background: white
+  text: black
+  accent: black
+
+data_sources:
+  bot:
+    endpoint: GET /api/gateway/status
+    description: "Current bot status and configuration"
+  user:
+    endpoint: GET /api/account/me
+    description: "Current user account info"
+
 sections:
-  - name: Machine
-    type: settings-group
-    title: "Machine"
-    fields:
-      - name: plan
-        type: display
-        label: "Plan"
-        source: assistant.machine_tier
-        format: tier-display
-      - name: container_status
-        type: status-indicator
-        label: "Status"
-        source: assistant.container_status
-      - name: region
-        type: display
-        label: "Region"
-        value: "Europe (Frankfurt)"
-    actions:
-      - label: "Upgrade"
-        action: navigate
-        to: /app/settings/upgrade
-      - label: "Restart"
-        action: api-call
-        endpoint: POST /api/assistant/restart
-        confirm: "Restart your assistant?"
-      - label: "Stop"
-        action: api-call
-        endpoint: POST /api/assistant/stop
-        confirm: "Stop your assistant? You can restart it anytime."
-        variant: destructive
-
-  - name: AIModel
-    type: settings-group
-    title: "AI Model"
-    fields:
-      - name: llm_mode
-        type: radio
-        label: "Billing"
-        options:
-          - value: byok
-            label: "Bring your own key"
-          - value: managed
-            label: "Pay through Flusk (+15%)"
-      - name: llm_provider
-        type: select
-        label: "Provider"
-        options: [anthropic, openai, google, azure_openai]
-      - name: llm_model
-        type: select
-        label: "Model"
-        options:
-          - claude-sonnet-4-20250514
-          - claude-haiku-3.5
-          - gpt-4o
-          - gpt-4o-mini
-          - gemini-2.0-flash
-      - name: llm_budget_cents
-        type: number
-        label: "Monthly spending limit ($)"
-        format: currency
-
   - name: Personality
     type: settings-group
     title: "Personality"
+    description: "Shape how your bot thinks, speaks, and behaves"
     fields:
       - name: name
         type: text
-        label: "Assistant Name"
-        placeholder: "Assistant"
+        label: "Bot Name"
+        placeholder: "FLUSK"
+        source: bot.name
       - name: soul
         type: textarea
         label: "Personality (SOUL.md)"
-        rows: 8
-        description: "Define how your assistant behaves, its tone, personality, and focus areas"
+        rows: 10
+        description: "Define how your bot behaves — its tone, personality, and focus areas"
+        source: bot.soul
+        endpoint_save: POST /api/gateway/config/soul
       - name: user_context
         type: textarea
         label: "About You (USER.md)"
         rows: 6
-        description: "Tell your assistant about yourself — name, job, preferences"
+        description: "Tell your bot about yourself — name, job, preferences, family"
+        source: bot.user_context
+        endpoint_save: POST /api/gateway/config/user
 
-  - name: Security
+  - name: Downloads
     type: settings-group
-    title: "Flusk Guard"
-    fields:
-      - name: pii_filtering
-        type: toggle
-        label: "PII Filtering"
-        description: "Automatically detect and mask sensitive personal data"
-        default: true
-      - name: cost_cap
-        type: number
-        label: "Monthly cost cap ($)"
-        default: 50
-      - name: sandbox_level
-        type: select
-        label: "Sandbox Level"
-        options:
-          - value: strict
-            label: "Strict — chat only, no code execution"
-          - value: standard
-            label: "Standard — sandboxed execution"
-          - value: full
-            label: "Full — unrestricted (advanced users)"
+    title: "Downloads"
+    description: "Get the native app for a better experience"
+    items:
+      - label: "Mac App"
+        description: "Native Mac menubar app with background sync"
+        icon: monitor
+        action:
+          label: "Download"
+          action: download
+          url: "https://flusk.app/download/mac"
+      - label: "iOS App"
+        description: "Manage your bot from your iPhone"
+        icon: smartphone
+        action:
+          label: "Coming Soon"
+          disabled: true
 
-  - name: Account
+  - name: DangerZone
     type: settings-group
-    title: "Account"
+    title: "Danger Zone"
+    variant: destructive
     fields:
       - name: email
         type: display
-        label: "Email"
+        label: "Account Email"
         source: user.email
       - name: flusk_key
         type: display
@@ -123,14 +79,18 @@ sections:
         source: user.flusk_key
         format: masked-key
     actions:
-      - label: "Billing"
-        action: navigate
-        to: /app/billing
-      - label: "Export Data"
+      - label: "Export All Data"
         action: api-call
         endpoint: POST /api/account/export
+        description: "Download all your data as a ZIP archive"
+        variant: secondary
+      - label: "Reset Bot"
+        action: api-call
+        endpoint: POST /api/gateway/reset
+        confirm: "Reset your bot? This will clear its memory and settings."
+        variant: destructive
       - label: "Delete Account"
         action: api-call
         endpoint: DELETE /api/account
-        confirm: "Are you sure? This will permanently delete your assistant and all data."
+        confirm: "Are you sure? This permanently deletes your bot and all data. There is no undo."
         variant: destructive

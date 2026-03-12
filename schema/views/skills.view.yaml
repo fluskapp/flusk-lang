@@ -1,95 +1,113 @@
 name: Skills
-type: table
+type: tabbed
 description: Installed skills and marketplace
 route: /app/skills
 auth: true
 ssr: false
+
+design:
+  theme: monochrome
+  background: white
+  text: black
+  accent: black
+
 data_sources:
   installed:
-    entity: SkillInstall
-    query: findByAssistant
-    params: [assistantId]
-sections:
-  - name: InstalledSkills
-    type: card-grid
-    columns: 3
-    title: "Installed Skills"
-    source: installed
-    display:
-      - field: skill_id
-        type: heading
-        format: skill-name
-      - field: skill_version
-        type: badge
-      - field: status
-        type: status-badge
-    actions:
-      - label: "Configure"
-        action: edit
-      - label: "Disable"
-        action: update
-        field: status
-        value: disabled
-      - label: "Remove"
-        action: delete
-        confirm: "Remove this skill?"
+    endpoint: GET /api/gateway/skills
+    description: "Installed skills from the gateway"
 
-  - name: Marketplace
-    type: card-grid
-    columns: 3
-    title: "Skill Marketplace"
-    static_data:
-      - id: content-writer
-        name: "Content Writer"
-        icon: "pen-tool"
-        description: "Write blog posts, social media, newsletters"
-        category: "Writing"
-      - id: meeting-notes
-        name: "Meeting Notes"
-        icon: "mic"
-        description: "Auto-summarize meetings from calendar"
-        category: "Productivity"
-      - id: data-analyst
-        name: "Data Analyst"
-        icon: "bar-chart"
-        description: "Analyze CSV, Excel, databases"
-        category: "Data"
-      - id: code-reviewer
-        name: "Code Reviewer"
-        icon: "git-pull-request"
-        description: "Review PRs and suggest improvements"
-        category: "Development"
-      - id: web-researcher
-        name: "Web Researcher"
-        icon: "search"
-        description: "Deep research on any topic"
-        category: "Research"
-      - id: travel-planner
-        name: "Travel Planner"
-        icon: "plane"
-        description: "Find flights, hotels, plan trips"
-        category: "Lifestyle"
-      - id: expense-tracker
-        name: "Expense Tracker"
-        icon: "receipt"
-        description: "Track spending, generate reports"
-        category: "Finance"
-      - id: language-tutor
-        name: "Language Tutor"
-        icon: "languages"
-        description: "Practice conversations in any language"
-        category: "Learning"
-    display:
-      - field: name
-        type: heading
-      - field: description
-        type: subtitle
-      - field: category
-        type: badge
-    actions:
-      - label: "Install"
-        action: install-skill
-    search:
-      enabled: true
-      fields: [name, description, category]
-    note: "You can also install skills via chat: \"Hey, install the meeting notes skill\""
+tabs:
+  - id: installed
+    label: "Installed"
+    sections:
+      - name: InstalledSkills
+        type: card-grid
+        columns: 3
+        title: "Installed Skills"
+        source: installed
+        empty_state:
+          title: "No skills installed"
+          description: "Browse the marketplace to add skills to your bot"
+        display:
+          - field: name
+            type: heading
+            format: skill-name
+          - field: version
+            type: badge
+          - field: description
+            type: subtitle
+          - field: status
+            type: status-badge
+        actions:
+          - label: "Configure"
+            action: navigate
+            to: /app/skills/:id/configure
+          - label: "Uninstall"
+            action: api-call
+            endpoint: DELETE /api/gateway/skills/:id
+            confirm: "Uninstall this skill?"
+            variant: destructive
+
+  - id: marketplace
+    label: "Marketplace"
+    sections:
+      - name: Marketplace
+        type: card-grid
+        columns: 3
+        title: "Available Skills"
+        static_data:
+          - id: github
+            name: "GitHub"
+            icon: git-branch
+            description: "Manage issues, PRs, and CI runs via gh CLI"
+            category: "Development"
+          - id: notion
+            name: "Notion"
+            icon: book-open
+            description: "Create and manage pages, databases, and blocks"
+            category: "Productivity"
+          - id: google-calendar
+            name: "Google Calendar"
+            icon: calendar
+            description: "Schedule events, check availability, set reminders"
+            category: "Productivity"
+          - id: web-search
+            name: "Web Search"
+            icon: search
+            description: "Search the web using Brave Search API"
+            category: "Research"
+          - id: coding-agent
+            name: "Coding Agent"
+            icon: code
+            description: "Delegate coding tasks to background agents"
+            category: "Development"
+          - id: session-logs
+            name: "Session Logs"
+            icon: file-text
+            description: "Search and analyze older conversation logs"
+            category: "Memory"
+          - id: model-usage
+            name: "Model Usage"
+            icon: bar-chart
+            description: "Summarize per-model cost and usage data"
+            category: "Analytics"
+          - id: skill-creator
+            name: "Skill Creator"
+            icon: plus-circle
+            description: "Create and package new skills with scripts and assets"
+            category: "Development"
+        display:
+          - field: name
+            type: heading
+          - field: description
+            type: subtitle
+          - field: category
+            type: badge
+        actions:
+          - label: "Install"
+            action: api-call
+            endpoint: POST /api/gateway/skills/install
+            params:
+              skill_id: "{{id}}"
+            label_installed: "Installed"
+            disabled_when: installed

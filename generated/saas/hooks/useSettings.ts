@@ -2,20 +2,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
-export function useBotDashboard() {
+export function useSettings() {
   return useQuery({
-    queryKey: ['BotDashboard'],
+    queryKey: ['Settings'],
     queryFn: async () => {
       const results = await Promise.all([
       apiClient.get<any[]>('/api/bot').catch(() => []),
-      apiClient.get<any[]>('/api/proxy_session').catch(() => []),
-      apiClient.get<any[]>('/api/proxy_event').catch(() => [])
+      apiClient.get<any[]>('/api/user').catch(() => [])
       ]);
       return {
       bot: results[0],
-      proxy_session: results[1],
-      proxy_event: results[2],
-      runtime_adapter: {}
+      user: results[1]
       };
     },
   });
