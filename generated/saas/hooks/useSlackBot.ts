@@ -8,7 +8,7 @@ export const slackBotKeys = {
   detail: (id: string) => ['slack-bot', id] as const,
 } as const;
 
-export function useSlackBot(params?: Record<string, unknown>) {
+export function useSlackBotList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: slackBotKeys.all,
     queryFn: () => apiClient.get<SlackBot[]>('/api/slack-bot', { params }),

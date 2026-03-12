@@ -144,7 +144,9 @@ export const ${keysVar} = {
 `;
 
   if (listOp) {
-    code += `export function use${hookPrefix}(params?: Record<string, unknown>) {
+    // Use plural form for list hook to avoid conflict with detail hook
+    const listHookName = hookPrefix === entityName ? `${hookPrefix}List` : hookPrefix;
+    code += `export function use${listHookName}(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: ${keysVar}.all,
     queryFn: () => apiClient.get<${entityName}[]>('${basePath}', { params }),

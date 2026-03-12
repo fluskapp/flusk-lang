@@ -262,7 +262,9 @@ function renderDataTable(section: any, indent: string): string {
 function renderCardGrid(section: any, indent: string): string {
   shadcnNeeds.add('card'); shadcnNeeds.add('badge');
   const cols = section.columns ?? 3;
-  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const staticItems: any[] = section.static_data ?? [];
+  const isStatic = staticItems.length > 0;
+  const src = isStatic ? JSON.stringify(staticItems) : (section.source ? sourceExpr(section.source) : '[]');
   const title = section.title ?? '';
   const widgets: any[] = section.widgets ?? [];
   let out = `${indent}<div>\n`;
@@ -276,7 +278,8 @@ function renderCardGrid(section: any, indent: string): string {
     out += `${indent}  </div>\n`;
   } else {
     out += `${indent}  <div className="grid grid-cols-1 sm:grid-cols-${cols} gap-4">\n`;
-    out += `${indent}    {((${src}) as any[] ?? []).map((item: any, i: number) => (\n${indent}      <Card key={i} className="hover:shadow-md transition-shadow">\n${indent}        <CardContent className="p-5">\n${indent}          <div className="flex items-start justify-between">\n${indent}            <h4 className="font-medium text-black text-sm">{item.name ?? item.title ?? \`Item \${i + 1}\`}</h4>\n${indent}            {item.status && (\n${indent}              <Badge variant=${badgeVariantExpr('item.status')}>{item.status}</Badge>\n${indent}            )}\n${indent}          </div>\n${indent}          {item.description && <p className="mt-1.5 text-xs text-black/50 line-clamp-2">{item.description}</p>}\n${indent}        </CardContent>\n${indent}      </Card>\n${indent}    ))}\n${indent}  </div>\n`;
+    const mapExpr = isStatic ? `(${src})` : `((${src}) as any[] ?? [])`;
+    out += `${indent}    {${mapExpr}.map((item: any, i: number) => (\n${indent}      <Card key={i} className="hover:shadow-md transition-shadow">\n${indent}        <CardContent className="p-5">\n${indent}          <div className="flex items-start justify-between">\n${indent}            <h4 className="font-medium text-black text-sm">{item.name ?? item.title ?? \`Item \${i + 1}\`}</h4>\n${indent}            {item.status && (\n${indent}              <Badge variant=${badgeVariantExpr('item.status')}>{item.status}</Badge>\n${indent}            )}\n${indent}          </div>\n${indent}          {item.description && <p className="mt-1.5 text-xs text-black/50 line-clamp-2">{item.description}</p>}\n${indent}        </CardContent>\n${indent}      </Card>\n${indent}    ))}\n${indent}  </div>\n`;
   }
   out += `${indent}</div>\n`;
   return out;
@@ -1507,6 +1510,7 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
     // Collect all sections from all tabs for analysis
     const allSections: any[] = tabs.flatMap((t: any) => t.sections ?? []);
     const icons = collectIcons(allSections);
+    const pageState = analyzePageState(allSections);
     shadcnNeeds.add('tabs');
     const tabsJsx = renderTabbedPage(schemaAny, '      ', isAuth);
     const shadcnImportLines = buildShadcnImports();
@@ -1517,6 +1521,11 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
     code += `\nexport function ${componentName}() {\n`;
     if (isAuth) code += `  const { data = {} as any, isLoading } = ${hookName}();\n  void isLoading;\n`;
     code += `  const navigate = (to: string) => { window.location.href = to; };\n`;
+    // Emit collapsible state for tabbed pages
+    for (const id of pageState.collapsible) {
+      const collapsed = id.toLowerCase().includes('raw');
+      code += `  const [${id}, set${id}] = React.useState(${!collapsed});\n`;
+    }
     code += `\n  return (\n    <div className="min-h-screen bg-white">\n      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">\n`;
     code += tabsJsx;
     code += `      </div>\n    </div>\n  );\n}\n\nexport default ${componentName};\n`;

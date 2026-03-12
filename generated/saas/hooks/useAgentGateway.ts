@@ -8,7 +8,7 @@ export const agentGatewayKeys = {
   detail: (id: string) => ['agent-gateway', id] as const,
 } as const;
 
-export function useAgentGateway(params?: Record<string, unknown>) {
+export function useAgentGatewayList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: agentGatewayKeys.all,
     queryFn: () => apiClient.get<AgentGateway[]>('/api/agent-gateway', { params }),

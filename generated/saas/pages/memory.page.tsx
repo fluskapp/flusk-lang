@@ -15,6 +15,7 @@ export function MemoryPage() {
   const { data = {} as any, isLoading } = useMemory();
   void isLoading;
   const navigate = (to: string) => { window.location.href = to; };
+  const [RawMemory, setRawMemory] = React.useState(false);
 
   return (
     <div className="min-h-screen bg-white">

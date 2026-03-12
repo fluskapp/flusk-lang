@@ -8,7 +8,7 @@ export const telemetryKeys = {
   detail: (id: string) => ['telemetry', id] as const,
 } as const;
 
-export function useTelemetry(params?: Record<string, unknown>) {
+export function useTelemetryList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: telemetryKeys.all,
     queryFn: () => apiClient.get<Telemetry[]>('/api/telemetry', { params }),

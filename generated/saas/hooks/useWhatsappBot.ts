@@ -8,7 +8,7 @@ export const whatsappBotKeys = {
   detail: (id: string) => ['whatsapp-bot', id] as const,
 } as const;
 
-export function useWhatsappBot(params?: Record<string, unknown>) {
+export function useWhatsappBotList(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: whatsappBotKeys.all,
     queryFn: () => apiClient.get<WhatsappBot[]>('/api/whatsapp-bot', { params }),
