@@ -6,13 +6,13 @@ export type ChartType = 'area' | 'line' | 'bar' | 'pie' | 'donut' | 'scatter';
 export interface ChartProps { type: ChartType; data?: any[]; title?: string; xAxis?: string; yAxis?: string; donut?: boolean; gradient?: boolean; className?: string; }
 
 const COLORS = ["#18181b","#0693e3","#22c55e","#f59e0b","#8b5cf6","#ec4899"];
-const PLACEHOLDER = [{ name: 'Mon', value: 42 }, { name: 'Tue', value: 78 }, { name: 'Wed', value: 55 }, { name: 'Thu', value: 91 }, { name: 'Fri', value: 67 }];
+const CHART_EMPTY: any[] = [];
 const AXIS_STYLE = { fontSize: 12, fill: '#78716c' };
 const GRID_COLOR = '#e7e5e4';
 const TOOLTIP_STYLE = { borderRadius: '8px', border: '1px solid #e7e5e4', fontSize: 13 };
 
 export function Chart({ type, data, title, xAxis = 'name', yAxis = 'value', donut = false, gradient = false, className = '' }: ChartProps) {
-  const chartData = data && data.length > 0 ? data : PLACEHOLDER;
+  const chartData = data && data.length > 0 ? data : CHART_EMPTY;
   const isPie = type === 'pie' || type === 'donut' || donut;
   const renderInner = () => {
     if (isPie) return (<PieChart><Pie data={chartData} cx="50%" cy="50%" innerRadius={donut || type === 'donut' ? 55 : 0} outerRadius={85} paddingAngle={3} dataKey={yAxis} nameKey={xAxis}>{chartData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip contentStyle={TOOLTIP_STYLE} /><Legend iconType="circle" iconSize={8} /></PieChart>);

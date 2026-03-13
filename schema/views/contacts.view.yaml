@@ -1,0 +1,75 @@
+name: Contacts
+type: page
+description: Manage who can talk to your bot and their access levels
+route: /app/contacts
+auth: true
+ssr: false
+
+design:
+  theme: monochrome
+  background: white
+  text: black
+  accent: black
+
+data_sources:
+  contacts:
+    endpoint: GET /api/gateway/contacts
+
+sections:
+  - name: header
+    type: page-header
+    title: "Contacts"
+    subtitle: "Who can talk to your bot, and what they can do"
+    actions:
+      - label: "Add contact"
+        action: modal
+        modal: add-contact
+
+  - name: stats
+    type: stat-grid
+    columns: 4
+    source: contacts
+    stats:
+      - label: "Total"
+        value: "{{contacts.length}}"
+      - label: "Trusted"
+        value: "{{contacts.filter(c => c.role === 'trusted').length}}"
+      - label: "Allowed"
+        value: "{{contacts.filter(c => c.role === 'allowed').length}}"
+      - label: "Blocked"
+        value: "{{contacts.filter(c => c.role === 'blocked').length}}"
+
+  - name: filters
+    type: filter-bar
+    filters:
+      - type: search
+        placeholder: "Search..."
+      - type: status-filter
+        options: ["All", "Trusted", "Allowed", "Blocked"]
+
+  - name: contact-list
+    type: crud-table
+    source: contacts
+    columns:
+      - field: name
+        label: "Name"
+        format: masked
+      - field: identifier
+        label: "Identifier"
+        format: masked
+      - field: channel
+        label: "Channel"
+      - field: role
+        label: "Access"
+        type: badge
+      - field: description
+        label: "Context"
+    actions:
+      - label: "Edit"
+        action: modal
+        modal: edit-contact
+      - label: "Remove"
+        action: api-call
+        endpoint: DELETE /api/gateway/contacts/:id
+        confirm: "Remove this contact?"
+        variant: destructive

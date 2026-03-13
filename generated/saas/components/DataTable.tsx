@@ -5,7 +5,7 @@ import { MoreHorizontal } from 'lucide-react';
 export interface Column { key: string; label: string; format?: string; widget?: string; sortable?: boolean; [key: string]: any; }
 export interface DataTableProps { title?: string; columns: Column[]; data?: any[]; actions?: Array<{ label: string; style?: string }>; pagination?: boolean; pageSize?: number; }
 
-const PLACEHOLDER_ROWS = [{ name: 'Alice Chen', email: 'alice@example.com', role: 'Admin', status: 'Active', last_active: '2m ago' }, { name: 'Bob Smith', email: 'bob@example.com', role: 'Member', status: 'Active', last_active: '1h ago' }];
+const TABLE_EMPTY: any[] = [];
 
 function StatusBadge({ value }: { value: string }) {
   const v = String(value).toLowerCase();
@@ -21,7 +21,7 @@ function CellValue({ value, col }: { value: any; col: Column }) {
 }
 
 export function DataTable({ title, columns, data, actions, pagination }: DataTableProps) {
-  const rows = data && data.length > 0 ? data : PLACEHOLDER_ROWS;
+  const rows = data && data.length > 0 ? data : TABLE_EMPTY;
   const visibleCols = columns.filter((c) => c.label);
   return (
     <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden">

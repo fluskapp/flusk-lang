@@ -8,6 +8,7 @@ export * from './useSolutions';
 export * from './useTelemetry';
 export * from './useWhatsappBot';
 export { useConnectors } from './useConnectors';
+export { useContacts } from './useContacts';
 export { useDashboard } from './useDashboard';
 export { useEvents } from './useEvents';
 export { useMemory } from './useMemory';

@@ -2,6 +2,7 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { ConnectorsPage } from '../pages/connectors.page';
+import { ContactsPage } from '../pages/contacts.page';
 import { DashboardPage } from '../pages/dashboard.page';
 import { EventsPage } from '../pages/events.page';
 import { MemoryPage } from '../pages/memory.page';
@@ -16,6 +17,7 @@ import { SettingsPage } from '../pages/settings.page';
  */
 export const router = createBrowserRouter([
   { path: '/app/connectors', element: <ConnectorsPage /> },
+  { path: '/app/contacts', element: <ContactsPage /> },
   { path: '/app/dashboard', element: <DashboardPage /> },
   { path: '/app/events', element: <EventsPage /> },
   { path: '/app/memory', element: <MemoryPage /> },

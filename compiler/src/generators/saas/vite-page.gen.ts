@@ -501,9 +501,13 @@ function renderTriggerTable(section: any, indent: string): string {
 }
 
 function renderCrudTable(section: any, indent: string): string {
-  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const src = section.source ? sourceExpr(section.source) : '[]';
   const title = section.title ?? section.name ?? '';
-  const columns: any[] = section.columns ?? [];
+  const columns: any[] = (section.columns ?? []).map((c: any) => ({
+    key: c.field ?? c.key ?? c.id ?? '',
+    label: c.label ?? c.field ?? '',
+    ...c,
+  }));
   return `${indent}<CrudTableSection title="${title}" columns={${JSON.stringify(columns)}} data={(${src}) as any[] | undefined} />\n`;
 }
 
@@ -1272,8 +1276,7 @@ function GoalTreeSection({ items, title }: { items: any[] | undefined; title: st
 function crudTableHelper(primary: string): string {
   return `
 function CrudTableSection({ title, columns, data }: { title?: string; columns: Array<{ key: string; label: string; [key: string]: any }>; data?: any[] }) {
-  const PLACEHOLDER = [{ id: 1, name: 'Item 1', status: 'Active', created: '2024-01-15' }, { id: 2, name: 'Item 2', status: 'Paused', created: '2024-01-10' }];
-  const [items, setItems] = React.useState<any[]>(data && data.length > 0 ? data : PLACEHOLDER);
+  const [items, setItems] = React.useState<any[]>(data && data.length > 0 ? data : []);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [dialogMode, setDialogMode] = React.useState<'create' | 'edit'>('create');
   const [editItem, setEditItem] = React.useState<any>(null);
@@ -1367,13 +1370,13 @@ export type ChartType = 'area' | 'line' | 'bar' | 'pie' | 'donut' | 'scatter';
 export interface ChartProps { type: ChartType; data?: any[]; title?: string; xAxis?: string; yAxis?: string; donut?: boolean; gradient?: boolean; className?: string; }
 
 const COLORS = ${colorsJson};
-const PLACEHOLDER = [{ name: 'Mon', value: 42 }, { name: 'Tue', value: 78 }, { name: 'Wed', value: 55 }, { name: 'Thu', value: 91 }, { name: 'Fri', value: 67 }];
+const CHART_EMPTY: any[] = [];
 const AXIS_STYLE = { fontSize: 12, fill: '#78716c' };
 const GRID_COLOR = '#e7e5e4';
 const TOOLTIP_STYLE = { borderRadius: '8px', border: '1px solid #e7e5e4', fontSize: 13 };
 
 export function Chart({ type, data, title, xAxis = 'name', yAxis = 'value', donut = false, gradient = false, className = '' }: ChartProps) {
-  const chartData = data && data.length > 0 ? data : PLACEHOLDER;
+  const chartData = data && data.length > 0 ? data : CHART_EMPTY;
   const isPie = type === 'pie' || type === 'donut' || donut;
   const renderInner = () => {
     if (isPie) return (<PieChart><Pie data={chartData} cx="50%" cy="50%" innerRadius={donut || type === 'donut' ? 55 : 0} outerRadius={85} paddingAngle={3} dataKey={yAxis} nameKey={xAxis}>{chartData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip contentStyle={TOOLTIP_STYLE} /><Legend iconType="circle" iconSize={8} /></PieChart>);
@@ -1395,7 +1398,7 @@ import { MoreHorizontal } from 'lucide-react';
 export interface Column { key: string; label: string; format?: string; widget?: string; sortable?: boolean; [key: string]: any; }
 export interface DataTableProps { title?: string; columns: Column[]; data?: any[]; actions?: Array<{ label: string; style?: string }>; pagination?: boolean; pageSize?: number; }
 
-const PLACEHOLDER_ROWS = [{ name: 'Alice Chen', email: 'alice@example.com', role: 'Admin', status: 'Active', last_active: '2m ago' }, { name: 'Bob Smith', email: 'bob@example.com', role: 'Member', status: 'Active', last_active: '1h ago' }];
+const TABLE_EMPTY: any[] = [];
 
 function StatusBadge({ value }: { value: string }) {
   const v = String(value).toLowerCase();
@@ -1411,7 +1414,7 @@ function CellValue({ value, col }: { value: any; col: Column }) {
 }
 
 export function DataTable({ title, columns, data, actions, pagination }: DataTableProps) {
-  const rows = data && data.length > 0 ? data : PLACEHOLDER_ROWS;
+  const rows = data && data.length > 0 ? data : TABLE_EMPTY;
   const visibleCols = columns.filter((c) => c.label);
   return (
     <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden">
