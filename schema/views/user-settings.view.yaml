@@ -64,6 +64,54 @@ sections:
           label: "Coming Soon"
           disabled: true
 
+  - name: GodMode
+    type: settings-group
+    title: "God Mode"
+    description: "Full access to your bot's workspace — every file, every config"
+    fields:
+      - name: workspace_path
+        type: display
+        label: "Workspace Path"
+        source: bot.workspace_path
+      - name: config_path
+        type: display
+        label: "Config Path"
+        source: bot.config_path
+    actions:
+      - label: "Open Workspace"
+        action: api-call
+        endpoint: GET /api/gateway/workspace/files
+        variant: secondary
+      - label: "View Config"
+        action: api-call
+        endpoint: GET /api/gateway/config
+        variant: secondary
+      - label: "Restart Bot"
+        action: api-call
+        endpoint: POST /api/gateway/restart
+        confirm: "Restart your bot? Active conversations will be interrupted."
+        variant: secondary
+
+  - name: GitBackup
+    type: settings-group
+    title: "Git Backup"
+    description: "Back up your bot's workspace to GitHub"
+    fields:
+      - name: backup_repo
+        type: text
+        label: "Repository URL"
+        placeholder: "git@github.com:user/my-bot-backup.git"
+        source: backup.repo_url
+    actions:
+      - label: "Initialize Backup"
+        action: api-call
+        endpoint: POST /api/backup/init
+        variant: secondary
+      - label: "Push Now"
+        action: api-call
+        endpoint: POST /api/backup/push
+        variant: default
+
   - name: DangerZone
     type: settings-group
     title: "Danger Zone"

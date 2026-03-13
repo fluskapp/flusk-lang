@@ -2,6 +2,7 @@
 import React from 'react';
 import { useSettings } from '../hooks/useSettings';
 import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -9,6 +10,7 @@ import { Label } from '../../components/ui/label';
 export function SettingsPage() {
   const { data = {} as any, isLoading } = useSettings();
   const navigate = (to: string) => { window.location.href = to; };
+  const [formData, setFormData] = React.useState<Record<string, any>>({});
   void isLoading;
 
   return (
@@ -20,16 +22,22 @@ export function SettingsPage() {
         </CardHeader>
         <CardContent className="divide-y divide-black/[0.04]">
           <div className="flex items-center justify-between py-3.5">
-            <Label>Bot Name</Label>
-            <Input type="text" placeholder="Bot Name" className="w-64" />
+            <div><Label>Bot Name</Label></div>
+            <Input type="text" placeholder="FLUSK" className="w-64" value={formData['name'] ?? data?.name ?? ''} onChange={(e) => setFormData((d: any) => ({ ...d, 'name': e.target.value }))} />
           </div>
-          <div className="flex items-center justify-between py-3.5">
-            <Label>Personality (SOUL.md)</Label>
-            <Input type="text" placeholder="Personality (SOUL.md)" className="w-64" />
+          <div className="py-3.5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div><Label>Personality (SOUL.md)</Label><p className="text-xs text-black/40 mt-0.5">Define how your bot behaves — its tone, personality, and focus areas</p></div>
+              <Button size="sm" variant="outline" onClick={() => { fetch('/api/gateway/config/soul', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: formData['soul'] ?? '' }) }); }}>Save</Button>
+            </div>
+            <textarea rows={10} className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black/20" value={formData['soul'] ?? data?.soul ?? ''} onChange={(e) => setFormData((d: any) => ({ ...d, 'soul': e.target.value }))} />
           </div>
-          <div className="flex items-center justify-between py-3.5">
-            <Label>About You (USER.md)</Label>
-            <Input type="text" placeholder="About You (USER.md)" className="w-64" />
+          <div className="py-3.5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div><Label>About You (USER.md)</Label><p className="text-xs text-black/40 mt-0.5">Tell your bot about yourself — name, job, preferences, family</p></div>
+              <Button size="sm" variant="outline" onClick={() => { fetch('/api/gateway/config/user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: formData['user_context'] ?? '' }) }); }}>Save</Button>
+            </div>
+            <textarea rows={6} className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black/20" value={formData['user_context'] ?? data?.user_context ?? ''} onChange={(e) => setFormData((d: any) => ({ ...d, 'user_context': e.target.value }))} />
           </div>
         </CardContent>
       </Card>
@@ -39,22 +47,72 @@ export function SettingsPage() {
           <CardDescription>Get the native app for a better experience</CardDescription>
         </CardHeader>
         <CardContent className="divide-y divide-black/[0.04]">
+          <div className="flex items-center justify-between py-3.5">
+            <div><span className="text-sm font-medium">Mac App</span><p className="text-xs text-black/40 mt-0.5">Native Mac menubar app with background sync</p></div>
+            <Button size="sm" variant="outline" onClick={() => window.open('https://flusk.app/download/mac', '_blank')}>Download</Button>
+          </div>
+          <div className="flex items-center justify-between py-3.5">
+            <div><span className="text-sm font-medium">iOS App</span><p className="text-xs text-black/40 mt-0.5">Manage your bot from your iPhone</p></div>
+            <Button size="sm" variant="outline" disabled>Coming Soon</Button>
+          </div>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Danger Zone</CardTitle>
+          <CardTitle className="text-sm">God Mode</CardTitle>
+          <CardDescription>Full access to your bot's workspace — every file, every config</CardDescription>
+        </CardHeader>
+        <CardContent className="divide-y divide-black/[0.04]">
+          <div className="flex items-center justify-between py-3.5">
+            <Label>Workspace Path</Label>
+            <Badge variant="outline">{data?.workspace_path ?? '—'}</Badge>
+          </div>
+          <div className="flex items-center justify-between py-3.5">
+            <Label>Config Path</Label>
+            <Badge variant="outline">{data?.config_path ?? '—'}</Badge>
+          </div>
+        </CardContent>
+        <CardFooter className="flex gap-2 justify-end">
+          <Button variant="secondary" size="sm" onClick={() => { fetch('/api/gateway/workspace/files', { method: 'GET' }); }}>Open Workspace</Button>
+          <Button variant="secondary" size="sm" onClick={() => { fetch('/api/gateway/config', { method: 'GET' }); }}>View Config</Button>
+          <Button variant="secondary" size="sm" onClick={() => { if (!window.confirm('Restart your bot? Active conversations will be interrupted.')) return; fetch('/api/gateway/restart', { method: 'POST' }); }}>Restart Bot</Button>
+        </CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Git Backup</CardTitle>
+          <CardDescription>Back up your bot's workspace to GitHub</CardDescription>
+        </CardHeader>
+        <CardContent className="divide-y divide-black/[0.04]">
+          <div className="flex items-center justify-between py-3.5">
+            <div><Label>Repository URL</Label></div>
+            <Input type="text" placeholder="git@github.com:user/my-bot-backup.git" className="w-64" value={formData['backup_repo'] ?? data?.backup_repo ?? ''} onChange={(e) => setFormData((d: any) => ({ ...d, 'backup_repo': e.target.value }))} />
+          </div>
+        </CardContent>
+        <CardFooter className="flex gap-2 justify-end">
+          <Button variant="secondary" size="sm" onClick={() => { fetch('/api/backup/init', { method: 'POST' }); }}>Initialize Backup</Button>
+          <Button variant="default" size="sm" onClick={() => { fetch('/api/backup/push', { method: 'POST' }); }}>Push Now</Button>
+        </CardFooter>
+      </Card>
+      <Card className="border-red-200">
+        <CardHeader>
+          <CardTitle className="text-sm text-red-600">Danger Zone</CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-black/[0.04]">
           <div className="flex items-center justify-between py-3.5">
             <Label>Account Email</Label>
-            <Badge variant="outline">{/* email */}</Badge>
+            <Badge variant="outline">{data?.email ?? '—'}</Badge>
           </div>
           <div className="flex items-center justify-between py-3.5">
             <Label>Flusk Key</Label>
-            <Badge variant="outline">{/* flusk_key */}</Badge>
+            <code className="text-xs bg-black/[0.04] px-2 py-1 rounded font-mono">{(data?.flusk_key ?? '').toString().slice(0, 8)}...</code>
           </div>
         </CardContent>
+        <CardFooter className="flex gap-2 justify-end">
+          <Button variant="secondary" size="sm" onClick={() => { fetch('/api/account/export', { method: 'POST' }); }}>Export All Data</Button>
+          <Button variant="destructive" size="sm" onClick={() => { if (!window.confirm('Reset your bot? This will clear its memory and settings.')) return; fetch('/api/gateway/reset', { method: 'POST' }); }}>Reset Bot</Button>
+          <Button variant="destructive" size="sm" onClick={() => { if (!window.confirm('Are you sure? This permanently deletes your bot and all data. There is no undo.')) return; fetch('/api/account', { method: 'DELETE' }); }}>Delete Account</Button>
+        </CardFooter>
       </Card>
     </>
   );
