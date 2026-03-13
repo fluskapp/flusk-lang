@@ -83,10 +83,28 @@ steps:
       - selected_skills
     installs: skills
 
-  - name: installation
+  - name: setup_mode
+    title: "How to Run FLUSK"
+    description: "Choose between local install or cloud"
+    tool: show_setup_choice
+    options:
+      - id: local
+        label: "Install on My Mac"
+        description: "Full privacy. Everything runs on your machine. Free with your own API key."
+        icon: laptop
+        recommended: true
+      - id: cloud
+        label: "Use FLUSK Cloud"
+        description: "No install needed. We handle everything. Starts at $19/mo."
+        icon: cloud
+    collects:
+      - setup_mode
+
+  - name: installation_local
     title: "Install FLUSK"
     description: "Download and install the Mac app"
     tool: show_download
+    condition: "setup_mode === 'local'"
     platform: mac
     download_url: "https://flusk.app/download/mac"
     instructions:
@@ -94,6 +112,49 @@ steps:
       - "Open and drag FLUSK to Applications"
       - "Launch FLUSK from Applications"
       - "It will auto-configure with your settings"
+
+  - name: installation_cloud
+    title: "Choose Your Plan"
+    description: "Pick a cloud machine size"
+    tool: show_cloud_plans
+    condition: "setup_mode === 'cloud'"
+    plans:
+      - id: starter
+        name: "Starter"
+        price: "$19/mo"
+        specs: "1 vCPU, 2GB RAM"
+        description: "Perfect for personal use"
+      - id: pro
+        name: "Pro"
+        price: "$49/mo"
+        specs: "2 vCPU, 4GB RAM"
+        description: "For power users and small teams"
+        recommended: true
+      - id: power
+        name: "Power"
+        price: "$99/mo"
+        specs: "4 vCPU, 8GB RAM"
+        description: "For heavy workloads and multiple bots"
+
+  - name: api_key
+    title: "API Key"
+    description: "Connect your AI provider"
+    tool: show_api_key_input
+    condition: "setup_mode === 'local'"
+    providers:
+      - id: anthropic
+        label: "Anthropic (Claude)"
+        description: "Recommended — best for personal AI"
+        recommended: true
+      - id: openai
+        label: "OpenAI (GPT)"
+        description: "ChatGPT models"
+      - id: google
+        label: "Google (Gemini)"
+        description: "Gemini models"
+    collects:
+      - api_provider
+      - api_key
 
   - name: channels
     title: "Connect Channels"

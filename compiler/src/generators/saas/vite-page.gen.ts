@@ -993,6 +993,18 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
   out += `${indent}      </div>\n`;
   out += `${indent}      <p className="text-black/60 text-sm leading-relaxed">${greeting}</p>\n`;
   out += `${indent}    </div>\n`;
+  // Emit step condition evaluators
+  out += `${indent}    {/* Step Conditions */}\n`;
+  const condArr = steps.map((s: any) => {
+    if (!s.condition) return 'null';
+    if (s.condition.includes("'local'")) return `(d: any) => d['setup_mode'] === 'local'`;
+    if (s.condition.includes("'cloud'")) return `(d: any) => d['setup_mode'] === 'cloud'`;
+    return 'null';
+  });
+  // This line is computed but used in onClick handlers above
+  out += `${indent}    {/* eslint-disable-next-line */}\n`;
+  out += `${indent}    {void 0 /* stepConditions used in navigation */}\n`;
+
   out += `${indent}    {/* Step Progress */}\n`;
   out += `${indent}    <div className="flex items-center gap-2 mb-8">\n`;
   for (let i = 0; i < steps.length; i++) {
@@ -1032,6 +1044,33 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
         out += `${indent}            </div>\n`;
       }
       out += `${indent}          </div>\n`;
+    } else if (step.plans?.length) {
+      out += `${indent}          <div className="grid grid-cols-3 gap-3 mb-5">\n`;
+      for (const plan of step.plans) {
+        out += `${indent}            <button onClick={() => setOnboardingData((d: any) => ({ ...d, cloud_plan: '${plan.id}' }))} className={\`flex flex-col gap-2 p-4 rounded-xl border-2 transition-colors text-left \${onboardingData.cloud_plan === '${plan.id}' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}\`}>\n`;
+        out += `${indent}              <span className="text-sm font-bold">${plan.name}</span>\n`;
+        out += `${indent}              <span className={\`text-xl font-semibold \${onboardingData.cloud_plan === '${plan.id}' ? 'text-white' : 'text-black'}\`}>${plan.price}</span>\n`;
+        if (plan.specs) out += `${indent}              <span className={\`text-xs \${onboardingData.cloud_plan === '${plan.id}' ? 'text-white/60' : 'text-black/30'}\`}>${plan.specs}</span>\n`;
+        if (plan.description) out += `${indent}              <span className={\`text-xs \${onboardingData.cloud_plan === '${plan.id}' ? 'text-white/70' : 'text-black/40'}\`}>${plan.description}</span>\n`;
+        if (plan.recommended) out += `${indent}              <span className={\`text-xs font-medium \${onboardingData.cloud_plan === '${plan.id}' ? 'text-white' : 'text-black/60'}\`}>★ Recommended</span>\n`;
+        out += `${indent}            </button>\n`;
+      }
+      out += `${indent}          </div>\n`;
+    } else if (step.providers?.length) {
+      out += `${indent}          <div className="space-y-3 mb-5">\n`;
+      for (const prov of step.providers) {
+        out += `${indent}            <button onClick={() => setOnboardingData((d: any) => ({ ...d, api_provider: '${prov.id}' }))} className={\`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-colors \${onboardingData.api_provider === '${prov.id}' ? 'border-black' : 'border-black/10 hover:border-black/30'}\`}>\n`;
+        out += `${indent}              <div><span className="text-sm font-medium text-black">${prov.label}</span>`;
+        if (prov.description) out += `<span className="text-xs text-black/40 ml-2">${prov.description}</span>`;
+        out += `</div>\n`;
+        if (prov.recommended) out += `${indent}              <span className="text-xs text-black/50">Recommended</span>\n`;
+        out += `${indent}            </button>\n`;
+      }
+      out += `${indent}          </div>\n`;
+      out += `${indent}          <div className="space-y-2 mb-4">\n`;
+      out += `${indent}            <Label htmlFor="api_key">API Key</Label>\n`;
+      out += `${indent}            <Input id="api_key" name="api_key" type="password" placeholder="sk-..." value={onboardingData['api_key'] ?? ''} onChange={(e) => setOnboardingData((d: any) => ({ ...d, api_key: e.target.value }))} />\n`;
+      out += `${indent}          </div>\n`;
     } else if (step.download_url) {
       out += `${indent}          <div className="text-center py-4 mb-5">\n`;
       out += `${indent}            <Button size="lg" className="bg-black text-white hover:bg-black/80" onClick={() => window.open('${step.download_url}', '_blank')}>Download FLUSK</Button>\n`;
@@ -1040,7 +1079,7 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
     }
     out += `${indent}          <div className="flex justify-between pt-2">\n`;
     out += `${indent}            {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}\n`;
-    out += `${indent}            <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < ${steps.length - 1}) { setCurrentStep((s: number) => s + 1); } else { navigate('${redirectOnComplete}'); } }}>{currentStep < ${steps.length - 1} ? 'Continue →' : 'Get Started'}</Button>\n`;
+    out += `${indent}            <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < ${steps.length - 1}) { let next = currentStep + 1; while (next < ${steps.length}) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < ${steps.length}) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('${redirectOnComplete}'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('${redirectOnComplete}'); } }}>{currentStep < ${steps.length - 1} ? 'Continue →' : 'Get Started'}</Button>\n`;
     out += `${indent}          </div>\n`;
     out += `${indent}        </CardContent>\n`;
     out += `${indent}      </Card>\n`;
@@ -1584,6 +1623,14 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
     code += `  const [currentStep, setCurrentStep] = React.useState(0);\n`;
     code += `  const [onboardingData, setOnboardingData] = React.useState<Record<string, any>>({});\n`;
     code += `  const step = currentStep;\n  void step;\n`;
+    // Emit step conditions for conditional navigation
+    const condArr = steps.map((s: any) => {
+      if (!s.condition) return 'null';
+      if (s.condition.includes("'local'")) return `(d: Record<string, any>) => d['setup_mode'] === 'local'`;
+      if (s.condition.includes("'cloud'")) return `(d: Record<string, any>) => d['setup_mode'] === 'cloud'`;
+      return 'null';
+    });
+    code += `  const stepConditions: Array<((d: Record<string, any>) => boolean) | null> = [${condArr.join(', ')}];\n`;
     code += `\n  return (\n`;
     code += renderChatOnboardingPage(schemaAny, '    ');
     code += `  );\n}\n\nexport default ${componentName};\n`;

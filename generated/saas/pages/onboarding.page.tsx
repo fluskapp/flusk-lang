@@ -14,6 +14,7 @@ export function OnboardingPage() {
   const [onboardingData, setOnboardingData] = React.useState<Record<string, any>>({});
   const step = currentStep;
   void step;
+  const stepConditions: Array<((d: Record<string, any>) => boolean) | null> = [null, null, null, null, (d: Record<string, any>) => d['setup_mode'] === 'local', (d: Record<string, any>) => d['setup_mode'] === 'cloud', (d: Record<string, any>) => d['setup_mode'] === 'local', null, null];
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
@@ -25,6 +26,9 @@ export function OnboardingPage() {
           </div>
           <p className="text-black/60 text-sm leading-relaxed">Hey, I'm FLUSK — your bot that actually has a personality. Let's get you set up. Won't take long, promise.</p>
         </div>
+        {/* Step Conditions */}
+        {/* eslint-disable-next-line */}
+        {void 0 /* stepConditions used in navigation */}
         {/* Step Progress */}
         <div className="flex items-center gap-2 mb-8">
           <div className={`flex-1 h-1 rounded-full transition-colors ${step > 0 ? 'bg-black' : step === 0 ? 'bg-black' : 'bg-black/[0.07]'}`} />
@@ -33,6 +37,9 @@ export function OnboardingPage() {
           <div className={`flex-1 h-1 rounded-full transition-colors ${step > 3 ? 'bg-black' : step === 3 ? 'bg-black' : 'bg-black/[0.07]'}`} />
           <div className={`flex-1 h-1 rounded-full transition-colors ${step > 4 ? 'bg-black' : step === 4 ? 'bg-black' : 'bg-black/[0.07]'}`} />
           <div className={`flex-1 h-1 rounded-full transition-colors ${step > 5 ? 'bg-black' : step === 5 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 6 ? 'bg-black' : step === 6 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 7 ? 'bg-black' : step === 7 ? 'bg-black' : 'bg-black/[0.07]'}`} />
+          <div className={`flex-1 h-1 rounded-full transition-colors ${step > 8 ? 'bg-black' : step === 8 ? 'bg-black' : 'bg-black/[0.07]'}`} />
         </div>
         {/* Steps */}
         {currentStep === 0 && (
@@ -54,7 +61,7 @@ export function OnboardingPage() {
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -84,7 +91,7 @@ export function OnboardingPage() {
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -116,12 +123,34 @@ export function OnboardingPage() {
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
         )}
         {currentStep === 3 && (
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold text-black mb-1">How to Run FLUSK</h2>
+              <p className="text-sm text-black/50 mb-5">Choose between local install or cloud</p>
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_3: 'local' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_3 === 'local' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
+                  <span className="text-sm font-medium">Install on My Mac</span>
+                  <span className={`text-xs ${onboardingData.step_3 === 'local' ? 'text-white/70' : 'text-black/30'}`}>Full privacy. Everything runs on your machine. Free with your own API key.</span>
+                </button>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_3: 'cloud' }))} className={`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.step_3 === 'cloud' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
+                  <span className="text-sm font-medium">Use FLUSK Cloud</span>
+                  <span className={`text-xs ${onboardingData.step_3 === 'cloud' ? 'text-white/70' : 'text-black/30'}`}>No install needed. We handle everything. Starts at $19/mo.</span>
+                </button>
+              </div>
+              <div className="flex justify-between pt-2">
+                {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {currentStep === 4 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
               <h2 className="text-lg font-semibold text-black mb-1">Install FLUSK</h2>
@@ -132,12 +161,65 @@ export function OnboardingPage() {
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
         )}
-        {currentStep === 4 && (
+        {currentStep === 5 && (
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold text-black mb-1">Choose Your Plan</h2>
+              <p className="text-sm text-black/50 mb-5">Pick a cloud machine size</p>
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, cloud_plan: 'starter' }))} className={`flex flex-col gap-2 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.cloud_plan === 'starter' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
+                  <span className="text-sm font-bold">Starter</span>
+                  <span className={`text-xl font-semibold ${onboardingData.cloud_plan === 'starter' ? 'text-white' : 'text-black'}`}>$19/mo</span>
+                  <span className={`text-xs ${onboardingData.cloud_plan === 'starter' ? 'text-white/60' : 'text-black/30'}`}>1 vCPU, 2GB RAM</span>
+                  <span className={`text-xs ${onboardingData.cloud_plan === 'starter' ? 'text-white/70' : 'text-black/40'}`}>Perfect for personal use</span>
+                </button>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, cloud_plan: 'pro' }))} className={`flex flex-col gap-2 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.cloud_plan === 'pro' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
+                  <span className="text-sm font-bold">Pro</span>
+                  <span className={`text-xl font-semibold ${onboardingData.cloud_plan === 'pro' ? 'text-white' : 'text-black'}`}>$49/mo</span>
+                  <span className={`text-xs ${onboardingData.cloud_plan === 'pro' ? 'text-white/60' : 'text-black/30'}`}>2 vCPU, 4GB RAM</span>
+                  <span className={`text-xs ${onboardingData.cloud_plan === 'pro' ? 'text-white/70' : 'text-black/40'}`}>For power users and small teams</span>
+                  <span className={`text-xs font-medium ${onboardingData.cloud_plan === 'pro' ? 'text-white' : 'text-black/60'}`}>★ Recommended</span>
+                </button>
+                <button onClick={() => setOnboardingData((d: any) => ({ ...d, cloud_plan: 'power' }))} className={`flex flex-col gap-2 p-4 rounded-xl border-2 transition-colors text-left ${onboardingData.cloud_plan === 'power' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}`}>
+                  <span className="text-sm font-bold">Power</span>
+                  <span className={`text-xl font-semibold ${onboardingData.cloud_plan === 'power' ? 'text-white' : 'text-black'}`}>$99/mo</span>
+                  <span className={`text-xs ${onboardingData.cloud_plan === 'power' ? 'text-white/60' : 'text-black/30'}`}>4 vCPU, 8GB RAM</span>
+                  <span className={`text-xs ${onboardingData.cloud_plan === 'power' ? 'text-white/70' : 'text-black/40'}`}>For heavy workloads and multiple bots</span>
+                </button>
+              </div>
+              <div className="flex justify-between pt-2">
+                {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {currentStep === 6 && (
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold text-black mb-1">API Key</h2>
+              <p className="text-sm text-black/50 mb-5">Connect your AI provider</p>
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="api_provider">Api Provider</Label>
+                <Input id="api_provider" name="api_provider" placeholder="api provider" value={onboardingData['api_provider'] ?? ''} onChange={(e) => setOnboardingData((d: any) => ({ ...d, 'api_provider': e.target.value }))} />
+              </div>
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="api_key">Api Key</Label>
+                <Input id="api_key" name="api_key" placeholder="api key" value={onboardingData['api_key'] ?? ''} onChange={(e) => setOnboardingData((d: any) => ({ ...d, 'api_key': e.target.value }))} />
+              </div>
+              <div className="flex justify-between pt-2">
+                {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {currentStep === 7 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
               <h2 className="text-lg font-semibold text-black mb-1">Connect Channels</h2>
@@ -166,18 +248,18 @@ export function OnboardingPage() {
               </div>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
         )}
-        {currentStep === 5 && (
+        {currentStep === 8 && (
           <Card className="shadow-sm">
             <CardContent className="p-6">
               <h2 className="text-lg font-semibold text-black mb-1">You're All Set!</h2>
               <div className="flex justify-between pt-2">
                 {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}
-                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 5) { setCurrentStep((s: number) => s + 1); } else { navigate('/app/dashboard'); } }}>{currentStep < 5 ? 'Continue →' : 'Get Started'}</Button>
+                <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < 8) { let next = currentStep + 1; while (next < 9) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < 9) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('/app/dashboard'); } }}>{currentStep < 8 ? 'Continue →' : 'Get Started'}</Button>
               </div>
             </CardContent>
           </Card>
