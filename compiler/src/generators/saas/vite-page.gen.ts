@@ -1020,11 +1020,12 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
     out += `${indent}          <h2 className="text-lg font-semibold text-black mb-1">${step.title ?? step.name ?? ''}</h2>\n`;
     if (step.description) out += `${indent}          <p className="text-sm text-black/50 mb-5">${step.description}</p>\n`;
     if (step.options?.length) {
+      const dataKey = step.collects?.[0] ?? `step_${i}`;
       out += `${indent}          <div className="grid grid-cols-2 gap-3 mb-5">\n`;
       for (const opt of step.options) {
-        out += `${indent}            <button onClick={() => setOnboardingData((d: any) => ({ ...d, step_${i}: '${opt.id}' }))} className={\`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left \${onboardingData.step_${i} === '${opt.id}' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}\`}>\n`;
+        out += `${indent}            <button onClick={() => setOnboardingData((d: any) => ({ ...d, '${dataKey}': '${opt.id}' }))} className={\`flex flex-col gap-1.5 p-4 rounded-xl border-2 transition-colors text-left \${onboardingData['${dataKey}'] === '${opt.id}' ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'}\`}>\n`;
         out += `${indent}              <span className="text-sm font-medium">${opt.label}</span>\n`;
-        if (opt.description) out += `${indent}              <span className={\`text-xs \${onboardingData.step_${i} === '${opt.id}' ? 'text-white/70' : 'text-black/30'}\`}>${opt.description}</span>\n`;
+        if (opt.description) out += `${indent}              <span className={\`text-xs \${onboardingData['${dataKey}'] === '${opt.id}' ? 'text-white/70' : 'text-black/30'}\`}>${opt.description}</span>\n`;
         out += `${indent}            </button>\n`;
       }
       out += `${indent}          </div>\n`;
@@ -1079,7 +1080,7 @@ function renderChatOnboardingPage(schema: any, indent: string): string {
     }
     out += `${indent}          <div className="flex justify-between pt-2">\n`;
     out += `${indent}            {currentStep > 0 && <Button variant="ghost" size="sm" onClick={() => setCurrentStep((s: number) => s - 1)}>← Back</Button>}\n`;
-    out += `${indent}            <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < ${steps.length - 1}) { let next = currentStep + 1; while (next < ${steps.length}) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < ${steps.length}) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('${redirectOnComplete}'); } } else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('${redirectOnComplete}'); } }}>{currentStep < ${steps.length - 1} ? 'Continue →' : 'Get Started'}</Button>\n`;
+    out += `${indent}            <Button className="ml-auto bg-black text-white hover:bg-black/80" onClick={() => { if (currentStep < ${steps.length - 1}) { let next = currentStep + 1; while (next < ${steps.length}) { const fn = stepConditions[next]; if (fn === null || fn(onboardingData)) break; next++; } if (next < ${steps.length}) setCurrentStep(next); else { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('${redirectOnComplete}'); } } else { saveOnboarding(onboardingData).then(() => { localStorage.setItem('flusk_onboarding_complete', 'true'); navigate('${redirectOnComplete}'); }); } }}>{currentStep < ${steps.length - 1} ? 'Continue →' : 'Get Started'}</Button>\n`;
     out += `${indent}          </div>\n`;
     out += `${indent}        </CardContent>\n`;
     out += `${indent}      </Card>\n`;
@@ -1620,6 +1621,11 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
     code += `\nexport function ${componentName}() {\n`;
     if (isAuth) code += `  const { data = {} as any, isLoading } = ${hookName}();\n  void isLoading;\n`;
     code += `  const navigate = (to: string) => { window.location.href = to; };\n`;
+    code += `  const saveOnboarding = async (data: Record<string, any>) => {\n`;
+    code += `    try {\n`;
+    code += `      await fetch('/api/gateway/onboarding/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });\n`;
+    code += `    } catch (e) { console.error('Failed to save onboarding:', e); }\n`;
+    code += `  };\n`;
     code += `  const [currentStep, setCurrentStep] = React.useState(0);\n`;
     code += `  const [onboardingData, setOnboardingData] = React.useState<Record<string, any>>({});\n`;
     code += `  const step = currentStep;\n  void step;\n`;

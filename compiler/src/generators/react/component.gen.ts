@@ -80,10 +80,10 @@ export function StatCard({ data, label, format = 'number', icon, className = '',
   };
 
   return (
-    <div dir={dir} className={\`rounded-xl border border-stone-200 bg-white p-6 transition-shadow hover:shadow-md \${className}\`}>
+    <div dir={dir} className={\`rounded-xl border border-black/[0.08] bg-white p-6 transition-shadow hover:shadow-md \${className}\`}>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-stone-500">{label}</p>
-        {icon && <span className="text-stone-400">{icon}</span>}
+        <p className="text-sm font-medium text-black/[0.02]0">{label}</p>
+        {icon && <span className="text-black/[0.30]">{icon}</span>}
       </div>
       <p className="mt-2 text-3xl font-bold tracking-tight text-[#0F1629]">
         {formatValue(data)}
@@ -98,10 +98,10 @@ export function Chart({ data, chart, animate = true, className = '', dir }: Char
   const items = Array.isArray(data) ? data : [];
 
   return (
-    <div dir={dir} className={\`rounded-xl border border-stone-200 bg-white p-6 \${className}\`}>
+    <div dir={dir} className={\`rounded-xl border border-black/[0.08] bg-white p-6 \${className}\`}>
       <div className="h-64 w-full">
         {items.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-stone-400">No data</div>
+          <div className="flex h-full items-center justify-center text-black/[0.30]">No data</div>
         ) : (
           <div className="relative h-full w-full">
             {/* SVG chart placeholder - wire recharts here */}
@@ -173,26 +173,26 @@ export function DataTable({ data, columns, actions, sortable = true, filterable 
   const items = Array.isArray(data) ? data as Record<string, unknown>[] : [];
 
   return (
-    <div dir={dir} className={\`rounded-xl border border-stone-200 bg-white overflow-hidden \${className}\`}>
+    <div dir={dir} className={\`rounded-xl border border-black/[0.08] bg-white overflow-hidden \${className}\`}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-100 bg-stone-50">
+            <tr className="border-b border-black/[0.06] bg-black/[0.02]">
               {columns.map((col) => (
-                <th key={col} className="px-6 py-3 text-left font-medium text-stone-500 uppercase tracking-wider text-xs">
+                <th key={col} className="px-6 py-3 text-left font-medium text-black/[0.02]0 uppercase tracking-wider text-xs">
                   {col.replace(/([A-Z])/g, ' $1').trim()}
                 </th>
               ))}
               {actions && actions.length > 0 && (
-                <th className="px-6 py-3 text-right font-medium text-stone-500 uppercase tracking-wider text-xs">Actions</th>
+                <th className="px-6 py-3 text-right font-medium text-black/[0.02]0 uppercase tracking-wider text-xs">Actions</th>
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-stone-100">
+          <tbody className="divide-y divide-black/[0.06]">
             {items.map((row, i) => (
-              <tr key={i} className="hover:bg-stone-50 transition-colors">
+              <tr key={i} className="hover:bg-black/[0.02] transition-colors">
                 {columns.map((col) => (
-                  <td key={col} className="px-6 py-4 text-stone-700 whitespace-nowrap">
+                  <td key={col} className="px-6 py-4 text-black/[0.70] whitespace-nowrap">
                     {String(row[col] ?? '')}
                   </td>
                 ))}
@@ -209,7 +209,7 @@ export function DataTable({ data, columns, actions, sortable = true, filterable 
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={columns.length + (actions?.length ? 1 : 0)} className="px-6 py-12 text-center text-stone-400">
+                <td colSpan={columns.length + (actions?.length ? 1 : 0)} className="px-6 py-12 text-center text-black/[0.30]">
                   No data available
                 </td>
               </tr>
@@ -224,8 +224,8 @@ export function DataTable({ data, columns, actions, sortable = true, filterable 
   'form': () => `
 export function Form({ data, className = '', dir }: FormProps) {
   return (
-    <form dir={dir} className={\`rounded-xl border border-stone-200 bg-white p-6 space-y-4 \${className}\`}>
-      <p className="text-stone-500 text-sm">Form component</p>
+    <form dir={dir} className={\`rounded-xl border border-black/[0.08] bg-white p-6 space-y-4 \${className}\`}>
+      <p className="text-black/[0.02]0 text-sm">Form component</p>
     </form>
   );
 }`,
@@ -240,7 +240,7 @@ export function ChatMessages({ data, className = '', dir }: ChatMessagesProps) {
         <div key={i} className={\`max-w-[80%] rounded-2xl px-4 py-2 text-sm \${
           msg.role === 'user'
             ? 'ml-auto bg-[#3B3FBF] text-white'
-            : 'mr-auto bg-stone-100 text-stone-700'
+            : 'mr-auto bg-black/[0.06] text-black/[0.70]'
         }\`}>
           {String(msg.content ?? '')}
         </div>
@@ -252,11 +252,11 @@ export function ChatMessages({ data, className = '', dir }: ChatMessagesProps) {
   'chat-input': () => `
 export function ChatInput({ className = '', dir }: ChatInputProps) {
   return (
-    <div dir={dir} className={\`flex items-center gap-3 border-t border-stone-200 p-4 \${className}\`}>
+    <div dir={dir} className={\`flex items-center gap-3 border-t border-black/[0.08] p-4 \${className}\`}>
       <input
         type="text"
         placeholder="Type a message..."
-        className="flex-1 rounded-xl border border-stone-200 px-4 py-3 text-sm text-stone-700 placeholder-stone-400 focus:border-[#3B3FBF] focus:outline-none focus:ring-1 focus:ring-[#3B3FBF]"
+        className="flex-1 rounded-xl border border-black/[0.08] px-4 py-3 text-sm text-black/[0.70] placeholder-black/[0.30] focus:border-[#3B3FBF] focus:outline-none focus:ring-1 focus:ring-[#3B3FBF]"
       />
       <button className="rounded-xl bg-[#E8384F] px-6 py-3 text-sm font-medium text-white hover:bg-[#d42f45] transition-colors">
         Send
@@ -268,8 +268,8 @@ export function ChatInput({ className = '', dir }: ChatInputProps) {
   'preview': () => `
 export function Preview({ data, className = '', dir }: PreviewProps) {
   return (
-    <div dir={dir} className={\`rounded-xl border border-stone-200 bg-white p-6 \${className}\`}>
-      <pre className="text-sm text-stone-600 whitespace-pre-wrap font-mono">
+    <div dir={dir} className={\`rounded-xl border border-black/[0.08] bg-white p-6 \${className}\`}>
+      <pre className="text-sm text-black/[0.55] whitespace-pre-wrap font-mono">
         {typeof data === 'string' ? data : JSON.stringify(data, null, 2)}
       </pre>
     </div>
@@ -283,15 +283,15 @@ const fallbackComponent = (widget: WidgetDef): string => {
   const name = componentName(widget.name);
   const propsKeys = Object.keys(widget.props).filter((k) => k !== 'source');
   const propsStr = propsKeys.length > 0
-    ? propsKeys.map((k) => `<span className="text-stone-400">{${JSON.stringify(k)}}: </span><span>{String(${k} ?? '')}</span>`).join('\n          ')
+    ? propsKeys.map((k) => `<span className="text-black/[0.30]">{${JSON.stringify(k)}}: </span><span>{String(${k} ?? '')}</span>`).join('\n          ')
     : '';
 
   return `
 export function ${name}({ data, ${propsKeys.join(', ')}, className = '', dir }: ${name}Props) {
   return (
-    <div dir={dir} className={\`rounded-xl border border-stone-200 bg-white p-6 \${className}\`}>
-      <p className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">${widget.name}</p>
-      ${propsStr ? `<div className="space-y-1 text-sm text-stone-600">\n          ${propsStr}\n        </div>` : '<p className="text-sm text-stone-500">No data</p>'}
+    <div dir={dir} className={\`rounded-xl border border-black/[0.08] bg-white p-6 \${className}\`}>
+      <p className="text-xs font-medium text-black/[0.30] uppercase tracking-wider mb-2">${widget.name}</p>
+      ${propsStr ? `<div className="space-y-1 text-sm text-black/[0.55]">\n          ${propsStr}\n        </div>` : '<p className="text-sm text-black/[0.02]0">No data</p>'}
     </div>
   );
 }`;
