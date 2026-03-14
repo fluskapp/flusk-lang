@@ -31,7 +31,7 @@ export function DashboardPage() {
                 <p className="text-sm font-medium text-black/50 leading-tight">Uptime</p>
                 <Clock className="w-4 h-4 text-black/30" />
               </div>
-              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.uptime_seconds ?? '—'}</p>
+              <p className="mt-3 text-2xl font-semibold text-black tabular-nums">{data?.status?.uptime ?? '—'}</p>
             </CardContent>
           </Card>
           <Card>
@@ -112,9 +112,8 @@ export function DashboardPage() {
           <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">
             {((data?.recentEvents) as any[] ?? []).slice(0, 20).map((event: any, i: number) => (
               <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.02] transition-colors">
-                <span className="text-xs text-black/30 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
                 <span className="text-xs font-medium text-black/60 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>
-                <span className="text-xs text-black/50 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>
+                <span className="text-xs text-black/50 flex-1 truncate">{event.summary ?? event.content_preview ?? (typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? ''))}</span>
                 {event.blocked && <Badge variant="destructive" className="text-xs flex-shrink-0">blocked</Badge>}
               </div>
             ))}

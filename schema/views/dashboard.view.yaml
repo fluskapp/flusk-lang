@@ -34,7 +34,7 @@ sections:
         type: status-indicator
         icon: activity
       - label: "Uptime"
-        field: uptime_seconds
+        field: uptime
         format: duration
         icon: clock
       - label: "Messages Today"
@@ -97,14 +97,9 @@ sections:
     title: "Recent Activity"
     source: recentEvents
     display:
-      - field: created_at
-        type: timestamp
-        format: "HH:mm"
       - field: event_type
         type: label
-      - field: channel
-        type: icon
-      - field: details
+      - field: summary
         type: text-preview
         max_length: 80
     footer:

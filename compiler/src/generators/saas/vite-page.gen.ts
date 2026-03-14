@@ -816,9 +816,8 @@ function renderEventFeed(section: any, indent: string): string {
   out += `${indent}  <div className="divide-y divide-black/[0.06] rounded-xl border border-black/10 bg-white overflow-hidden">\n`;
   out += `${indent}    {((${src}) as any[] ?? []).slice(0, 20).map((event: any, i: number) => (\n`;
   out += `${indent}      <div key={i} className="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.02] transition-colors">\n`;
-  out += `${indent}        <span className="text-xs text-black/30 font-mono mt-0.5 flex-shrink-0 w-12">{event.created_at ? new Date(event.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>\n`;
   out += `${indent}        <span className="text-xs font-medium text-black/60 flex-shrink-0 w-24 truncate">{event.event_type ?? event.type ?? ''}</span>\n`;
-  out += `${indent}        <span className="text-xs text-black/50 flex-1 truncate">{typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? event.message ?? '')}</span>\n`;
+  out += `${indent}        <span className="text-xs text-black/50 flex-1 truncate">{event.summary ?? event.content_preview ?? (typeof event.details === 'object' ? JSON.stringify(event.details).slice(0, 80) : String(event.details ?? ''))}</span>\n`;
   out += `${indent}        {event.blocked && <Badge variant="destructive" className="text-xs flex-shrink-0">blocked</Badge>}\n`;
   out += `${indent}      </div>\n`;
   out += `${indent}    ))}\n`;
