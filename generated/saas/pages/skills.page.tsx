@@ -29,7 +29,19 @@ export function SkillsPage() {
           />
         </TabsContent>
         <TabsContent value="marketplace" className="space-y-6">
-          {/* Section: InstallSkill (type: form-action) */}
+          <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden mt-6">
+            <div className="px-5 py-4 border-b border-black/[0.06]">
+              <h3 className="text-sm font-semibold text-black/80">Install a Skill</h3>
+              <p className="text-xs text-black/40 mt-0.5">Enter a skill name or ClawHub URL to install</p>
+            </div>
+            <form onSubmit={async (e: any) => { e.preventDefault(); const fd = Object.fromEntries(new FormData(e.target)); await fetch('/api/gateway/skills/install', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fd) }); e.target.reset(); window.location.reload(); }} className="p-5 space-y-4">
+              <div>
+                <label className="text-xs font-medium text-black/50 block mb-1">Skill Name</label>
+                <input name="skill_name" type="text" placeholder="e.g. answeroverflow or github.com/user/skill" className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20" />
+              </div>
+              <button type="submit" className="px-5 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-black/80 transition-colors">Install</button>
+            </form>
+          </div>
         </TabsContent>
       </Tabs>
       </div>

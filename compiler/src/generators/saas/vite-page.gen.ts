@@ -806,6 +806,46 @@ function renderStatGrid(section: any, indent: string): string {
   return out;
 }
 
+function renderFormAction(section: any, indent: string): string {
+  const title = section.title ?? '';
+  const desc = section.description ?? '';
+  const fields: any[] = section.fields ?? [];
+  const action = section.action ?? {};
+  const endpoint = action.endpoint ?? '';
+  const label = action.label ?? 'Submit';
+
+  let out = `${indent}<div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden mt-6">\n`;
+  if (title) {
+    out += `${indent}  <div className="px-5 py-4 border-b border-black/[0.06]">\n`;
+    out += `${indent}    <h3 className="text-sm font-semibold text-black/80">${title}</h3>\n`;
+    if (desc) out += `${indent}    <p className="text-xs text-black/40 mt-0.5">${desc}</p>\n`;
+    out += `${indent}  </div>\n`;
+  }
+  out += `${indent}  <form onSubmit={async (e: any) => { e.preventDefault(); const fd = Object.fromEntries(new FormData(e.target)); await fetch('${endpoint.replace(/^(GET|POST|PUT|DELETE)\s+/, '')}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fd) }); e.target.reset(); window.location.reload(); }} className="p-5 space-y-4">\n`;
+  for (const field of fields) {
+    const ph = field.placeholder ?? '';
+    const lab = field.label ?? field.name ?? '';
+    out += `${indent}    <div>\n`;
+    out += `${indent}      <label className="text-xs font-medium text-black/50 block mb-1">${lab}</label>\n`;
+    if (field.type === 'textarea') {
+      out += `${indent}      <textarea name="${field.name}" placeholder="${ph}" rows={${field.rows ?? 3}} className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20 resize-none" />\n`;
+    } else if (field.type === 'select') {
+      out += `${indent}      <select name="${field.name}" className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20 bg-white">\n`;
+      for (const opt of (field.options ?? [])) {
+        out += `${indent}        <option value="${opt.value}">${opt.label}</option>\n`;
+      }
+      out += `${indent}      </select>\n`;
+    } else {
+      out += `${indent}      <input name="${field.name}" type="text" placeholder="${ph}" className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20" />\n`;
+    }
+    out += `${indent}    </div>\n`;
+  }
+  out += `${indent}    <button type="submit" className="px-5 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-black/80 transition-colors">${label}</button>\n`;
+  out += `${indent}  </form>\n`;
+  out += `${indent}</div>\n`;
+  return out;
+}
+
 function renderCodeBlock(section: any, indent: string): string {
   const src = section.source ? sourceExpr(section.source) : 'undefined';
   const field = section.field ?? 'content';
@@ -1222,6 +1262,7 @@ function renderSection(section: any, indent: string, isAuth = false, ctx?: { isM
     case 'card-list':     return renderCardList(section, indent, isAuth);
     case 'file-list':     return renderFileList(section, indent);
     case 'code-block':    return renderCodeBlock(section, indent);
+    case 'form-action':   return renderFormAction(section, indent);
     case 'status-card':   return renderStatusCard(section, indent);
     case 'hero':          return renderHero(section, indent);
     case 'navbar':        return renderNavbar(section, indent);

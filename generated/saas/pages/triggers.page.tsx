@@ -21,7 +21,40 @@ export function TriggersPage() {
           emptyDescription="Add a trigger to activate your bot when things happen — location changes, calendar events, scheduled tasks"
           pageSize={25}
         />
-        {/* Section: AddTrigger (type: form-action) */}
+        <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden mt-6">
+          <div className="px-5 py-4 border-b border-black/[0.06]">
+            <h3 className="text-sm font-semibold text-black/80">Add Trigger</h3>
+            <p className="text-xs text-black/40 mt-0.5">Connect a new event source</p>
+          </div>
+          <form onSubmit={async (e: any) => { e.preventDefault(); const fd = Object.fromEntries(new FormData(e.target)); await fetch('/api/gateway/triggers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fd) }); e.target.reset(); window.location.reload(); }} className="p-5 space-y-4">
+            <div>
+              <label className="text-xs font-medium text-black/50 block mb-1">Name</label>
+              <input name="name" type="text" placeholder="e.g. Office Arrival" className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-black/50 block mb-1">Type</label>
+              <select name="type" className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20 bg-white">
+                <option value="location">Location</option>
+                <option value="schedule">Scheduled</option>
+                <option value="webhook">Webhook</option>
+                <option value="github">GitHub</option>
+                <option value="jira">Jira</option>
+                <option value="calendar">Calendar</option>
+                <option value="email">Email</option>
+                <option value="slack">Slack</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-black/50 block mb-1">Prompt</label>
+              <textarea name="prompt" placeholder="What should the bot do when this trigger fires? e.g. 'I just arrived at the office, check my calendar and brief me on today'" rows={3} className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20 resize-none" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-black/50 block mb-1">Configuration</label>
+              <textarea name="config" placeholder="Additional config (JSON) — e.g. location coordinates, cron expression, webhook URL" rows={2} className="w-full text-sm px-3 py-2 border border-black/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20 resize-none" />
+            </div>
+            <button type="submit" className="px-5 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-black/80 transition-colors">Add Trigger</button>
+          </form>
+        </div>
       </div>
     </div>
   );
