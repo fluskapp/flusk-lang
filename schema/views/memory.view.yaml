@@ -38,6 +38,9 @@ tabs:
             label: "Content"
             type: text-preview
             max_length: 120
+          - key: headingCount
+            label: "Sections"
+            type: number
         empty_state:
           title: "No memory entries yet"
           description: "Your bot stores memories as you interact — conversations, decisions, preferences"

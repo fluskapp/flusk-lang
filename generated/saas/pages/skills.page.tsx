@@ -21,7 +21,7 @@ export function SkillsPage() {
         <TabsContent value="installed" className="space-y-6">
           <DataTable
             title="Installed Skills"
-            columns={[{"key":"name","label":"Name","type":"text","sortable":true},{"key":"description","label":"Description","type":"text-preview","max_length":80},{"key":"version","label":"Version","type":"text"},{"key":"enabled","label":"Status","type":"status-badge"}]}
+            columns={[{"key":"name","label":"Name","type":"text","sortable":true},{"key":"description","label":"Description","type":"text-preview","max_length":80},{"key":"version","label":"Version","type":"text"},{"key":"status","label":"Status","type":"status-badge"}]}
             data={data?.installed as any[] | undefined}
             emptyTitle="No skills installed"
             emptyDescription="Install skills from the marketplace to extend your bot's capabilities"

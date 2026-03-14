@@ -34,7 +34,7 @@ tabs:
           - key: version
             label: "Version"
             type: text
-          - key: enabled
+          - key: status
             label: "Status"
             type: status-badge
         row_actions:

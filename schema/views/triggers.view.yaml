@@ -1,6 +1,6 @@
 name: Triggers
 type: page
-description: "Connect external triggers and event sources to your bot"
+description: "Manage triggers that activate your bot"
 route: /app/triggers
 auth: true
 ssr: false
@@ -10,75 +10,85 @@ design:
 
 data_sources:
   triggers:
-    endpoint: GET /api/gateway/connectors
-    description: "Connected event sources and triggers"
+    endpoint: GET /api/gateway/triggers
+    description: "All configured triggers"
+    unwrap: triggers
 
 sections:
-  - name: ActiveTriggers
+  - name: TriggerList
     type: data-table
-    title: "Active Triggers"
-    description: "Event sources that trigger your bot to take action"
+    title: "Triggers"
+    description: "Event sources that activate your bot — each trigger sends a prompt when fired"
     source: triggers
     columns:
       - key: name
-        label: "Trigger"
+        label: "Name"
         type: text
         sortable: true
       - key: type
         label: "Type"
         type: status-badge
+      - key: prompt
+        label: "Prompt"
+        type: text-preview
+        max_length: 80
       - key: status
         label: "Status"
         type: status-badge
-      - key: last_event
-        label: "Last Event"
+      - key: last_fired
+        label: "Last Fired"
         type: relative-time
-      - key: events_count
-        label: "Events"
+      - key: fire_count
+        label: "Fired"
         type: number
-    empty_state:
-      title: "No triggers connected"
-      description: "Connect event sources to activate your bot — location changes, Jira updates, calendar events"
-
-  - name: AvailableTriggers
-    type: card-grid
-    title: "Available Triggers"
-    description: "Connect new event sources to activate your bot"
-    columns: 3
-    static_data:
-      - id: location
-        name: "Location"
-        description: "Trigger actions when you arrive or leave a place"
-        category: "trigger"
-      - id: jira
-        name: "Jira"
-        description: "React to ticket updates, assignments, and comments"
-        category: "trigger"
-      - id: github-events
-        name: "GitHub"
-        description: "PRs, issues, CI runs — your bot stays in the loop"
-        category: "trigger"
-      - id: calendar
-        name: "Calendar"
-        description: "Meeting prep, schedule changes, daily briefings"
-        category: "trigger"
-      - id: email
-        name: "Email"
-        description: "Incoming emails trigger analysis and smart replies"
-        category: "trigger"
-      - id: slack-events
-        name: "Slack"
-        description: "Channel messages, mentions, and reactions"
-        category: "trigger"
-      - id: webhook
-        name: "Webhook"
-        description: "Send any JSON payload to trigger your bot"
-        category: "trigger"
-      - id: cron
-        name: "Scheduled"
-        description: "Daily summaries, weekly reports, recurring tasks"
-        category: "automation"
-    card_actions:
-      - label: "Connect"
+    row_actions:
+      - label: "Edit"
+        action: modal
+      - label: "Disable"
         action: api-call
-        endpoint: POST /api/gateway/connectors
+        endpoint: POST /api/gateway/triggers/:id/toggle
+      - label: "Delete"
+        action: api-call
+        endpoint: DELETE /api/gateway/triggers/:id
+        confirm: "Delete this trigger?"
+        variant: destructive
+    empty_state:
+      title: "No triggers yet"
+      description: "Add a trigger to activate your bot when things happen — location changes, calendar events, scheduled tasks"
+    pageSize: 25
+
+  - name: AddTrigger
+    type: form-action
+    title: "Add Trigger"
+    description: "Connect a new event source"
+    fields:
+      - name: name
+        label: "Name"
+        type: text
+        placeholder: "e.g. Office Arrival"
+      - name: type
+        label: "Type"
+        type: select
+        options:
+          - { value: location, label: "Location" }
+          - { value: schedule, label: "Scheduled" }
+          - { value: webhook, label: "Webhook" }
+          - { value: github, label: "GitHub" }
+          - { value: jira, label: "Jira" }
+          - { value: calendar, label: "Calendar" }
+          - { value: email, label: "Email" }
+          - { value: slack, label: "Slack" }
+      - name: prompt
+        label: "Prompt"
+        type: textarea
+        placeholder: "What should the bot do when this trigger fires? e.g. 'I just arrived at the office, check my calendar and brief me on today'"
+        rows: 3
+      - name: config
+        label: "Configuration"
+        type: textarea
+        placeholder: "Additional config (JSON) — e.g. location coordinates, cron expression, webhook URL"
+        rows: 2
+    action:
+      label: "Add Trigger"
+      endpoint: POST /api/gateway/triggers
+      params_from: fields

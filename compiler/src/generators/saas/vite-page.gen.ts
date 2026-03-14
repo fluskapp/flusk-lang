@@ -806,6 +806,23 @@ function renderStatGrid(section: any, indent: string): string {
   return out;
 }
 
+function renderCodeBlock(section: any, indent: string): string {
+  const src = section.source ? sourceExpr(section.source) : 'undefined';
+  const field = section.field ?? 'content';
+  const title = section.title ?? '';
+  const desc = section.description ?? '';
+  let out = `${indent}<div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden">\n`;
+  if (title) {
+    out += `${indent}  <div className="px-5 py-4 border-b border-black/[0.06]">\n`;
+    out += `${indent}    <h3 className="text-sm font-semibold text-black/80">${title}</h3>\n`;
+    if (desc) out += `${indent}    <p className="text-xs text-black/40 mt-0.5">${desc}</p>\n`;
+    out += `${indent}  </div>\n`;
+  }
+  out += `${indent}  <pre className="p-5 text-[13px] leading-relaxed text-black/70 overflow-auto max-h-[60vh] whitespace-pre-wrap font-mono bg-black/[0.02]">{(${src})?.['${field}'] ?? (typeof (${src}) === 'string' ? (${src}) : 'Loading...')}</pre>\n`;
+  out += `${indent}</div>\n`;
+  return out;
+}
+
 function renderEventFeed(section: any, indent: string): string {
   shadcnNeeds.add('card'); shadcnNeeds.add('badge');
   const src = section.source ? sourceExpr(section.source) : 'undefined';
@@ -1204,6 +1221,7 @@ function renderSection(section: any, indent: string, isAuth = false, ctx?: { isM
     case 'event-feed':    return renderEventFeed(section, indent);
     case 'card-list':     return renderCardList(section, indent, isAuth);
     case 'file-list':     return renderFileList(section, indent);
+    case 'code-block':    return renderCodeBlock(section, indent);
     case 'status-card':   return renderStatusCard(section, indent);
     case 'hero':          return renderHero(section, indent);
     case 'navbar':        return renderNavbar(section, indent);

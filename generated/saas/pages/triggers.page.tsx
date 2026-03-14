@@ -3,8 +3,6 @@ import React from 'react';
 import { useTriggers } from '../hooks/useTriggers';
 import { MoreHorizontal } from 'lucide-react';
 import { DataTable } from '../components';
-import { Badge } from '../../components/ui/badge';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/card';
 
 export function TriggersPage() {
   const { data = {} as any, isLoading } = useTriggers();
@@ -15,32 +13,15 @@ export function TriggersPage() {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <DataTable
-          title="Active Triggers"
-          description="Event sources that trigger your bot to take action"
-          columns={[{"key":"name","label":"Trigger","type":"text","sortable":true},{"key":"type","label":"Type","type":"status-badge"},{"key":"status","label":"Status","type":"status-badge"},{"key":"last_event","label":"Last Event","type":"relative-time"},{"key":"events_count","label":"Events","type":"number"}]}
+          title="Triggers"
+          description="Event sources that activate your bot — each trigger sends a prompt when fired"
+          columns={[{"key":"name","label":"Name","type":"text","sortable":true},{"key":"type","label":"Type","type":"status-badge"},{"key":"prompt","label":"Prompt","type":"text-preview","max_length":80},{"key":"status","label":"Status","type":"status-badge"},{"key":"last_fired","label":"Last Fired","type":"relative-time"},{"key":"fire_count","label":"Fired","type":"number"}]}
           data={data?.triggers as any[] | undefined}
-          emptyTitle="No triggers connected"
-          emptyDescription="Connect event sources to activate your bot — location changes, Jira updates, calendar events"
+          emptyTitle="No triggers yet"
+          emptyDescription="Add a trigger to activate your bot when things happen — location changes, calendar events, scheduled tasks"
           pageSize={25}
         />
-        <div>
-          <h3 className="text-sm font-semibold text-black/70 mb-3">Available Triggers</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {([{"id":"location","name":"Location","description":"Trigger actions when you arrive or leave a place","category":"trigger"},{"id":"jira","name":"Jira","description":"React to ticket updates, assignments, and comments","category":"trigger"},{"id":"github-events","name":"GitHub","description":"PRs, issues, CI runs — your bot stays in the loop","category":"trigger"},{"id":"calendar","name":"Calendar","description":"Meeting prep, schedule changes, daily briefings","category":"trigger"},{"id":"email","name":"Email","description":"Incoming emails trigger analysis and smart replies","category":"trigger"},{"id":"slack-events","name":"Slack","description":"Channel messages, mentions, and reactions","category":"trigger"},{"id":"webhook","name":"Webhook","description":"Send any JSON payload to trigger your bot","category":"trigger"},{"id":"cron","name":"Scheduled","description":"Daily summaries, weekly reports, recurring tasks","category":"automation"}]).map((item: any, i: number) => (
-              <Card key={i} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between">
-                    <h4 className="font-medium text-black text-sm">{item.name ?? item.title ?? `Item ${i + 1}`}</h4>
-                    {item.status && (
-                      <Badge variant={(() => { const s = (item.status ?? '').toLowerCase(); if (s === 'active' || s === 'connected') return 'default'; if (s === 'paused' || s === 'warning' || s === 'info') return 'secondary'; if (s === 'error' || s === 'critical') return 'destructive'; return 'outline'; })()}>{item.status}</Badge>
-                    )}
-                  </div>
-                  {item.description && <p className="mt-1.5 text-xs text-black/50 line-clamp-2">{item.description}</p>}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        {/* Section: AddTrigger (type: form-action) */}
       </div>
     </div>
   );

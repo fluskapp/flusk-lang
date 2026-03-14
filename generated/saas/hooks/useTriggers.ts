@@ -9,10 +9,10 @@ export function useTriggers() {
     queryKey: ['Triggers'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any>('/api/gateway/connectors').catch(() => null)
+      apiClient.get<any>('/api/gateway/triggers').catch(() => null)
       ]);
       return {
-        triggers: autoUnwrap(results[0])
+        triggers: results[0]?.['triggers'] ?? results[0]
       };
     },
   });

@@ -22,7 +22,7 @@ export function MemoryPage() {
           <DataTable
             title="Memory Timeline"
             description="Day-by-day notes and memories your bot has stored"
-            columns={[{"key":"date","label":"Date","type":"date","sortable":true},{"key":"title","label":"Title","type":"text"},{"key":"preview","label":"Content","type":"text-preview","max_length":120}]}
+            columns={[{"key":"date","label":"Date","type":"date","sortable":true},{"key":"title","label":"Title","type":"text"},{"key":"preview","label":"Content","type":"text-preview","max_length":120},{"key":"headingCount","label":"Sections","type":"number"}]}
             data={data?.timeline as any[] | undefined}
             emptyTitle="No memory entries yet"
             emptyDescription="Your bot stores memories as you interact — conversations, decisions, preferences"
@@ -30,7 +30,13 @@ export function MemoryPage() {
           />
         </TabsContent>
         <TabsContent value="raw" className="space-y-6">
-          {/* Section: MemoryContent (type: code-block) */}
+          <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-black/[0.06]">
+              <h3 className="text-sm font-semibold text-black/80">MEMORY.md</h3>
+              <p className="text-xs text-black/40 mt-0.5">The bot's long-term memory file — curated from daily notes</p>
+            </div>
+            <pre className="p-5 text-[13px] leading-relaxed text-black/70 overflow-auto max-h-[60vh] whitespace-pre-wrap font-mono bg-black/[0.02]">{(data?.memoryRaw)?.['content'] ?? (typeof (data?.memoryRaw) === 'string' ? (data?.memoryRaw) : 'Loading...')}</pre>
+          </div>
         </TabsContent>
       </Tabs>
       </div>
