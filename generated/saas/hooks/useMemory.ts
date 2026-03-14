@@ -9,14 +9,12 @@ export function useMemory() {
     queryKey: ['Memory'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any>('/api/gateway/workspace/files').catch(() => null),
       apiClient.get<any>('/api/gateway/memory/timeline').catch(() => null),
       apiClient.get<any>('/api/gateway/memory/raw').catch(() => null)
       ]);
       return {
-        files: results[0]?.['files'] ?? results[0],
-        timeline: autoUnwrap(results[1]),
-        memoryRaw: autoUnwrap(results[2])
+        timeline: results[0]?.['entries'] ?? results[0],
+        memoryRaw: autoUnwrap(results[1])
       };
     },
   });

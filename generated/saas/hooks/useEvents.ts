@@ -9,14 +9,12 @@ export function useEvents() {
     queryKey: ['Events'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any>('/api/gateway/events', { params: {"limit":100,"order":"created_at DESC"} }).catch(() => null),
-      apiClient.get<any>('/api/gateway/events', { params: {"limit":100,"order":"created_at DESC","filter":"blocked=true,severity=warning|error"} }).catch(() => null),
-      apiClient.get<any>('/api/gateway/guard/stats').catch(() => null)
+      apiClient.get<any>('/api/gateway/events', { params: {"limit":100} }).catch(() => null),
+      apiClient.get<any>('/api/gateway/events', { params: {"limit":50,"blocked":true} }).catch(() => null)
       ]);
       return {
         events: results[0]?.['events'] ?? results[0],
-        guardEvents: results[1]?.['events'] ?? results[1],
-        guardStats: autoUnwrap(results[2])
+        guardEvents: results[1]?.['events'] ?? results[1]
       };
     },
   });

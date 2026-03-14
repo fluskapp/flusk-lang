@@ -1,144 +1,54 @@
 name: Pichefkes
-type: file-browser
-description: Finder-like file browser for the bot workspace — browse, preview, and manage files
-route: /app/pichefkes
+type: page
+description: "Finder-style file browser for bot's pichefkes directory"
+route: /app/files
 auth: true
 ssr: false
 
 design:
   theme: monochrome
+  reference: "macOS Finder clone — github.com/guyariely/finder-clone"
+  layout: finder
   background: white
-  text: black
-  accent: black
 
 data_sources:
-  workspace:
-    endpoint: GET /api/gateway/workspace/files
+  files:
+    endpoint: GET /api/gateway/pichefkes
+    description: "Files in the bot's pichefkes directory"
     unwrap: files
-    description: "Bot workspace files (Pichefkes)"
-    params:
-      category: workspace
-  signals:
-    endpoint: GET /api/gateway/workspace/files
-    unwrap: files
-    description: "Signals — structured data and outputs"
-    params:
-      category: signals
-  noise:
-    endpoint: GET /api/gateway/workspace/files
-    unwrap: files
-    description: "Noise — temp files, logs, raw dumps"
-    params:
-      category: noise
-  preview:
-    endpoint: GET /api/gateway/workspace/files/:name/content
-    description: "File content for preview"
-    lazy: true
 
-layout:
-  type: finder
-  sidebar:
-    width: 220
-    sections:
-      - id: pichefkes
-        label: "Pichefkes"
-        icon: folder
-        source: workspace
-      - id: signals
-        label: "Signals"
-        icon: radio
-        source: signals
-      - id: noise
-        label: "Noise"
-        icon: wind
-        source: noise
-  main:
-    type: icon-grid
-    default_icon_size: 64
-    min_icon_size: 32
-    max_icon_size: 128
-  preview:
-    type: side-panel
-    width: 360
-    style: textedit
-    editable: true
-    save_endpoint: POST /api/gateway/workspace/files/:name/content
-
-controls:
-  toolbar:
-    - type: breadcrumbs
-      field: current_path
-    - type: icon-size-slider
-      min: 32
-      max: 128
-      default: 64
-      label: "Icon Size"
-    - type: search
-      placeholder: "Search files..."
-      fields: [name, content_preview]
-    - type: button
-      label: "New File"
-      action: create-file
-      endpoint: POST /api/gateway/workspace/files
-
-file_display:
-  - field: name
-    type: filename
-  - field: size
-    type: file-size
-  - field: modified_at
-    type: timestamp
-    format: "MMM D"
-  - field: type
-    type: file-icon
-    icons:
-      md: file-text
-      txt: file-text
-      json: code
-      yaml: code
-      py: code
-      js: code
-      ts: code
-      csv: table
-      png: image
-      jpg: image
-      pdf: file
-      default: file
-
-interactions:
-  drag_and_drop:
-    enabled: true
-    upload_endpoint: POST /api/gateway/workspace/files/upload
-    reorder: true
-  double_click:
-    action: open-preview
-  right_click:
-    menu:
-      - label: "Open"
-        action: open-preview
-      - label: "Rename"
-        action: rename
-        endpoint: PATCH /api/gateway/workspace/files/:name
+sections:
+  - name: FinderView
+    type: data-table
+    title: "Pichefkes"
+    source: files
+    columns:
+      - key: name
+        label: "Name"
+        type: text
+        sortable: true
+      - key: size
+        label: "Size"
+        type: filesize
+        sortable: true
+      - key: modified
+        label: "Modified"
+        type: relative-time
+        sortable: true
+      - key: type
+        label: "Kind"
+        type: text
+    empty_state:
+      title: "No pichefkes yet"
+      description: "Your bot will drop files here as it works — notes, research, drafts, anything useful"
+    row_actions:
+      - label: "View"
+        action: preview
       - label: "Download"
         action: download
-        endpoint: GET /api/gateway/workspace/files/:name/download
-      - label: "Move to Signals"
-        action: move
-        endpoint: PATCH /api/gateway/workspace/files/:name/category
-        params:
-          category: signals
-      - label: "Move to Noise"
-        action: move
-        endpoint: PATCH /api/gateway/workspace/files/:name/category
-        params:
-          category: noise
-      - separator: true
+        endpoint: GET /api/gateway/pichefkes/:name/download
       - label: "Delete"
         action: api-call
-        endpoint: DELETE /api/gateway/workspace/files/:name
+        endpoint: DELETE /api/gateway/pichefkes/:name
         confirm: "Delete this file?"
         variant: destructive
-
-empty_state:
-  title: "No files here"
-  description: "Your bot will store files here as it works. You can also drag files in."

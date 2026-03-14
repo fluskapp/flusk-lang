@@ -9,14 +9,10 @@ export function usePichefkes() {
     queryKey: ['Pichefkes'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any>('/api/gateway/workspace/files', { params: {"category":"workspace"} }).catch(() => null),
-      apiClient.get<any>('/api/gateway/workspace/files', { params: {"category":"signals"} }).catch(() => null),
-      apiClient.get<any>('/api/gateway/workspace/files', { params: {"category":"noise"} }).catch(() => null)
+      apiClient.get<any>('/api/gateway/pichefkes').catch(() => null)
       ]);
       return {
-        workspace: results[0]?.['files'] ?? results[0],
-        signals: results[1]?.['files'] ?? results[1],
-        noise: results[2]?.['files'] ?? results[2]
+        files: results[0]?.['files'] ?? results[0]
       };
     },
   });

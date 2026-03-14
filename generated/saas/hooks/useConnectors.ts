@@ -9,12 +9,10 @@ export function useConnectors() {
     queryKey: ['Connectors'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any>('/api/gateway/channels').catch(() => null),
-      apiClient.get<any>('/api/gateway/tools').catch(() => null)
+      apiClient.get<any>('/api/gateway/connectors').catch(() => null)
       ]);
       return {
-        channels: results[0]?.['channels'] ?? results[0],
-        tools: autoUnwrap(results[1])
+        connectors: autoUnwrap(results[0])
       };
     },
   });

@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
   { path: '/app/events', element: <EventsPage /> },
   { path: '/app/memory', element: <MemoryPage /> },
   { path: '/onboarding', element: <OnboardingPage /> },
-  { path: '/app/pichefkes', element: <PichefkesPage /> },
+  { path: '/app/files', element: <PichefkesPage /> },
   { path: '/app/skills', element: <SkillsPage /> },
   { path: '/app/settings', element: <SettingsPage /> },
 ]);

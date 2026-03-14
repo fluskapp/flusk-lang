@@ -1,43 +1,43 @@
 name: Skills
 type: tabbed
-description: Manage bot skills — installed and marketplace
+description: "Manage installed and available skills"
 route: /app/skills
 auth: true
 ssr: false
 
 design:
   theme: monochrome
-  background: white
-  text: black
-  accent: black
 
 data_sources:
   installed:
     endpoint: GET /api/gateway/skills
-    description: "Installed skills from the gateway"
+    description: "Installed skills"
     unwrap: skills
 
 tabs:
-  - id: installed
+  - name: Installed
     label: "Installed"
     sections:
       - name: InstalledSkills
-        type: card-grid
-        columns: 3
+        type: data-table
         title: "Installed Skills"
         source: installed
-        empty_state:
-          title: "No skills installed"
-          description: "Browse the marketplace to add skills to your bot"
-        display:
-          - field: name
-            type: heading
-            format: skill-name
-          - field: description
-            type: subtitle
-          - field: status
+        columns:
+          - key: name
+            label: "Name"
+            type: text
+            sortable: true
+          - key: description
+            label: "Description"
+            type: text-preview
+            max_length: 80
+          - key: version
+            label: "Version"
+            type: text
+          - key: enabled
+            label: "Status"
             type: status-badge
-        actions:
+        row_actions:
           - label: "Disable"
             action: api-call
             endpoint: POST /api/gateway/skills/:id/disable
@@ -48,272 +48,23 @@ tabs:
               name: "{{id}}"
             confirm: "Uninstall this skill?"
             variant: destructive
+        empty_state:
+          title: "No skills installed"
+          description: "Install skills from the marketplace to extend your bot's capabilities"
 
-  - id: marketplace
+  - name: Marketplace
     label: "Marketplace"
     sections:
-      - name: Marketplace
-        type: card-grid
-        columns: 3
-        title: "All Skills"
-        search:
-          enabled: true
-          fields: [name, description, category]
-        filter:
-          field: category
-          options: [Productivity, Development, Communication, Media, Smart Home, Analytics, AI Tools]
-        static_data:
-          # --- Productivity ---
-          - id: apple-notes
-            name: "Apple Notes"
-            icon: file-text
-            description: "Read and write Apple Notes"
-            category: "Productivity"
-          - id: apple-reminders
-            name: "Apple Reminders"
-            icon: bell
-            description: "Manage reminders and lists"
-            category: "Productivity"
-          - id: bear-notes
-            name: "Bear Notes"
-            icon: file-text
-            description: "Manage Bear markdown notes"
-            category: "Productivity"
-          - id: things-mac
-            name: "Things 3"
-            icon: check-circle
-            description: "Task management via Things CLI"
-            category: "Productivity"
-          - id: obsidian
-            name: "Obsidian"
-            icon: file-text
-            description: "Manage Obsidian vault notes"
-            category: "Productivity"
-          - id: notion
-            name: "Notion"
-            icon: book-open
-            description: "Create pages, databases, and blocks"
-            category: "Productivity"
-          - id: trello
-            name: "Trello"
-            icon: layout
-            description: "Manage boards, lists, and cards"
-            category: "Productivity"
-          - id: google-calendar
-            name: "Google Calendar"
-            icon: calendar
-            description: "Schedule events, check availability"
-            category: "Productivity"
-          - id: himalaya
-            name: "Email (Himalaya)"
-            icon: mail
-            description: "Read and send emails via CLI"
-            category: "Productivity"
-          - id: ordercli
-            name: "Orders"
-            icon: shopping-cart
-            description: "Track orders and deliveries"
-            category: "Productivity"
-          # --- Development ---
-          - id: github
-            name: "GitHub"
-            icon: git-branch
-            description: "Issues, PRs, CI runs, code review"
-            category: "Development"
-          - id: gh-issues
-            name: "GitHub Issues"
-            icon: alert-circle
-            description: "Auto-fix issues and open PRs"
-            category: "Development"
-          - id: coding-agent
-            name: "Coding Agent"
-            icon: code
-            description: "Delegate coding tasks to background agents"
-            category: "Development"
-          - id: skill-creator
-            name: "Skill Creator"
-            icon: plus-circle
-            description: "Create and package new skills"
-            category: "Development"
-          - id: tmux
-            name: "Tmux"
-            icon: terminal
-            description: "Terminal multiplexer control"
-            category: "Development"
-          # --- Communication ---
-          - id: slack
-            name: "Slack"
-            icon: message-square
-            description: "Send and manage Slack messages"
-            category: "Communication"
-          - id: discord
-            name: "Discord"
-            icon: hash
-            description: "Manage Discord channels and messages"
-            category: "Communication"
-          - id: imsg
-            name: "iMessage"
-            icon: message-circle
-            description: "Send and read iMessages"
-            category: "Communication"
-          - id: voice-call
-            name: "Voice Call"
-            icon: phone
-            description: "Make and receive voice calls"
-            category: "Communication"
-          # --- Media ---
-          - id: openai-image-gen
-            name: "Image Generator"
-            icon: image
-            description: "Generate images with DALL-E"
-            category: "Media"
-          - id: openai-whisper
-            name: "Whisper (Local)"
-            icon: mic
-            description: "Local speech-to-text transcription"
-            category: "Media"
-          - id: openai-whisper-api
-            name: "Whisper (API)"
-            icon: mic
-            description: "Cloud speech-to-text via OpenAI"
-            category: "Media"
-          - id: sherpa-onnx-tts
-            name: "Text-to-Speech"
-            icon: volume-2
-            description: "Local TTS with sherpa-onnx"
-            category: "Media"
-          - id: video-frames
-            name: "Video Frames"
-            icon: film
-            description: "Extract frames from video files"
-            category: "Media"
-          - id: nano-pdf
-            name: "PDF Tools"
-            icon: file
-            description: "Read and process PDF files"
-            category: "Media"
-          - id: camsnap
-            name: "Camera Snap"
-            icon: camera
-            description: "Capture photos from connected cameras"
-            category: "Media"
-          - id: peekaboo
-            name: "Peekaboo"
-            icon: eye
-            description: "Screen capture and image analysis"
-            category: "Media"
-          - id: gifgrep
-            name: "GIF Search"
-            icon: image
-            description: "Search and find GIFs"
-            category: "Media"
-          - id: spotify-player
-            name: "Spotify"
-            icon: music
-            description: "Control Spotify playback"
-            category: "Media"
-          - id: sonoscli
-            name: "Sonos"
-            icon: speaker
-            description: "Control Sonos speakers"
-            category: "Media"
-          - id: songsee
-            name: "Song Recognition"
-            icon: music
-            description: "Identify playing songs"
-            category: "Media"
-          # --- Smart Home ---
-          - id: openhue
-            name: "Philips Hue"
-            icon: sun
-            description: "Control Hue smart lights"
-            category: "Smart Home"
-          - id: goplaces
-            name: "Location"
-            icon: map-pin
-            description: "Find places and get directions"
-            category: "Smart Home"
-          # --- Analytics ---
-          - id: model-usage
-            name: "Model Usage"
-            icon: bar-chart
-            description: "Track AI model costs and usage"
-            category: "Analytics"
-          - id: session-logs
-            name: "Session Logs"
-            icon: file-text
-            description: "Search conversation history"
-            category: "Analytics"
-          - id: healthcheck
-            name: "Health Check"
-            icon: activity
-            description: "Monitor system health status"
-            category: "Analytics"
-          # --- AI Tools ---
-          - id: gemini
-            name: "Gemini"
-            icon: sparkles
-            description: "Google Gemini AI integration"
-            category: "AI Tools"
-          - id: canvas
-            name: "Canvas"
-            icon: layout
-            description: "Display HTML on connected devices"
-            category: "AI Tools"
-          - id: summarize
-            name: "Summarize"
-            icon: align-left
-            description: "Summarize long texts and articles"
-            category: "AI Tools"
-          - id: blogwatcher
-            name: "Blog Watcher"
-            icon: rss
-            description: "Monitor blogs for new posts"
-            category: "AI Tools"
-          - id: oracle
-            name: "Oracle"
-            icon: help-circle
-            description: "Ask Oracle for answers"
-            category: "AI Tools"
-          - id: weather
-            name: "Weather"
-            icon: cloud
-            description: "Get weather forecasts"
-            category: "AI Tools"
-          - id: clawhub
-            name: "ClawHub"
-            icon: package
-            description: "Browse and install community skills"
-            category: "AI Tools"
-          # --- Passwords ---
-          - id: 1password
-            name: "1Password"
-            icon: lock
-            description: "Access passwords and secure notes"
-            category: "Security"
-          # --- Web ---
-          - id: xurl
-            name: "URL Fetch"
-            icon: link
-            description: "Fetch and extract web content"
-            category: "AI Tools"
-          - id: wacli
-            name: "Web Archive"
-            icon: archive
-            description: "Access Wayback Machine archives"
-            category: "AI Tools"
-        display:
-          - field: name
-            type: heading
-          - field: description
-            type: subtitle
-          - field: category
-            type: badge
-        actions:
-          - label: "Install"
-            action: api-call
-            endpoint: POST /api/gateway/skills/install
-            params:
-              name: "{{id}}"
-            label_installed: "Installed"
-            disabled_when: installed
+      - name: InstallSkill
+        type: form-action
+        title: "Install a Skill"
+        description: "Enter a skill name or ClawHub URL to install"
+        fields:
+          - name: skill_name
+            label: "Skill Name"
+            type: text
+            placeholder: "e.g. answeroverflow or github.com/user/skill"
+        action:
+          label: "Install"
+          endpoint: POST /api/gateway/skills/install
+          params_from: fields

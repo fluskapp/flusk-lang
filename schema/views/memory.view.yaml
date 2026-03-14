@@ -1,162 +1,56 @@
 name: Memory
 type: tabbed
-description: Bot memory — files in workspace and timeline of daily summaries
+description: "Bot memory — timeline and raw long-term memory"
 route: /app/memory
 auth: true
 ssr: false
 
 design:
   theme: monochrome
-  background: white
-  text: black
-  accent: black
 
 data_sources:
-  files:
-    endpoint: GET /api/gateway/workspace/files
-    description: "Files stored in the bot workspace"
-    unwrap: files
   timeline:
     endpoint: GET /api/gateway/memory/timeline
-    description: "Day summaries and memory entries over time"
+    description: "Day-by-day memory entries"
+    unwrap: entries
   memoryRaw:
     endpoint: GET /api/gateway/memory/raw
-    description: "Raw MEMORY.md content from the bot"
+    description: "Raw MEMORY.md content"
 
 tabs:
-  - id: files
-    label: "Files"
-    sections:
-      - name: WorkspaceFiles
-        type: file-list
-        title: "Bot Workspace"
-        description: "Files your bot has created or stored in its workspace"
-        source: files
-        display:
-          - field: name
-            type: heading
-          - field: size
-            type: file-size
-          - field: modified_at
-            type: timestamp
-            format: "MMM D, HH:mm"
-          - field: type
-            type: file-type-badge
-        actions:
-          - label: "View"
-            action: inline-preview
-            type: text-edit
-          - label: "Download"
-            action: download
-          - label: "Delete"
-            action: api-call
-            endpoint: DELETE /api/gateway/workspace/files/:name
-            confirm: "Delete this file?"
-            variant: destructive
-        empty_state:
-          title: "No files yet"
-          description: "Your bot will store files here as it works"
-
-      - name: AddMemory
-        type: form
-        title: "Tell Your Bot Something"
-        description: "Anything you add here will be remembered in future conversations."
-        fields:
-          - name: content
-            label: "What should I remember?"
-            type: textarea
-            placeholder: "e.g., I prefer morning meetings, My wife's birthday is June 15th"
-          - name: category
-            label: "Category"
-            type: select
-            options:
-              - value: preference
-                label: "Preference"
-              - value: person
-                label: "Person"
-              - value: date
-                label: "Important Date"
-              - value: goal
-                label: "Goal"
-              - value: boundary
-                label: "Boundary / Off-limits"
-              - value: insight
-                label: "Insight"
-        submit:
-          label: "Remember This"
-          endpoint: POST /api/gateway/memory/entries
-
-      - name: RawMemory
-        type: collapsible
-        title: "Raw MEMORY.md"
-        collapsed: true
-        source: memoryRaw
-        display:
-          field: content
-          type: markdown-editor
-
-  - id: timeline
+  - name: Timeline
     label: "Timeline"
     sections:
-      - name: DayTimeline
-        type: timeline
-        title: "Daily Summaries"
+      - name: DayEntries
+        type: data-table
+        title: "Memory Timeline"
+        description: "Day-by-day notes and memories your bot has stored"
         source: timeline
-        display:
-          date_field: date
-          content_field: summary_text
-          mood_field: mood
-          stats:
-            - field: message_count
-              label: "msgs"
-            - field: action_count
-              label: "actions"
-            - field: cost_cents
-              label: "cost"
-              format: currency
-            - field: guard_blocks
-              label: "blocks"
-              type: warning-badge
-              condition: "guard_blocks > 0"
-        on_expand:
-          sections:
-            - name: DayDetail
-              type: content-card
-              display:
-                field: summary_text
-                type: markdown
-
-            - name: KeyDecisions
-              type: tag-list
-              title: "Key Decisions"
-              field: key_decisions
-              icon: check-circle
-              condition: "key_decisions != null"
-
-            - name: ThingsToRemember
-              type: tag-list
-              title: "Remembered"
-              field: things_to_remember
-              icon: brain
-              condition: "things_to_remember != null"
-
-            - name: GuardReport
-              type: stat-grid
-              columns: 3
-              title: "Guard Report"
-              stats:
-                - label: "PII Detected"
-                  field: pii_detections
-                  icon: eye-off
-                  type: warning-stat
-                - label: "Blocked Actions"
-                  field: guard_blocks
-                  icon: shield-off
-                  type: warning-stat
-                - label: "Total Cost"
-                  field: cost_cents
-                  format: currency
-                  icon: dollar-sign
+        columns:
+          - key: date
+            label: "Date"
+            type: date
+            sortable: true
+          - key: title
+            label: "Title"
+            type: text
+          - key: preview
+            label: "Content"
+            type: text-preview
+            max_length: 120
         empty_state:
-          title: "No history yet"
-          description: "As you chat with your bot, daily summaries will appear here"
+          title: "No memory entries yet"
+          description: "Your bot stores memories as you interact — conversations, decisions, preferences"
+
+  - name: RawMemory
+    label: "Raw"
+    sections:
+      - name: MemoryContent
+        type: code-block
+        title: "MEMORY.md"
+        description: "The bot's long-term memory file — curated from daily notes"
+        source: memoryRaw
+        field: content
+        language: markdown
+        readonly: false
+        endpoint_save: PUT /api/gateway/memory/raw

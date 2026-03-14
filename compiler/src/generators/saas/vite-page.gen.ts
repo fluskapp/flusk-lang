@@ -1622,6 +1622,12 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
     if (isAuth) code += `import { ${hookName} } from '../hooks/${hookName}';\n`;
     if (icons.size > 0) code += `import { ${[...icons].sort().join(', ')} } from 'lucide-react';\n`;
     if (shadcnImportLines) code += shadcnImportLines + '\n';
+    // Import shared components for tab sections (DataTable, StatCard, Chart)
+    const tabSharedImports: string[] = [];
+    if (allSections.some((s: any) => s.type === 'data-table')) tabSharedImports.push('DataTable');
+    if (allSections.some((s: any) => s.type === 'stat-cards')) tabSharedImports.push('StatCard');
+    if (allSections.some((s: any) => s.type === 'chart')) tabSharedImports.push('Chart');
+    if (tabSharedImports.length > 0) code += `import { ${tabSharedImports.join(', ')} } from '../components';\n`;
     code += `\nexport function ${componentName}() {\n`;
     if (isAuth) code += `  const { data = {} as any, isLoading } = ${hookName}();\n  void isLoading;\n`;
     code += `  const navigate = (to: string) => { window.location.href = to; };\n`;
@@ -1705,9 +1711,14 @@ function generatePageCode(schema: FluskSchema, primary: string): string {
   }
 
   // ── Standard page types ──
-  const needsStatCard = sections.some((s) => s.type === 'stat-cards' || s.widgets?.some((w: any) => w.type === 'stat-card'));
-  const needsChart = sections.some((s) => s.type === 'chart' || s.type === 'grid' || s.widgets?.some((w: any) => w.type === 'chart'));
-  const needsDataTable = sections.some((s) => s.type === 'data-table');
+  // Collect all sections including those nested inside tabs
+  const allNestedSections = [
+    ...sections,
+    ...sections.flatMap((s: any) => (s.tabs ?? []).flatMap((t: any) => t.sections ?? [])),
+  ];
+  const needsStatCard = allNestedSections.some((s) => s.type === 'stat-cards' || s.widgets?.some((w: any) => w.type === 'stat-card'));
+  const needsChart = allNestedSections.some((s) => s.type === 'chart' || s.type === 'grid' || s.widgets?.some((w: any) => w.type === 'chart'));
+  const needsDataTable = allNestedSections.some((s) => s.type === 'data-table');
   const sharedImports: string[] = [];
   if (needsStatCard) sharedImports.push('StatCard');
   if (needsChart) sharedImports.push('Chart');

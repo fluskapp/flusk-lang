@@ -1,152 +1,90 @@
 name: Events
 type: tabbed
-description: Activity feed and Guard security events
+description: "All bot activity and guard events"
 route: /app/events
 auth: true
 ssr: false
 
 design:
   theme: monochrome
-  background: white
-  text: black
-  accent: black
 
 data_sources:
   events:
     endpoint: GET /api/gateway/events
     description: "All bot activity events"
-    unwrap: events
     params:
       limit: 100
-      order: created_at DESC
+    unwrap: events
   guardEvents:
     endpoint: GET /api/gateway/events
-    description: "Guard-flagged or blocked events"
-    unwrap: events
+    description: "Guard-flagged events"
     params:
-      limit: 100
-      order: created_at DESC
-      filter: blocked=true,severity=warning|error
-  guardStats:
-    endpoint: GET /api/gateway/guard/stats
-    description: "PII detection and guard statistics"
+      limit: 50
+      blocked: true
+    unwrap: events
 
 tabs:
-  - id: activity
+  - name: Activity
     label: "Activity"
     sections:
-      - name: ActivityFeed
-        type: event-feed
+      - name: EventsTable
+        type: data-table
         title: "Activity"
         source: events
-        display:
-          - field: created_at
-            type: timestamp
-            format: "MMM D, HH:mm:ss"
-          - field: event_type
-            type: label
-            format: uppercase
-          - field: channel
-            type: icon-label
-          - field: details
-            type: json-preview
-            max_length: 120
-          - field: cost_cents
-            type: currency
-            condition: "cost_cents > 0"
-          - field: blocked
-            type: blocked-badge
-            condition: "blocked == true"
-          - field: severity
-            type: severity-badge
-        filters:
-          - field: event_type
-            type: multi-select
+        columns:
+          - key: created_at
+            label: "Time"
+            type: relative-time
+            sortable: true
+          - key: event_type
             label: "Type"
-          - field: channel
-            type: multi-select
+            type: status-badge
+            sortable: true
+          - key: channel
             label: "Channel"
-          - field: severity
-            type: multi-select
-            label: "Severity"
-        actions:
-          - label: "Export Logs"
-            action: export
-            format: csv
+            type: text
+          - key: content_preview
+            label: "Details"
+            type: text-preview
+            max_length: 100
+          - key: cost_usd
+            label: "Cost"
+            type: currency
+            sortable: true
+          - key: tokens
+            label: "Tokens"
+            type: number
+            sortable: true
         empty_state:
-          title: "No activity yet"
-          description: "Events will appear here as your bot runs"
+          title: "No events yet"
+          description: "Activity will appear here as your bot processes messages"
 
-  - id: guard
+  - name: Guard
     label: "Guard"
     sections:
-      - name: GuardStats
-        type: stat-grid
-        columns: 4
-        title: "Guard Overview"
-        source: guardStats
-        stats:
-          - label: "PII Detected"
-            field: pii_total
-            icon: eye-off
-            type: warning-stat
-          - label: "Blocked Events"
-            field: blocked_total
-            icon: shield-off
-            type: warning-stat
-          - label: "Phone Numbers"
-            field: pii_phone
-            icon: phone
-            type: info-stat
-          - label: "Email Addresses"
-            field: pii_email
-            icon: mail
-            type: info-stat
-
-      - name: PIIBreakdown
-        type: stat-grid
-        columns: 3
-        title: "PII Breakdown"
-        source: guardStats
-        stats:
-          - label: "Names"
-            field: pii_name
-            icon: user
-          - label: "Addresses"
-            field: pii_address
-            icon: map-pin
-          - label: "Credit Cards"
-            field: pii_credit_card
-            icon: credit-card
-          - label: "SSNs"
-            field: pii_ssn
-            icon: lock
-          - label: "Passwords"
-            field: pii_password
-            icon: key
-          - label: "Other PII"
-            field: pii_other
-            icon: alert-circle
-
-      - name: GuardEventFeed
-        type: event-feed
-        title: "Blocked & Flagged"
+      - name: GuardTable
+        type: data-table
+        title: "Guard Events"
+        description: "PII detections and blocked content"
         source: guardEvents
-        display:
-          - field: created_at
-            type: timestamp
-            format: "MMM D, HH:mm:ss"
-          - field: event_type
-            type: label
-            format: uppercase
-          - field: severity
-            type: severity-badge
-          - field: details
-            type: json-preview
-            max_length: 120
-          - field: blocked
-            type: blocked-badge
-            condition: "blocked == true"
+        columns:
+          - key: created_at
+            label: "Time"
+            type: relative-time
+            sortable: true
+          - key: pii_types
+            label: "PII Types"
+            type: text
+          - key: blocked
+            label: "Blocked"
+            type: boolean-badge
+          - key: content_preview
+            label: "Details"
+            type: text-preview
+            max_length: 100
+          - key: channel
+            label: "Source"
+            type: text
         empty_state:
-          title: "Nothing blocked"
-          description: "Your bot has been behaving. Good bot."
+          title: "No guard events"
+          description: "PII detections and blocked content will appear here"

@@ -1,171 +1,92 @@
 name: Connectors
-type: tabbed
-description: Connect messaging channels and external tools to your bot
+type: page
+description: "Connect external triggers and event sources to your bot"
 route: /app/connectors
 auth: true
 ssr: false
 
 design:
   theme: monochrome
-  background: white
-  text: black
-  accent: black
 
 data_sources:
-  channels:
-    endpoint: GET /api/gateway/channels
-    description: "Connected messaging channels"
-    unwrap: channels
-  tools:
-    endpoint: GET /api/gateway/tools
-    description: "Connected external tools and integrations"
+  connectors:
+    endpoint: GET /api/gateway/connectors
+    description: "Connected event sources and triggers"
 
-tabs:
-  - id: channels
-    label: "Channels"
-    sections:
-      - name: ChannelList
-        type: connector-grid
-        title: "Messaging Channels"
-        description: "Connect your bot to messaging platforms where you want to talk to it"
-        available:
-          - id: whatsapp
-            label: "WhatsApp"
-            icon: message-circle
-            description: "Scan QR code from your phone"
-            setup: qr-scan
-            setup_endpoint: POST /api/gateway/channels/whatsapp/setup
-            status_endpoint: GET /api/gateway/channels/whatsapp/status
-          - id: telegram
-            label: "Telegram"
-            icon: send
-            description: "Connect via Telegram bot token"
-            setup: bot-token
-            setup_endpoint: POST /api/gateway/channels/telegram/setup
-            status_endpoint: GET /api/gateway/channels/telegram/status
-          - id: imessage
-            label: "iMessage"
-            icon: message-square
-            description: "Chat via iMessage — requires Mac app"
-            setup: mac-app
-            setup_endpoint: POST /api/gateway/channels/imessage/setup
-            status_endpoint: GET /api/gateway/channels/imessage/status
-            requires: mac-app
-          - id: signal
-            label: "Signal"
-            icon: shield
-            description: "Connect via Signal on your phone"
-            setup: phone-link
-            setup_endpoint: POST /api/gateway/channels/signal/setup
-            status_endpoint: GET /api/gateway/channels/signal/status
-          - id: discord
-            label: "Discord"
-            icon: hash
-            description: "Add your bot to a Discord server"
-            setup: oauth
-            oauth_url: /api/gateway/channels/discord/oauth
-            status_endpoint: GET /api/gateway/channels/discord/status
-          - id: slack
-            label: "Slack"
-            icon: layout
-            description: "Add your bot to a Slack workspace"
-            setup: oauth
-            oauth_url: /api/gateway/channels/slack/oauth
-            status_endpoint: GET /api/gateway/channels/slack/status
-        source: channels
-        display:
-          - field: type
-            type: icon-label
-          - field: status
-            type: status-badge
-          - field: message_count
-            label: "Messages"
-            type: number
-          - field: connected_at
-            label: "Connected"
-            type: timestamp
-            format: "MMM D"
-        actions_connected:
-          - label: "Disconnect"
-            action: api-call
-            endpoint: DELETE /api/gateway/channels/:id
-            confirm: "Disconnect this channel?"
-            variant: destructive
-        actions_disconnected:
-          - label: "Connect"
-            action: setup-channel
+sections:
+  - name: ActiveConnectors
+    type: data-table
+    title: "Active Connectors"
+    description: "Event sources that trigger your bot to take action"
+    source: connectors
+    columns:
+      - key: name
+        label: "Connector"
+        type: text
+        sortable: true
+      - key: type
+        label: "Type"
+        type: status-badge
+      - key: status
+        label: "Status"
+        type: status-badge
+      - key: last_event
+        label: "Last Event"
+        type: relative-time
+      - key: events_count
+        label: "Events"
+        type: number
+    row_actions:
+      - label: "Configure"
+        action: modal
+      - label: "Disconnect"
+        action: api-call
+        endpoint: DELETE /api/gateway/connectors/:id
+        confirm: "Disconnect this connector?"
+        variant: destructive
+    empty_state:
+      title: "No connectors yet"
+      description: "Connect triggers to activate your bot — location changes, Jira updates, calendar events, and more"
 
-  - id: tools
-    label: "Tools"
-    sections:
-      - name: ToolList
-        type: connector-grid
-        title: "External Tools"
-        description: "Connect tools your bot can use to get things done"
-        available:
-          - id: github
-            label: "GitHub"
-            icon: git-branch
-            description: "Manage issues, PRs, and CI runs"
-            setup: token
-            setup_endpoint: POST /api/gateway/tools/github/setup
-            status_endpoint: GET /api/gateway/tools/github/status
-            docs_url: "https://docs.flusk.app/tools/github"
-          - id: google-calendar
-            label: "Google Calendar"
-            icon: calendar
-            description: "Schedule events and check availability"
-            setup: oauth
-            oauth_url: /api/gateway/tools/google-calendar/oauth
-            status_endpoint: GET /api/gateway/tools/google-calendar/status
-          - id: gmail
-            label: "Gmail"
-            icon: mail
-            description: "Read and send emails"
-            setup: oauth
-            oauth_url: /api/gateway/tools/gmail/oauth
-            status_endpoint: GET /api/gateway/tools/gmail/status
-          - id: notion
-            label: "Notion"
-            icon: book-open
-            description: "Create and manage pages and databases"
-            setup: token
-            setup_endpoint: POST /api/gateway/tools/notion/setup
-            status_endpoint: GET /api/gateway/tools/notion/status
-            docs_url: "https://docs.flusk.app/tools/notion"
-          - id: brave-search
-            label: "Brave Search"
-            icon: search
-            description: "Web search with Brave Search API"
-            setup: token
-            setup_endpoint: POST /api/gateway/tools/brave-search/setup
-            status_endpoint: GET /api/gateway/tools/brave-search/status
-          - id: custom-api
-            label: "Custom API"
-            icon: plug
-            description: "Connect any REST API to your bot"
-            setup: manual
-            setup_endpoint: POST /api/gateway/tools/custom/setup
-            status_endpoint: GET /api/gateway/tools/custom/status
-        source: tools
-        display:
-          - field: type
-            type: icon-label
-          - field: status
-            type: status-badge
-          - field: connected_at
-            label: "Connected"
-            type: timestamp
-            format: "MMM D"
-        actions_connected:
-          - label: "Configure"
-            action: navigate
-            to: /app/connectors/tools/:id
-          - label: "Disconnect"
-            action: api-call
-            endpoint: DELETE /api/gateway/tools/:id
-            confirm: "Disconnect this tool?"
-            variant: destructive
-        actions_disconnected:
-          - label: "Connect"
-            action: setup-tool
+  - name: AvailableConnectors
+    type: card-grid
+    title: "Available Connectors"
+    description: "Connect new event sources"
+    columns: 3
+    static_data:
+      - id: location
+        name: "Location"
+        description: "Trigger actions based on where you are"
+        category: "trigger"
+      - id: jira
+        name: "Jira"
+        description: "React to ticket updates, assignments, and comments"
+        category: "trigger"
+      - id: github-events
+        name: "GitHub Events"
+        description: "PRs, issues, CI runs — your bot stays in the loop"
+        category: "trigger"
+      - id: calendar
+        name: "Google Calendar"
+        description: "Meeting prep, schedule changes, reminders"
+        category: "trigger"
+      - id: email
+        name: "Email (Gmail)"
+        description: "Incoming emails trigger bot analysis and drafts"
+        category: "trigger"
+      - id: slack-events
+        name: "Slack Events"
+        description: "Channel messages, mentions, reactions"
+        category: "trigger"
+      - id: webhook
+        name: "Custom Webhook"
+        description: "Send any JSON payload to trigger your bot"
+        category: "trigger"
+      - id: cron
+        name: "Scheduled Tasks"
+        description: "Run actions on a schedule — daily summaries, weekly reports"
+        category: "automation"
+    card_actions:
+      - label: "Connect"
+        action: api-call
+        endpoint: POST /api/gateway/connectors

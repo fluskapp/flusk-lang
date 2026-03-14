@@ -35,14 +35,14 @@ sections:
         label: "Personality (SOUL.md)"
         rows: 10
         description: "Define how your bot behaves — its tone, personality, and focus areas"
-        source: bot.soul
+        source: user.soul
         endpoint_save: POST /api/gateway/config/soul
       - name: user_context
         type: textarea
         label: "About You (USER.md)"
         rows: 6
         description: "Tell your bot about yourself — name, job, preferences, family"
-        source: bot.user_context
+        source: user.user
         endpoint_save: POST /api/gateway/config/user
 
   - name: Downloads
@@ -63,34 +63,6 @@ sections:
         action:
           label: "Coming Soon"
           disabled: true
-
-  - name: GodMode
-    type: settings-group
-    title: "God Mode"
-    description: "Full access to your bot's workspace — every file, every config"
-    fields:
-      - name: workspace_path
-        type: display
-        label: "Workspace Path"
-        source: bot.workspace_path
-      - name: config_path
-        type: display
-        label: "Config Path"
-        source: bot.config_path
-    actions:
-      - label: "Open Workspace"
-        action: api-call
-        endpoint: GET /api/gateway/workspace/files
-        variant: secondary
-      - label: "View Config"
-        action: api-call
-        endpoint: GET /api/gateway/config
-        variant: secondary
-      - label: "Restart Bot"
-        action: api-call
-        endpoint: POST /api/gateway/restart
-        confirm: "Restart your bot? Active conversations will be interrupted."
-        variant: secondary
 
   - name: GitBackup
     type: settings-group
@@ -116,29 +88,13 @@ sections:
     type: settings-group
     title: "Danger Zone"
     variant: destructive
-    fields:
-      - name: email
-        type: display
-        label: "Account Email"
-        source: user.email
-      - name: flusk_key
-        type: display
-        label: "Flusk Key"
-        source: user.flusk_key
-        format: masked-key
     actions:
       - label: "Export All Data"
         action: api-call
-        endpoint: POST /api/account/export
-        description: "Download all your data as a ZIP archive"
+        endpoint: POST /api/gateway/export
         variant: secondary
       - label: "Reset Bot"
         action: api-call
         endpoint: POST /api/gateway/reset
         confirm: "Reset your bot? This will clear its memory and settings."
-        variant: destructive
-      - label: "Delete Account"
-        action: api-call
-        endpoint: DELETE /api/account
-        confirm: "Are you sure? This permanently deletes your bot and all data. There is no undo."
         variant: destructive
