@@ -21,9 +21,12 @@ export function MemoryPage() {
         <TabsContent value="timeline" className="space-y-6">
           <DataTable
             title="Memory Timeline"
+            description="Day-by-day notes and memories your bot has stored"
             columns={[{"key":"date","label":"Date","type":"date","sortable":true},{"key":"title","label":"Title","type":"text"},{"key":"preview","label":"Content","type":"text-preview","max_length":120}]}
             data={data?.timeline as any[] | undefined}
-            actions={[]}
+            emptyTitle="No memory entries yet"
+            emptyDescription="Your bot stores memories as you interact — conversations, decisions, preferences"
+            pageSize={25}
           />
         </TabsContent>
         <TabsContent value="raw" className="space-y-6">

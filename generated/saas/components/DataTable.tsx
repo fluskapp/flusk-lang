@@ -3,31 +3,143 @@ import React from 'react';
 import { MoreHorizontal } from 'lucide-react';
 
 export interface Column { key: string; label: string; format?: string; widget?: string; sortable?: boolean; [key: string]: any; }
-export interface DataTableProps { title?: string; columns: Column[]; data?: any[]; actions?: Array<{ label: string; style?: string }>; pagination?: boolean; pageSize?: number; }
+export interface DataTableProps {
+  title?: string;
+  description?: string;
+  columns: Column[];
+  data?: any[];
+  actions?: Array<{ label: string; style?: string }>;
+  pagination?: boolean;
+  pageSize?: number;
+  emptyTitle?: string;
+  emptyDescription?: string;
+}
 
 const TABLE_EMPTY: any[] = [];
 
+function formatRelativeTime(val: string | number): string {
+  try {
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return String(val);
+    const now = Date.now();
+    const diff = now - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch { return String(val); }
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function formatCurrency(val: number): string {
+  if (val === 0) return '—';
+  return `$${val < 0.01 ? val.toFixed(4) : val.toFixed(2)}`;
+}
+
 function StatusBadge({ value }: { value: string }) {
-  const v = String(value).toLowerCase();
-  const cls = v === 'active' || v === 'connected' || v === 'admin' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : v === 'paused' || v === 'pending' || v === 'manager' ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-black/[0.02] text-black/60 ring-black/10';
-  return <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ring-1 ring-inset ${cls}`}>{value}</span>;
+  const v = String(value ?? '').toLowerCase().replace(/_/g, ' ');
+  const cls =
+    v === 'active' || v === 'connected' || v === 'online' || v === 'success' || v === 'true'
+      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+    : v === 'paused' || v === 'pending' || v === 'warning'
+      ? 'bg-amber-50 text-amber-700 ring-amber-200'
+    : v === 'error' || v === 'blocked' || v === 'failed' || v === 'disconnected'
+      ? 'bg-red-50 text-red-700 ring-red-200'
+    : 'bg-black/[0.03] text-black/60 ring-black/10';
+  return <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ring-1 ring-inset capitalize ${cls}`}>{v || '—'}</span>;
 }
 
 function CellValue({ value, col }: { value: any; col: Column }) {
-  if (value == null) return <span className="text-black/20">—</span>;
-  const isStatus = col.widget === 'status-badge' || col.widget === 'role-badge' || col.key === 'status' || col.key === 'role';
-  if (isStatus) return <StatusBadge value={String(value)} />;
+  if (value == null || value === '') return <span className="text-black/20">—</span>;
+  const t = col.type ?? col.widget ?? '';
+  // Status badges
+  if (t === 'status-badge' || t === 'boolean-badge' || t === 'role-badge' || col.key === 'status' || col.key === 'role')
+    return <StatusBadge value={String(value)} />;
+  // Relative time
+  if (t === 'relative-time' || t === 'date')
+    return <span className="text-black/50 text-xs">{formatRelativeTime(value)}</span>;
+  // File size
+  if (t === 'filesize')
+    return <span className="text-black/50 tabular-nums">{formatFileSize(Number(value))}</span>;
+  // Currency
+  if (t === 'currency')
+    return <span className="text-black/50 tabular-nums">{formatCurrency(Number(value))}</span>;
+  // Number
+  if (t === 'number')
+    return <span className="text-black/50 tabular-nums">{Number(value).toLocaleString()}</span>;
+  // Text preview (truncated)
+  if (t === 'text-preview') {
+    const max = col.max_length ?? 80;
+    const s = String(value);
+    return <span className="text-black/60 text-sm" title={s.length > max ? s : undefined}>{s.length > max ? s.slice(0, max) + '…' : s}</span>;
+  }
+  // Default text
   return <span className="text-black/70">{String(value)}</span>;
 }
 
-export function DataTable({ title, columns, data, actions, pagination }: DataTableProps) {
-  const rows = data && data.length > 0 ? data : TABLE_EMPTY;
+export function DataTable({ title, description, columns, data, actions, pagination, pageSize = 20, emptyTitle, emptyDescription }: DataTableProps) {
+  const rows = data && data.length > 0 ? data.slice(0, pageSize) : TABLE_EMPTY;
   const visibleCols = columns.filter((c) => c.label);
+  if (rows.length === 0 && (emptyTitle || emptyDescription)) {
+    return (
+      <div className="bg-white rounded-xl border border-black/10 shadow-sm p-12 text-center">
+        <p className="text-sm font-medium text-black/60">{emptyTitle ?? 'Nothing here yet'}</p>
+        {emptyDescription && <p className="text-xs text-black/30 mt-1">{emptyDescription}</p>}
+      </div>
+    );
+  }
   return (
     <div className="bg-white rounded-xl border border-black/10 shadow-sm overflow-hidden">
-      {(title || (actions && actions.length > 0)) && (<div className="px-5 py-4 border-b border-black/[0.06] flex items-center justify-between">{title && <h3 className="text-sm font-semibold text-black/80">{title}</h3>}<div className="flex gap-2">{actions?.map((action, i) => (<button key={i} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: '#18181b' }}>{action.label}</button>))}</div></div>)}
-      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="bg-white border-b border-black/[0.06]">{visibleCols.map((col) => <th key={col.key} className="px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap">{col.label}</th>)}<th className="px-4 py-3 w-8" /></tr></thead><tbody className="divide-y divide-black/[0.04]">{rows.map((row: any, i: number) => (<tr key={i} className="hover:bg-black/[0.02]/80 transition-colors group">{visibleCols.map((col) => (<td key={col.key} className="px-4 py-3"><CellValue value={row[col.key]} col={col} /></td>))}<td className="px-4 py-3 text-right"><button className="text-black/20 hover:text-black/60 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal className="w-4 h-4" /></button></td></tr>))}</tbody></table></div>
-      {pagination && (<div className="px-5 py-3 border-t border-black/[0.06] flex items-center justify-between"><span className="text-xs text-black/30">Showing {rows.length} results</span><div className="flex gap-1"><button className="px-2.5 py-1 text-xs text-black/60 border border-black/10 rounded-md hover:bg-black/[0.02]">Prev</button><button className="px-2.5 py-1 text-xs text-black/60 border border-black/10 rounded-md hover:bg-black/[0.02]">Next</button></div></div>)}
+      {(title || description || (actions && actions.length > 0)) && (
+        <div className="px-5 py-4 border-b border-black/[0.06] flex items-center justify-between">
+          <div>
+            {title && <h3 className="text-sm font-semibold text-black/80">{title}</h3>}
+            {description && <p className="text-xs text-black/40 mt-0.5">{description}</p>}
+          </div>
+          <div className="flex gap-2">{actions?.map((action, i) => (
+            <button key={i} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: '#18181b' }}>{action.label}</button>
+          ))}</div>
+        </div>
+      )}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-black/[0.01] border-b border-black/[0.06]">
+              {visibleCols.map((col) => <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-black/40 whitespace-nowrap">{col.label}</th>)}
+              <th className="px-4 py-3 w-8" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-black/[0.04]">
+            {rows.map((row: any, i: number) => (
+              <tr key={i} className="hover:bg-black/[0.015] transition-colors group">
+                {visibleCols.map((col) => (
+                  <td key={col.key} className="px-4 py-3"><CellValue value={row[col.key]} col={col} /></td>
+                ))}
+                <td className="px-4 py-3 text-right">
+                  <button className="text-black/20 hover:text-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {data && data.length > pageSize && (
+        <div className="px-5 py-3 border-t border-black/[0.06] flex items-center justify-between">
+          <span className="text-xs text-black/30">Showing {rows.length} of {data.length}</span>
+        </div>
+      )}
     </div>
   );
 }

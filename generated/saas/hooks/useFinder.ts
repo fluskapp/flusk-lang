@@ -2,17 +2,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
-export function useConnectors() {
+export function useFinder() {
   const autoUnwrap = (r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; };
 
   return useQuery({
-    queryKey: ['Connectors'],
+    queryKey: ['Finder'],
     queryFn: async () => {
       const results = await Promise.all([
-      apiClient.get<any>('/api/gateway/connectors').catch(() => null)
+      apiClient.get<any>('/api/gateway/pichefkes').catch(() => null)
       ]);
       return {
-        connectors: autoUnwrap(results[0])
+        files: results[0]?.['files'] ?? results[0]
       };
     },
   });

@@ -21,17 +21,22 @@ export function EventsPage() {
         <TabsContent value="activity" className="space-y-6">
           <DataTable
             title="Activity"
-            columns={[{"key":"created_at","label":"Time","type":"relative-time","sortable":true},{"key":"event_type","label":"Type","type":"status-badge","sortable":true},{"key":"channel","label":"Channel","type":"text"},{"key":"content_preview","label":"Details","type":"text-preview","max_length":100},{"key":"cost_usd","label":"Cost","type":"currency","sortable":true},{"key":"tokens","label":"Tokens","type":"number","sortable":true}]}
+            columns={[{"key":"createdAt","label":"Time","type":"relative-time","sortable":true},{"key":"event_type","label":"Type","type":"status-badge","sortable":true},{"key":"summary","label":"What happened","type":"text-preview","max_length":120}]}
             data={data?.events as any[] | undefined}
-            actions={[]}
+            emptyTitle="No events yet"
+            emptyDescription="Activity will appear here as your bot processes messages"
+            pageSize={25}
           />
         </TabsContent>
         <TabsContent value="guard" className="space-y-6">
           <DataTable
             title="Guard Events"
-            columns={[{"key":"created_at","label":"Time","type":"relative-time","sortable":true},{"key":"pii_types","label":"PII Types","type":"text"},{"key":"blocked","label":"Blocked","type":"boolean-badge"},{"key":"content_preview","label":"Details","type":"text-preview","max_length":100},{"key":"channel","label":"Source","type":"text"}]}
+            description="PII detections and blocked content"
+            columns={[{"key":"createdAt","label":"Time","type":"relative-time","sortable":true},{"key":"pii_summary","label":"Detected","type":"text"},{"key":"blocked","label":"Blocked","type":"status-badge"},{"key":"source_url","label":"Source","type":"text"}]}
             data={data?.guardEvents as any[] | undefined}
-            actions={[]}
+            emptyTitle="No guard events"
+            emptyDescription="PII detections and blocked content will appear here"
+            pageSize={25}
           />
         </TabsContent>
       </Tabs>

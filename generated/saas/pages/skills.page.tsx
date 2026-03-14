@@ -23,7 +23,9 @@ export function SkillsPage() {
             title="Installed Skills"
             columns={[{"key":"name","label":"Name","type":"text","sortable":true},{"key":"description","label":"Description","type":"text-preview","max_length":80},{"key":"version","label":"Version","type":"text"},{"key":"enabled","label":"Status","type":"status-badge"}]}
             data={data?.installed as any[] | undefined}
-            actions={[]}
+            emptyTitle="No skills installed"
+            emptyDescription="Install skills from the marketplace to extend your bot's capabilities"
+            pageSize={25}
           />
         </TabsContent>
         <TabsContent value="marketplace" className="space-y-6">

@@ -32,7 +32,7 @@ tabs:
         title: "Activity"
         source: events
         columns:
-          - key: created_at
+          - key: createdAt
             label: "Time"
             type: relative-time
             sortable: true
@@ -40,24 +40,14 @@ tabs:
             label: "Type"
             type: status-badge
             sortable: true
-          - key: channel
-            label: "Channel"
-            type: text
-          - key: content_preview
-            label: "Details"
+          - key: summary
+            label: "What happened"
             type: text-preview
-            max_length: 100
-          - key: cost_usd
-            label: "Cost"
-            type: currency
-            sortable: true
-          - key: tokens
-            label: "Tokens"
-            type: number
-            sortable: true
+            max_length: 120
         empty_state:
           title: "No events yet"
           description: "Activity will appear here as your bot processes messages"
+        pageSize: 25
 
   - name: Guard
     label: "Guard"
@@ -68,23 +58,20 @@ tabs:
         description: "PII detections and blocked content"
         source: guardEvents
         columns:
-          - key: created_at
+          - key: createdAt
             label: "Time"
             type: relative-time
             sortable: true
-          - key: pii_types
-            label: "PII Types"
+          - key: pii_summary
+            label: "Detected"
             type: text
           - key: blocked
             label: "Blocked"
-            type: boolean-badge
-          - key: content_preview
-            label: "Details"
-            type: text-preview
-            max_length: 100
-          - key: channel
+            type: status-badge
+          - key: source_url
             label: "Source"
             type: text
         empty_state:
           title: "No guard events"
           description: "PII detections and blocked content will appear here"
+        pageSize: 25

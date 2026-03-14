@@ -1,26 +1,25 @@
-name: Pichefkes
+name: Finder
 type: page
-description: "Finder-style file browser for bot's pichefkes directory"
-route: /app/files
+description: "Finder-style file browser for bot's working files"
+route: /app/finder
 auth: true
 ssr: false
 
 design:
   theme: monochrome
   reference: "macOS Finder clone — github.com/guyariely/finder-clone"
-  layout: finder
-  background: white
 
 data_sources:
   files:
     endpoint: GET /api/gateway/pichefkes
-    description: "Files in the bot's pichefkes directory"
+    description: "Files in the bot's working directory"
     unwrap: files
 
 sections:
   - name: FinderView
     type: data-table
-    title: "Pichefkes"
+    title: "Finder"
+    description: "Files your bot creates as it works — notes, research, drafts"
     source: files
     columns:
       - key: name
@@ -39,16 +38,6 @@ sections:
         label: "Kind"
         type: text
     empty_state:
-      title: "No pichefkes yet"
+      title: "No files yet"
       description: "Your bot will drop files here as it works — notes, research, drafts, anything useful"
-    row_actions:
-      - label: "View"
-        action: preview
-      - label: "Download"
-        action: download
-        endpoint: GET /api/gateway/pichefkes/:name/download
-      - label: "Delete"
-        action: api-call
-        endpoint: DELETE /api/gateway/pichefkes/:name
-        confirm: "Delete this file?"
-        variant: destructive
+    pageSize: 50

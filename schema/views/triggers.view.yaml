@@ -1,7 +1,7 @@
-name: Connectors
+name: Triggers
 type: page
 description: "Connect external triggers and event sources to your bot"
-route: /app/connectors
+route: /app/triggers
 auth: true
 ssr: false
 
@@ -9,19 +9,19 @@ design:
   theme: monochrome
 
 data_sources:
-  connectors:
+  triggers:
     endpoint: GET /api/gateway/connectors
     description: "Connected event sources and triggers"
 
 sections:
-  - name: ActiveConnectors
+  - name: ActiveTriggers
     type: data-table
-    title: "Active Connectors"
+    title: "Active Triggers"
     description: "Event sources that trigger your bot to take action"
-    source: connectors
+    source: triggers
     columns:
       - key: name
-        label: "Connector"
+        label: "Trigger"
         type: text
         sortable: true
       - key: type
@@ -36,55 +36,47 @@ sections:
       - key: events_count
         label: "Events"
         type: number
-    row_actions:
-      - label: "Configure"
-        action: modal
-      - label: "Disconnect"
-        action: api-call
-        endpoint: DELETE /api/gateway/connectors/:id
-        confirm: "Disconnect this connector?"
-        variant: destructive
     empty_state:
-      title: "No connectors yet"
-      description: "Connect triggers to activate your bot — location changes, Jira updates, calendar events, and more"
+      title: "No triggers connected"
+      description: "Connect event sources to activate your bot — location changes, Jira updates, calendar events"
 
-  - name: AvailableConnectors
+  - name: AvailableTriggers
     type: card-grid
-    title: "Available Connectors"
-    description: "Connect new event sources"
+    title: "Available Triggers"
+    description: "Connect new event sources to activate your bot"
     columns: 3
     static_data:
       - id: location
         name: "Location"
-        description: "Trigger actions based on where you are"
+        description: "Trigger actions when you arrive or leave a place"
         category: "trigger"
       - id: jira
         name: "Jira"
         description: "React to ticket updates, assignments, and comments"
         category: "trigger"
       - id: github-events
-        name: "GitHub Events"
+        name: "GitHub"
         description: "PRs, issues, CI runs — your bot stays in the loop"
         category: "trigger"
       - id: calendar
-        name: "Google Calendar"
-        description: "Meeting prep, schedule changes, reminders"
+        name: "Calendar"
+        description: "Meeting prep, schedule changes, daily briefings"
         category: "trigger"
       - id: email
-        name: "Email (Gmail)"
-        description: "Incoming emails trigger bot analysis and drafts"
+        name: "Email"
+        description: "Incoming emails trigger analysis and smart replies"
         category: "trigger"
       - id: slack-events
-        name: "Slack Events"
-        description: "Channel messages, mentions, reactions"
+        name: "Slack"
+        description: "Channel messages, mentions, and reactions"
         category: "trigger"
       - id: webhook
-        name: "Custom Webhook"
+        name: "Webhook"
         description: "Send any JSON payload to trigger your bot"
         category: "trigger"
       - id: cron
-        name: "Scheduled Tasks"
-        description: "Run actions on a schedule — daily summaries, weekly reports"
+        name: "Scheduled"
+        description: "Daily summaries, weekly reports, recurring tasks"
         category: "automation"
     card_actions:
       - label: "Connect"
