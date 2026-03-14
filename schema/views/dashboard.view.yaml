@@ -13,14 +13,14 @@ design:
 
 data_sources:
   status:
-    endpoint: GET /api/gateway/status
-    description: "Live bot status, uptime, and runtime metrics"
+    endpoint: GET /api/gateway/dashboard/stats
+    description: "Aggregated dashboard stats (status, uptime, messages, skills, channels)"
   recentEvents:
     endpoint: GET /api/gateway/events
     description: "Recent activity events"
     params:
       limit: 10
-      order: created_at DESC
+    unwrap: events
 
 sections:
   - name: BotStatus

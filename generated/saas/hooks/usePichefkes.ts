@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
 export function usePichefkes() {
+  const autoUnwrap = (r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; };
+
   return useQuery({
     queryKey: ['Pichefkes'],
     queryFn: async () => {
@@ -12,9 +14,9 @@ export function usePichefkes() {
       apiClient.get<any>('/api/gateway/workspace/files', { params: {"category":"noise"} }).catch(() => null)
       ]);
       return {
-        workspace: results[0],
-        signals: results[1],
-        noise: results[2]
+        workspace: results[0]?.['files'] ?? results[0],
+        signals: results[1]?.['files'] ?? results[1],
+        noise: results[2]?.['files'] ?? results[2]
       };
     },
   });

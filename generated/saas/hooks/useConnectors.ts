@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
 export function useConnectors() {
+  const autoUnwrap = (r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; };
+
   return useQuery({
     queryKey: ['Connectors'],
     queryFn: async () => {
@@ -11,8 +13,8 @@ export function useConnectors() {
       apiClient.get<any>('/api/gateway/tools').catch(() => null)
       ]);
       return {
-        channels: results[0],
-        tools: results[1]
+        channels: results[0]?.['channels'] ?? results[0],
+        tools: autoUnwrap(results[1])
       };
     },
   });

@@ -15,12 +15,14 @@ data_sources:
   events:
     endpoint: GET /api/gateway/events
     description: "All bot activity events"
+    unwrap: events
     params:
       limit: 100
       order: created_at DESC
   guardEvents:
     endpoint: GET /api/gateway/events
     description: "Guard-flagged or blocked events"
+    unwrap: events
     params:
       limit: 100
       order: created_at DESC

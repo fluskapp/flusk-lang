@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
 export function useEvents() {
+  const autoUnwrap = (r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; };
+
   return useQuery({
     queryKey: ['Events'],
     queryFn: async () => {
@@ -12,9 +14,9 @@ export function useEvents() {
       apiClient.get<any>('/api/gateway/guard/stats').catch(() => null)
       ]);
       return {
-        events: results[0],
-        guardEvents: results[1],
-        guardStats: results[2]
+        events: results[0]?.['events'] ?? results[0],
+        guardEvents: results[1]?.['events'] ?? results[1],
+        guardStats: autoUnwrap(results[2])
       };
     },
   });

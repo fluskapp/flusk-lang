@@ -16,7 +16,7 @@ data_sources:
     endpoint: GET /api/gateway/status
     description: "Current bot status and configuration"
   user:
-    endpoint: GET /api/account/me
+    endpoint: GET /api/gateway/account/me
     description: "Current user account info"
 
 sections:

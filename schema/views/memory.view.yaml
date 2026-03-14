@@ -15,6 +15,7 @@ data_sources:
   files:
     endpoint: GET /api/gateway/workspace/files
     description: "Files stored in the bot workspace"
+    unwrap: files
   timeline:
     endpoint: GET /api/gateway/memory/timeline
     description: "Day summaries and memory entries over time"

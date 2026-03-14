@@ -308,13 +308,31 @@ export function ${hookName}(): { data: Record<string, any>; isLoading: boolean }
     resultKeys.push(key);
   }
 
-  const dataFields = resultKeys.map((key, i) => `        ${key}: results[${i}]`);
+  const unwrapMap: Record<string, string> = {};
+  for (const [key, source] of entries) {
+    if ((source as any).unwrap) {
+      unwrapMap[key] = (source as any).unwrap;
+    }
+  }
+  // Auto-unwrap: if API returns { key: [...] }, extract the array
+  // Also support explicit unwrap field in YAML
+  const autoUnwrap = `(r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; }`;
+  const needsAutoUnwrap = resultKeys.length > 0;
+
+  const dataFields = resultKeys.map((key, i) => {
+    if (unwrapMap[key]) {
+      return `        ${key}: results[${i}]?.['${unwrapMap[key]}'] ?? results[${i}]`;
+    }
+    return `        ${key}: autoUnwrap(results[${i}])`;
+  });
+
+  const autoUnwrapFn = needsAutoUnwrap ? `\n  const autoUnwrap = (r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; };\n` : '';
 
   return `${HEADER}
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
-export function ${hookName}() {
+export function ${hookName}() {${autoUnwrapFn}
   return useQuery({
     queryKey: ['${viewName}'],
     queryFn: async () => {

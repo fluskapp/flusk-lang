@@ -15,6 +15,7 @@ data_sources:
   channels:
     endpoint: GET /api/gateway/channels
     description: "Connected messaging channels"
+    unwrap: channels
   tools:
     endpoint: GET /api/gateway/tools
     description: "Connected external tools and integrations"

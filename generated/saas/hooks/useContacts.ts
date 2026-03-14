@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
 export function useContacts() {
+  const autoUnwrap = (r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; };
+
   return useQuery({
     queryKey: ['Contacts'],
     queryFn: async () => {
@@ -10,7 +12,7 @@ export function useContacts() {
       apiClient.get<any>('/api/gateway/contacts').catch(() => null)
       ]);
       return {
-        contacts: results[0]
+        contacts: autoUnwrap(results[0])
       };
     },
   });

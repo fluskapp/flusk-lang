@@ -3,16 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
 export function useSettings() {
+  const autoUnwrap = (r: any) => { if (r && typeof r === 'object' && !Array.isArray(r)) { const keys = Object.keys(r); if (keys.length === 1 && Array.isArray(r[keys[0]])) return r[keys[0]]; } return r; };
+
   return useQuery({
     queryKey: ['Settings'],
     queryFn: async () => {
       const results = await Promise.all([
       apiClient.get<any>('/api/gateway/status').catch(() => null),
-      apiClient.get<any>('/api/account/me').catch(() => null)
+      apiClient.get<any>('/api/gateway/account/me').catch(() => null)
       ]);
       return {
-        bot: results[0],
-        user: results[1]
+        bot: autoUnwrap(results[0]),
+        user: autoUnwrap(results[1])
       };
     },
   });

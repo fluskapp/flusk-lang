@@ -15,6 +15,7 @@ data_sources:
   installed:
     endpoint: GET /api/gateway/skills
     description: "Installed skills from the gateway"
+    unwrap: skills
 
 tabs:
   - id: installed

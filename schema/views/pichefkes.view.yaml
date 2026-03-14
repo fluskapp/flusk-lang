@@ -14,16 +14,19 @@ design:
 data_sources:
   workspace:
     endpoint: GET /api/gateway/workspace/files
+    unwrap: files
     description: "Bot workspace files (Pichefkes)"
     params:
       category: workspace
   signals:
     endpoint: GET /api/gateway/workspace/files
+    unwrap: files
     description: "Signals — structured data and outputs"
     params:
       category: signals
   noise:
     endpoint: GET /api/gateway/workspace/files
+    unwrap: files
     description: "Noise — temp files, logs, raw dumps"
     params:
       category: noise
